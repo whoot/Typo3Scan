@@ -285,7 +285,7 @@ def start(domain):
 def main(argv):
 	global user_agent
 	global verbosity
-	parser = argparse.ArgumentParser(add_help=False, usage='typofinder.py -d DOMAIN [DOMAIN ...] | -f FILE [--user_agent USER-AGENT] [--top VALUE] [-v]')
+	parser = argparse.ArgumentParser(add_help=False, usage='typoenum.py -d DOMAIN [DOMAIN ...] | -f FILE [--user_agent USER-AGENT] [--top VALUE] [-v]')
 	group = parser.add_mutually_exclusive_group()
 	group.add_argument('-d', '--domain', dest='domain', type=str, nargs='+')
 	group.add_argument('-f', '--file', dest='file', help='File with a list of domains')
