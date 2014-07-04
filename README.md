@@ -3,11 +3,9 @@ Typo-Enumerator
 
 Find out the Typo3 Version, Login-URL and Extensions
 
-This tool allows you to check, if a domain uses Typo3.
-If so, it will try to find out the Typo3 version an the installed extensions.
-If the --top parameter is set to a value, only the [value] top downloaded extensions are tested.
-<br>
-<br>
+This tool allows you to check, if a domain uses Typo3.<br>
+If so, it will try to find out the Typo3 version an the installed extensions.<br>
+If the --top parameter is set to a value, only the [value] top downloaded extensions are tested.<br><br>
 Usage:<br>
 ./typoenum.py -d DOMAIN [DOMAIN ...] [--user_agent USER-AGENT] [--top VALUE] [-v] <br>
 or <br>
