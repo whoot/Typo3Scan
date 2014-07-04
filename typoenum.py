@@ -2,12 +2,12 @@
 # -*- coding: utf-8 -*-
 
 ################## ChangeLog ##################
-## v0.1 Prototype			     			             ##
+## v0.1 Prototype			     ##
 ## v0.2 Added version search for Typo3 	     ##
-## v0.3 Added version guessing		     	     ##
-## v0.4 Optimized requests 		     		       ##
-## v0.5 Added support for Typo v6.X  	       ##
-## v0.6 Added extension search		     	     ##
+## v0.3 Added version guessing		     ##
+## v0.4 Optimized requests 		     ##
+## v0.5 Added support for Typo v6.X  	     ##
+## v0.6 Added extension search		     ##
 ## v0.7 Added version search for extensions  ##
 ###############################################
 
