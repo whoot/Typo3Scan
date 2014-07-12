@@ -23,15 +23,15 @@ v0.6 Added extension search
 v0.7 Added version search for extensions  
 v0.8 Added support for Privoxy and TOR
 ```
--> It is now possible to use Typo-Enumerator with Privoxy and TOR (--tor)<br>
-   Privoxy is used to prevent dns leakage ;)<br>
-   Please make sure the Privoxy config (/etc/privoxy/config) is set to something like:<br>
-      listen-address   127.0.0.1:8118<br>
-      forward-socks5 / 127.0.0.1:9050 .<br>
-   These are the standart ports for Privoxy and TOR<br>
-   If TOR is used, threads will be set to 2 in order to minimize errors<br>
+-> It is now possible to use Typo-Enumerator with Privoxy and TOR (--tor)
+   Privoxy is used to prevent dns leakage ;)
+   Please make sure the Privoxy config (/etc/privoxy/config) is set to something like:
+      listen-address   127.0.0.1:8118
+      forward-socks5 / 127.0.0.1:9050 .
+   These are the standart ports for Privoxy and TOR
+   If TOR is used, threads will be set to 2 in order to minimize errors
+   
+-> All requests (except of the update download) are now made with urllib2
 
--> All requests (except of the update download) are now made with urllib2<br>
-
--> Version search for extensions is now more reliable<br>
+-> Version search for extensions is now more reliable
 ```
