@@ -30,8 +30,6 @@ v0.8 Added support for Privoxy and TOR
       forward-socks5 / 127.0.0.1:9050 .
    These are the standart ports for Privoxy and TOR
    If TOR is used, threads will be set to 2 in order to minimize errors
-   
--> All requests (except of the update download) are now made with urllib2
 
 -> Version search for extensions is now more reliable
 ```
