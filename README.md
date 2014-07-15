@@ -33,3 +33,12 @@ v0.8 Added support for Privoxy and TOR
 
 -> Version search for extensions is now more reliable
 ```
+v0.8.1
+```
+-> Bugfixing
+
+-> It is now possible to specifiy the threads
+   Default is 10.
+   I strongly recommend to use only 2 or even 1 thread when using TOR!
+   This is because TOR is (extremely) slow and will produce connection errors if too many threads are used.
+```
