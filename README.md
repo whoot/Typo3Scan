@@ -15,7 +15,7 @@ Preferably, you can download Type-Enumerator by cloning the [Git](https://github
 
     git clone https://github.com/whoot/Typo-Enumerator.git
 
-Typo-Enumerator works out with [Python](http://www.python.org/download/) version **2.6.x** and **2.7.x** on any platform.
+Typo-Enumerator works with [Python](http://www.python.org/download/) version **2.6.x** and **2.7.x** on Debian/Ubuntu platform.
 
 If you want to use Typo-Enumerator with TOR, you need the [SocksiPy](http://socksipy.sourceforge.net/) module.
 On Debian/Ubuntu you can install it with apt-get:
