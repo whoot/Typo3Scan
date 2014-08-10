@@ -50,6 +50,6 @@ Links
 ----
 
 * Download: [.tar.gz](https://github.com/whoot/Typo-Enumerator/tarball/master) or [.zip](https://github.com/whoot/Typo-Enumerator/archive/master)
-* Changelog: https://github.com/whoot/Typo-Enumerator/blob/master/doc/CHANGELOG.md
-* TODO: https://github.com/whoot/Typo-Enumerator/blob/master/doc/TODO.md
+* Changelog: [Here](https://github.com/whoot/Typo-Enumerator/blob/master/doc/CHANGELOG.md)
+* TODO: [Here](https://github.com/whoot/Typo-Enumerator/blob/master/doc/TODO.md)
 * Issue tracker: https://github.com/whoot/Typo-Enumerator/issues
