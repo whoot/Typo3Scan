@@ -1,44 +1,55 @@
 Typo-Enumerator
 ===============
 
-Find out the Typo3 Version, Login-URL and Extensions
+Typo-Enumerator is an open source penetration testing tool that automates the process of detecting the [Typo3](https://typo3.org) CMS and its installed [extensions](https://typo3.org/extensions/repository/?id=23&L=0&q=&tx_solr[filter][outdated]=outdated%3AshowOutdated) (also the outdated ones!).
+If the --top parameter is set to a value, only the specified most downloaded extensions are tested.
 
-This tool allows you to check, if a domain uses Typo3.<br>
-If so, it will try to find out the Typo3 version and the installed extensions.<br>
-If the --top parameter is set to a value, only the [value] top downloaded extensions are tested.<br><br>
-Usage:<br>
-./typoenum.py -d DOMAIN [DOMAIN ...] [--user_agent USER-AGENT] [--top VALUE] [-v] [--tor] <br>
-or <br>
-./typoenum.py -f FILE [--user_agent USER-AGENT] [--top VALUE] [-v] [--tor]
-<br>
-<br>
+It is possible to use POST instead of GET Requests and do all requests through the [TOR Hidden Service](https://www.torproject.org/) network, with the help of [Privoxy](www.privoxy.org), in order to prevent DNS leakage.
 
-## ChangeLog:
-v0.1 Prototype   			             
-v0.2 Added version search for Typo3 	     
-v0.3 Added version guessing		     	     
-v0.4 Optimized requests 		     		       
-v0.5 Added support for Typo v6.X  	       
-v0.6 Added extension search		     	     
-v0.7 Added version search for extensions  
-v0.8 Added support for Privoxy and TOR
-```
--> It is now possible to use Typo-Enumerator with Privoxy and TOR (--tor)
-   Privoxy is used to prevent dns leakage ;)
-   Please make sure the Privoxy config (/etc/privoxy/config) is set to something like:
-      listen-address   127.0.0.1:8118
-      forward-socks5 / 127.0.0.1:9050 .
-   These are the standart ports for Privoxy and TOR
-   If TOR is used, threads will be set to 2 in order to minimize errors
+Installation
+----
 
--> Version search for extensions is now more reliable
-```
-v0.8.1
-```
--> Bugfixing
+You can download the latest tarball by clicking [here](https://github.com/whoot/Typo-Enumerator/tarball/master) or latest zipball by clicking  [here](https://github.com/whoot/Typo-Enumerator/zipball/master).
 
--> It is now possible to specifiy the threads
-   Default is 10.
-   I strongly recommend to use only 2 or even 1 thread when using TOR!
-   This is because TOR is (extremely) slow and will produce connection errors if too many threads are used.
-```
+Preferably, you can download Type-Enumerator by cloning the [Git](https://github.com/whoot/Typo-Enumerator) repository:
+
+    git clone https://github.com/whoot/Typo-Enumerator.git
+
+Typo-Enumerator works out with [Python](http://www.python.org/download/) version **2.6.x** and **2.7.x** on any platform.
+
+If you want to use Typo-Enumerator with TOR, you need the [SocksiPy](http://socksipy.sourceforge.net/) module.
+On Debian/Ubuntu you can install it with apt-get:
+
+	sudo apt-get install python-socksipy
+
+Usage
+----
+
+To get a list of all options use:
+
+    python typoenum.py -h
+
+You can use Typo-Enumerator with domains:
+
+	python typoenum.py -d DOMAIN [DOMAIN ...] [--user_agent USER-AGENT] [--top VALUE] [-v] [--tor]
+
+Or with a file with a list of domains:
+
+	python typoenum.py -f FILE [--user_agent USER-AGENT] [--top VALUE] [-v] [--tor]
+
+Example:
+Test if Typo3 and top 20 downloaded extensions are installed on localhost:
+
+	python typoenum.py -d 127.0.0.1 --top 20
+
+Bug Reporting
+----
+Bug reports are welcome! Please report all bugs on the [issue tracker](https://github.com/whoot/Typo-Enumerator/issues).
+
+Links
+----
+
+* Download: [.tar.gz](https://github.com/whoot/Typo-Enumerator/tarball/master) or [.zip](https://github.com/whoot/Typo-Enumerator/archive/master)
+* Changelog: https://github.com/whoot/Typo-Enumerator/doc/CHANGELOG.md
+* TODO: https://github.com/whoot/Typo-Enumerator/doc/TODO.md
+* Issue tracker: https://github.com/whoot/Typo-Enumerator/issues
