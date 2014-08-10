@@ -1,4 +1,4 @@
-# Version 0.3
+## Version 0.3
 
 * Using modules instead of one class
 * Accepting now strg+c when in multithreaded mode
@@ -10,50 +10,50 @@
 * Typo3 version search is more accurate
 * If the backend login page could not be found, but Typo3 is used, the user is asked, if he want to proceed. This will mostly lead to "no extensions are installed".
 
-# Version 0.2.1
+## Version 0.2.1
 
 * Fixed some bugs
-* It is now possible to specifiy threads
-  Default is 10.
-  I strongly recommend to use only 2 or even 1 thread when using TOR!
+* It is now possible to specifiy threads.<br>
+  Default is 10.<br>
+  I strongly recommend to use only 2 or even 1 thread when using TOR!<br>
   This is because TOR is (extremely) slow and will produce connection errors if too many threads are used.
 
-# Version 0.2
+## Version 0.2
 
 * Added support for Privoxy and TOR
-* It is now possible to use Typo-Enumerator with Privoxy and TOR (--tor)
-  Privoxy is used to prevent dns leakage ;)
-  Please make sure the Privoxy config (/etc/privoxy/config) is set to something like:
-	listen-address   127.0.0.1:8118
-	forward-socks5 / 127.0.0.1:9050 .
-  These are the standart ports for Privoxy and TOR
+* It is now possible to use Typo-Enumerator with Privoxy and TOR (--tor)<br>
+  Privoxy is used to prevent dns leakage ;)<br>
+  Please make sure the Privoxy config (/etc/privoxy/config) is set to something like:<br>
+	listen-address   127.0.0.1:8118<br>
+	forward-socks5 / 127.0.0.1:9050 .<br>
+  These are the standart ports for Privoxy and TOR<br>
   If TOR is used, threads will be set to 2 in order to minimize errors
 * Version search for extensions is now more reliable
 
-# Version 0.1.6
+## Version 0.1.6
 
 * Added version search for extensions
 
-# Version 0.1.5
+## Version 0.1.5
 
 * Added extension search
 
-# Version 0.1.4
+## Version 0.1.4
 
 * Added support for Typo v6.X
 
-# Version 0.1.3
+## Version 0.1.3
 
 * Optimized requests
 
-# Version 0.1.2
+## Version 0.1.2
 
 * Added version guessing
 
-# Version 0.1.1
+## Version 0.1.1
 
 * Added version search for Typo3
 
-# Version 0.1 
+## Version 0.1 
 
 * Prototype

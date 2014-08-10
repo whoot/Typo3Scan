@@ -5,3 +5,7 @@
 * Some extensions don't have any version information. These extensions must be listed in settings.NO_VERSIONINFO.
 * Use http:// or https:// plus the domain ?
 * Maybe use one library for all requests
+* Test on other platforms
+* Update "usage" in readme.md
+* Add screenshot
+* Use POST instead of GET Requests

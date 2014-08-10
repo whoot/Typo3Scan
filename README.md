@@ -1,10 +1,10 @@
-Typo-Enumerator
+Typo3-Enumerator
 ===============
 
-Typo-Enumerator is an open source penetration testing tool that automates the process of detecting the [Typo3](https://typo3.org) CMS and its installed [extensions](https://typo3.org/extensions/repository/?id=23&L=0&q=&tx_solr[filter][outdated]=outdated%3AshowOutdated) (also the outdated ones!).
+Typo3-Enumerator is an open source penetration testing tool that automates the process of detecting the [Typo3](https://typo3.org) CMS and its installed [extensions](https://typo3.org/extensions/repository/?id=23&L=0&q=&tx_solr[filter][outdated]=outdated%3AshowOutdated) (also the outdated ones!).
 If the --top parameter is set to a value, only the specified most downloaded extensions are tested.
 
-It is possible to use POST instead of GET Requests and do all requests through the [TOR Hidden Service](https://www.torproject.org/) network, with the help of [Privoxy](www.privoxy.org), in order to prevent DNS leakage.
+It is possible to do all requests through the [TOR Hidden Service](https://www.torproject.org/) network, with the help of [Privoxy](www.privoxy.org), in order to prevent DNS leakage.
 
 Installation
 ----
@@ -29,7 +29,7 @@ To get a list of all options use:
 
     python typoenum.py -h
 
-You can use Typo-Enumerator with domains:
+You can use Typo3-Enumerator with domains:
 
 	python typoenum.py -d DOMAIN [DOMAIN ...] [--user_agent USER-AGENT] [--top VALUE] [-v] [--tor]
 
