@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 
 ############ Version information ##############
-__version__ = "0.3"
+__version__ = "0.3.1"
 __program__ = "Typo-Enumerator v" + __version__
 __description__ = 'Automatic Typo3 and Typo3 extensions enumeration tool'
 __author__ = "Jan Rude"
