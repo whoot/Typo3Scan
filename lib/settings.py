@@ -44,7 +44,6 @@ verbose = False
 
 #Input and output queues
 in_queue = ""
-in_queue2 = ""
 out_queue = ""
 
 # Seconds to wait before timeout connection.
@@ -68,7 +67,7 @@ EXTENSION_PATHS = ('/typo3conf/ext/', '/typo3/sysext/')
 # Possible version info file
 EXTENSION_VERSION_INFO = ('ChangeLog', 'README.txt')
 
-EXTENSIONS_FOUND = {}
+EXTENSIONS_FOUND = 0
 
 
 

@@ -13,7 +13,7 @@ from lib import settings
 def search_version_info():
 	for path, regex in settings.TYPO3_VERSION_INFO.iteritems():
 		try:
-			request = urllib2.Request('http://' + settings.DOMAIN + path, None, settings.user_agent)
+			request = urllib2.Request(settings.DOMAIN + path, None, settings.user_agent)
 			response = urllib2.urlopen(request, timeout = settings.TIMEOUT)
 			news = response.read(700)
 			response.close()

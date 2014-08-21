@@ -32,13 +32,13 @@ def copy():
 		settings.in_queue.put(extension)
 
 # Searching installed extensions
-# Check on version if we get 200 or 403.
+# Check version if getting 200 or 403.
 def check_extension():
 	while True:
 		extension = settings.in_queue.get()
 		for path in settings.EXTENSION_PATHS:
 			try:
-				req = urllib2.Request('http://' + settings.DOMAIN + path + extension + '/', None, settings.user_agent)
+				req = urllib2.Request(settings.DOMAIN + path + extension + '/', None, settings.user_agent)
 				connection = urllib2.urlopen(req, timeout = settings.TIMEOUT)
 				connection.close()
 				check_extension_version(path, extension)
@@ -52,7 +52,7 @@ def check_extension():
 			except urllib2.URLError, e:
 				pass
 				#retry = raw_input('Error on checking ' + extension + ': ' + str(e.reason) + '\nRetrying? (y/n) ')
-				#if retry:
+				#if retry is 'y':
 				#	settings.in_queue.put(extension)
 		# if extension is not in any given path, it's not installed
 		if settings.verbose:
@@ -69,7 +69,7 @@ def check_extension_version(path, extension):
 			settings.out_queue.put(extension.ljust(32) + Fore.GREEN + 'installed' + Fore.RESET)
 	else:
 		try:
-			request = urllib2.Request('http://' + settings.DOMAIN + path + extension +'/ChangeLog', None, settings.user_agent)
+			request = urllib2.Request(settings.DOMAIN + path + extension +'/ChangeLog', None, settings.user_agent)
 			response = urllib2.urlopen(request, timeout = settings.TIMEOUT)
 			changelog = response.read(1500)
 			response.close()
