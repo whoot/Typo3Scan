@@ -14,6 +14,8 @@ def thread():
 	while settings.out_queue is not settings.out_queue.empty():
 		try:
 			extension = settings.out_queue.get()
+			if not "not installed" in extension:
+				settings.EXTENSIONS_FOUND += 1
 			print(extension)
 			settings.out_queue.task_done()
 		except Exception, e:
