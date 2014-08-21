@@ -31,16 +31,16 @@ To get a list of all options use:
 
 You can use Typo3-Enumerator with domains:
 
-	python typoenum.py -d DOMAIN [DOMAIN ...] [--user_agent USER-AGENT] [--top VALUE] [-v] [--tor]
+	python typoenum.py -d DOMAIN [DOMAIN ...] [--top VALUE]
 
 Or with a file with a list of domains:
 
-	python typoenum.py -f FILE [--user_agent USER-AGENT] [--top VALUE] [-v] [--tor]
+	python typoenum.py -f FILE [--top VALUE]
 
 Example:
 Test if Typo3 and top 20 downloaded extensions are installed on localhost:
 
-	python typoenum.py -d 127.0.0.1 --top 20
+	python typoenum.py -d https://127.0.0.1 --top 20
 
 Bug Reporting
 ----
