@@ -26,11 +26,13 @@ def main(argv):
 	parser = argparse.ArgumentParser(usage='typoenum.py [options]')
 	group = parser.add_mutually_exclusive_group()
 	anonGroup = parser.add_mutually_exclusive_group()
+	extensionGroup = parser.add_mutually_exclusive_group()
 	group.add_argument('-d', '--domain', dest='domain', type=str, nargs='+')
 	group.add_argument('-f', '--file', dest='file', help='File with a list of domains')
 	group.add_argument('-u', '--update', dest='update', action='store_true',help='Update the extension file')
 	parser.add_argument('--user_agent', dest='user_agent', metavar='USER-AGENT (default: Mozilla/5.0)')
-	parser.add_argument('--top', type=int, dest='top', metavar='VALUE', help='Check only most X downloaded extensions (default: all)')
+	extensionGroup.add_argument('--top', type=int, dest='top', metavar='VALUE', help='Check only most X downloaded extensions (default: all)')
+	extensionGroup.add_argument('-e', '--extension', type=str, dest='ext', metavar='EXTENSION', help='Check only for this extension(s)', nargs='+')
 	anonGroup.add_argument('--tor', help='using only TOR for connections', action='store_true')
 	anonGroup.add_argument('--privoxy', help='using only Privoxy for connections', action='store_true')
 	anonGroup.add_argument('--tp', help='using TOR and Privoxy for connections', action='store_true')
@@ -74,6 +76,9 @@ def main(argv):
 			else:
 				tp.connect(settings.DEFAULT_PRIVOXY_PORT)
 
+		if args.timeout:
+			settings.TIMEOUT = args.timeout
+
 		if args.user_agent:
 			settings.user_agent.update({'User-Agent':args.user_agent})
 
@@ -83,12 +88,13 @@ def main(argv):
 		if args.top or args.top is 0:
 			settings.TOP_EXTENSION = args.top
 
-		if args.timeout:
-			settings.TIMEOUT = args.timeout
+		if args.ext:
+			for extension in args.ext:
+				settings.EXTENSION_LIST.append(extension)
 
 		if args.domain:
 			for dom in args.domain:
-				start.start(dom)
+				start.check_typo_installation(dom)
 
 		elif args.file:
 			if not isfile(args.file):
@@ -97,7 +103,10 @@ def main(argv):
 			else:
 				with open(args.file, 'r') as f:
 					for line in f:
-						start.start(line.strip('\n')[0])
+						start.check_typo_installation(line.strip('\n')[0])
+	except KeyboardInterrupt:
+		print Fore.RED + "\nReceived keyboard interrupt.\nQuitting..." + Fore.RESET
+		exit(-1)
 	except Exception, e:
 		import traceback
 		print ('generic exception: ', traceback.format_exc())
