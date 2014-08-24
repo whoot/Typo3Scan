@@ -6,12 +6,22 @@ from colorama import Fore
 try:
 	import socks
 except:
-	print "The module 'SocksiPy' is not installed.\nPlease install it with: sudo apt-get install python-socksipy"
+	print "The module 'SocksiPy' is not installed."
+	if sys.platform.startswith('linux'):
+		"Please install it with: sudo apt-get install python-socksipy"
+	else:
+		"You can download it from http://socksipy.sourceforge.net/"
 	sys.exit(-2)
 
 def start_daemon():
-	os.system('service privoxy start')
-	print '[' + Fore.GREEN + ' ok ' + Fore.RESET + '] Starting privoxy daemon...done.'
+	if sys.platform.startswith('linux'):
+		os.system('service privoxy start')
+		print '[' + Fore.GREEN + ' ok ' + Fore.RESET + '] Starting privoxy daemon...done.'
+	elif sys.platform.startswith('win32') or sys.platform.startswith('cygwin'):
+		print "Please make sure Privoxy is running..."
+	else:
+		print "You are using", sys.platform, ", which is not supported (yet)."
+		sys.exit(-2)
 	
 # Using Privoxy for all connections
 def connect(port):
@@ -39,5 +49,8 @@ def connect(port):
 
 def stop():
 	print "\n"
-	os.system('service privoxy stop')
-	print '[' + Fore.GREEN + ' ok ' + Fore.RESET + '] Stopping privoxy daemon...done.'
+	if sys.platform.startswith('linux'):
+		os.system('service privoxy stop')
+		print '[' + Fore.GREEN + ' ok ' + Fore.RESET + '] Stopping privoxy daemon...done.'
+	elif sys.platform.startswith('win32') or sys.platform.startswith('cygwin'):
+		print "You can close Privoxy now..."
