@@ -17,15 +17,21 @@ Preferably, you can download Type-Enumerator by cloning the [Git](https://github
 
 Typo-Enumerator works with [Python](http://www.python.org/download/) version **2.6.x** and **2.7.x** on Debian/Ubuntu, RedHat and Windows platforms.
 
+On Windows you might need to install following packages:
+
+* [Colorama](https://pypi.python.org/pypi/colorama)
+* [Requests](https://pypi.python.org/pypi/requests/2.3.0)
+
+On Redhat you can install all needed packages with easy_install:
+
+	easy_install argparse
+	easy_install colorama
+	easy_install requests
+
 If you want to use Typo-Enumerator with TOR, you need the [SocksiPy](http://socksipy.sourceforge.net/) module.
 On Debian/Ubuntu you can install it with apt-get:
 
 	sudo apt-get install python-socksipy
-
-You might need to install following packages:
-
-* [Colorama](https://pypi.python.org/pypi/colorama)
-* [Requests](https://pypi.python.org/pypi/requests/2.3.0)
 
 Usage
 ----
