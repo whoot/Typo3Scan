@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 
 ############ Version information ##############
-__version__ = "0.3.1"
+__version__ = "0.3.2"
 __program__ = "Typo-Enumerator v" + __version__
 __description__ = 'Automatic Typo3 and Typo3 extensions enumeration tool'
 __author__ = "Jan Rude"
@@ -14,12 +14,14 @@ import os
 import datetime
 import argparse
 import warnings
-from colorama import Fore, Style
+from colorama import init, Fore, Style
 warnings.filterwarnings(action="ignore", message=".*was already imported", category=UserWarning)
 warnings.filterwarnings(action="ignore", category=DeprecationWarning)
 from lib import settings
 from lib import update
 from lib import start
+init()
+
 
 # Main
 def main(argv):
@@ -135,5 +137,5 @@ if __name__ == "__main__":
 	print('\t' + '(c)2014 by ' + __author__)
 	print('\t' + 'Status:\t' + __status__)
 	print('\t' + 'For legal purposes only!')
-	print(70*'*')
+	print(70*'*' + '\n')
 	sys.exit( not main( sys.argv ) )
