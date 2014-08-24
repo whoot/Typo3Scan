@@ -24,8 +24,8 @@ On Debian/Ubuntu you can install it with apt-get:
 
 You might need to install following packages:
 
-	[Colorama](https://pypi.python.org/pypi/colorama)
-	[Requests](https://pypi.python.org/pypi/requests/2.3.0)
+*[Colorama](https://pypi.python.org/pypi/colorama)
+*[Requests](https://pypi.python.org/pypi/requests/2.3.0)
 
 Usage
 ----
