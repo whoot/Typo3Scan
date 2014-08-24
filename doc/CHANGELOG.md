@@ -1,3 +1,7 @@
+## Version 0.3.2
+
+* Added support for Windows and Red Hat systems
+
 ## Version 0.3.1
 
 * It is now possible to check for specific extensions (-e or --extension).
