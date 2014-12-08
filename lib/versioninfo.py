@@ -6,8 +6,11 @@ Copyright (c) 2014 Jan Rude
 
 import re
 import urllib2
-from colorama import Fore
 from lib import settings
+try:
+	from colorama import Fore
+except:
+	pass
 
 # Searching for Typo3 version
 def search_version_info():
@@ -29,7 +32,16 @@ def search_version_info():
 # Output of Typo3 version
 def output():
 	if settings.TYPO_VERSION is None:
-		print "Typo3 Version:".ljust(32) + Fore.RED + "Not found" + Fore.RESET
+		print "Typo3 Version:".ljust(32)
+		if settings.COLORAMA:
+			print Fore.RED 
+		print "Not found"
+		if settings.COLORAMA:
+			Fore.RESET
 	else:
-		print "Typo3 Version:".ljust(32) + Fore.GREEN + settings.TYPO_VERSION + Fore.RESET
+		if settings.COLORAMA:
+			output = Fore.GREEN + settings.TYPO_VERSION + Fore.RESET
+		else:
+			output = settings.TYPO_VERSION
+		print "Typo3 Version:".ljust(32) + output
 		print "Link to vulnerabilities:".ljust(32) + "http://www.cvedetails.com/version-search.php?vendor=&product=Typo3&version=" + settings.TYPO_VERSION.split()[1]

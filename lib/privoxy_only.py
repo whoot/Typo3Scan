@@ -2,7 +2,7 @@ import socket
 import urllib2
 import os, sys
 import re
-from colorama import Fore
+
 try:
 	import socks
 except:
@@ -16,7 +16,7 @@ except:
 def start_daemon():
 	if sys.platform.startswith('linux'):
 		os.system('service privoxy start')
-		print '[' + Fore.GREEN + ' ok ' + Fore.RESET + '] Starting privoxy daemon...done.'
+		print '[ ok ] Starting privoxy daemon...done.'
 	elif sys.platform.startswith('win32') or sys.platform.startswith('cygwin'):
 		print "Please make sure Privoxy is running..."
 	else:
@@ -34,7 +34,7 @@ def connect(port):
 		response = torcheck.read()
 		torcheck.close()
 	except:
-		print Fore.RED + "Failed to connect through Privoxy!" + Fore.RESET
+		print "Failed to connect through Privoxy!"
 		print "Please make sure your configuration is right!\n"
 		sys.exit(-2)
 	try:
@@ -51,6 +51,6 @@ def stop():
 	print "\n"
 	if sys.platform.startswith('linux'):
 		os.system('service privoxy stop')
-		print '[' + Fore.GREEN + ' ok ' + Fore.RESET + '] Stopping privoxy daemon...done.'
+		print '[ ok ] Stopping privoxy daemon...done.'
 	elif sys.platform.startswith('win32') or sys.platform.startswith('cygwin'):
 		print "You can close Privoxy now..."

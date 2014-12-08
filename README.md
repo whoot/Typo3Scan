@@ -19,14 +19,16 @@ Typo-Enumerator works with [Python](http://www.python.org/download/) version **2
 
 On Windows you might need to install following packages:
 
-* [Colorama](https://pypi.python.org/pypi/colorama)
 * [Requests](https://pypi.python.org/pypi/requests/2.3.0)
 
 On Redhat you can install all needed packages with easy_install:
 
 	easy_install argparse
-	easy_install colorama
 	easy_install requests
+
+To make it look pretty, you may want to install colorama:
+
+* [Colorama](https://pypi.python.org/pypi/colorama)
 
 If you want to use Typo-Enumerator with TOR, you need the [SocksiPy](http://socksipy.sourceforge.net/) module.
 On Debian/Ubuntu you can install it with apt-get:

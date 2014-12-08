@@ -5,27 +5,37 @@ Copyright (c) 2014 Jan Rude
 """
 
 import re
+import os
+import sys
 import time
 import urllib2
 from Queue import Queue
-from colorama import Fore
+try:
+	from colorama import Fore
+except:
+	pass
 from os.path import isfile
 from threading import Thread, Lock
 from lib import settings
 
 def generate_list():
-	if not isfile('extensions'):
-		print(Fore.RED + "\nExtensionfile not found!\nPlease update Typo-Enumerator (python typoenum.py -u)" + Fore.RESET)
-		sys.exit(-2)
-	with open('extensions', 'r') as f:
-		count = 0
-		for extension in f:
-			if settings.TOP_EXTENSION > count:
-				settings.EXTENSION_LIST.append(extension.split('\n')[0])
-				count += 1
-			else:
-				f.close()
-				return
+	print ''
+	for ext_file in settings.EXTENSION_FILE:
+		if not isfile(os.path.join('extensions', ext_file)):
+			output("Could not find extension file " + ext_file 
+					+ "\nPossible values are: experimental | alpha | beta | stable | outdated | all", False)
+			sys.exit(-1)
+
+		with open(os.path.join('extensions', ext_file), 'r') as f:
+			count = 0
+			print "[+] Loading:", ext_file
+			for extension in f:
+				if settings.TOP_EXTENSION > count:
+					settings.EXTENSION_LIST.append(extension.split('\n')[0])
+					count += 1
+				else:
+					f.close()
+					return
 
 def copy():
 	for extension in settings.EXTENSION_LIST:
@@ -56,17 +66,18 @@ def check_extension():
 				#	settings.in_queue.put(extension)
 		# if extension is not in any given path, it's not installed
 		if settings.verbose:
-			settings.out_queue.put(extension.ljust(32) + Fore.RED + 'not installed' + Fore.RESET)
+			output(extension.ljust(32) + 'not installed', False)
 		settings.in_queue.task_done()
 
 # Searching version of installed extension
 def check_extension_version(path, extension):
+	settings.EXTENSIONS_FOUND += 1
 	# if no version information is available, skip version search
 	if extension in settings.NO_VERSIONINFO:
 		if settings.verbose:
-			settings.out_queue.put(extension.ljust(32) + Fore.GREEN + 'installed' + Fore.RESET + ' (no version information available)')
+			output(extension.ljust(32) + 'installed (no version information available)', True)
 		else:
-			settings.out_queue.put(extension.ljust(32) + Fore.GREEN + 'installed' + Fore.RESET)
+			output(extension.ljust(32) + 'installed', True)
 	else:
 		try:
 			request = urllib2.Request(settings.DOMAIN + path + extension +'/ChangeLog', None, settings.user_agent)
@@ -77,17 +88,26 @@ def check_extension_version(path, extension):
 				regex = re.compile("(\d{1,2}\.\d{1,2}\.?[0-9]?[0-9]?[' '\n])")
 				searchVersion = regex.search(changelog)
 				version = searchVersion.groups()
-				settings.out_queue.put(extension.ljust(32) + Fore.GREEN + 'installed (v' + version[0].split()[0] + ')' + Fore.RESET)
+				output(extension.ljust(32) + 'installed (v' + version[0].split()[0] + ')', True)
 			except:
 				try:
 					regex = re.compile("(\d{2,4}[\.\-]\d{1,2}[\.\-]\d{1,4})")
 					search = regex.search(changelog)
 					version = search.groups()
-					settings.out_queue.put(extension.ljust(32) + Fore.GREEN + 'installed (last entry from ' + version[0] + ')' + Fore.RESET)
+					output(extension.ljust(32) + 'installed (last entry from ' + version[0] + ')', True)
 				except:
 					if settings.verbose:
-						settings.out_queue.put(extension.ljust(32) + Fore.GREEN + "installed" + Fore.RESET + " (no version information found)")
+						output(extension.ljust(32) + 'installed (no version information found)', True)
 					else:
-						settings.out_queue.put(extension.ljust(32) + Fore.GREEN + "installed" + Fore.RESET)
+						output(extension.ljust(32) + 'installed', True)
 		except:
-			settings.out_queue.put(extension.ljust(32) + Fore.GREEN + "installed" + Fore.RESET)
+			output(extension.ljust(32) + "installed", True)
+
+def output(message, status):
+	if settings.COLORAMA:
+		if status:
+			print Fore.GREEN + message + Fore.RESET
+		else:
+			print Fore.RED + message + Fore.RESET
+	else:
+		print message

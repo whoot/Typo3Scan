@@ -8,7 +8,10 @@ import time
 from Queue import Queue
 from os.path import isfile
 from threading import Thread, Lock
-from colorama import Fore, Back
+try:
+	from colorama import Fore, Back
+except:
+	pass
 from lib import settings
 from lib import versioninfo
 from lib import login
@@ -18,7 +21,12 @@ from lib import extensions
 # Startmethod
 def check_typo_installation(domain):
 	settings.DOMAIN = domain
-	print '\n\n' + Fore.CYAN + '[ Checking ' + domain + ' ]' + '\n' + "-"* 70  + Fore.RESET
+	settings.EXTENSIONS_FOUND = 0
+	if settings.COLORAMA:
+		output = Fore.CYAN + '[ Checking ' + domain + ' ]' + '\n' + "-"* 70  + Fore.RESET
+	else:
+		output = '[ Checking ' + domain + ' ]' + '\n' + "-"* 70
+	print '\n\n' + output
 
 	check = login.search_login()
 	if check is "redirect":
@@ -31,21 +39,20 @@ def check_typo_installation(domain):
 		if mainpage is True:
 			init_extension_search()
 		elif mainpage is not "skip":
-			print "Typo3 Login:".ljust(32) + Fore.RED + "Typo3 is not used on this domain" + Fore.RESET
+			output("Typo3 Login:".ljust(32) + "Typo3 is not used on this domain", False)
 
 def init_extension_search():
 	settings.in_queue = Queue()
-	settings.out_queue = Queue()
 	versioninfo.search_version_info()
 	versioninfo.output()
 
-	if not settings.EXTENSION_LIST:
-		extensions.generate_list()
+	if settings.TOP_EXTENSION != 0:
+		if not settings.EXTENSION_LIST:
+			extensions.generate_list()
 
-	extensions.copy()
-	extensions_to_check = settings.in_queue.qsize()
+		extensions.copy()
+		extensions_to_check = settings.in_queue.qsize()
 
-	if extensions_to_check is not 0:
 		print '\nChecking', extensions_to_check, 'extension(s)...'
 		# Thanks to 'RedSparrow': http://stackoverflow.com/questions/17991033/python-cant-kill-main-thread-with-keyboardinterrupt
 		try:
@@ -59,18 +66,24 @@ def init_extension_search():
 				else:
 					break
 		except KeyboardInterrupt:
-			print Fore.RED + "\nReceived keyboard interrupt.\nQuitting..." + Fore.RESET
+			output("\nReceived keyboard interrupt.\nQuitting...", False)
 			exit(-1)
 		settings.in_queue.join()
 
-		installed_ext = settings.out_queue.qsize()
-		if installed_ext is 0:
-			print Fore.RED + "No extensions installed" + Fore.RESET
+		installed_ext = settings.EXTENSIONS_FOUND
+		if installed_ext == 0:
+			output("No extensions installed", False)
 		else:
-			t = Thread(target=output.thread, args=())
-			t.daemon = True
-			t.start()
-			settings.out_queue.join()
-			print Fore.GREEN + '\n', str(settings.EXTENSIONS_FOUND) + '/' + str(extensions_to_check),'extension(s) installed' + Fore.RESET
+			output('\n' + str(settings.EXTENSIONS_FOUND) + '/' + str(extensions_to_check) + ' extension(s) installed', True)
 	else:
 		print '\nSkipping check for extensions...'
+
+# print error messages
+def output(message, setting):
+	if settings.COLORAMA:
+		if not setting:
+			print Fore.RED + message + Fore.RESET
+		if setting:
+			print Fore.GREEN + message + Fore.RESET
+	else:
+		print message

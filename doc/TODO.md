@@ -5,4 +5,5 @@
 * Some extensions don't have any version information. These extensions must be listed in settings.NO_VERSIONINFO.
 * Maybe use one library for all requests
 * Add screenshot
-* Give the possibility to use POST instead of GET requests
+
+* verbose gruscht gscheid behandeln

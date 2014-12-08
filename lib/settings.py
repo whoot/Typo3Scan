@@ -8,8 +8,7 @@ from Queue import Queue
 from threading import Thread, Lock
 
 # Domain to check
-# Valid: string
-DOMAIN = ""
+DOMAIN = ''
 
 # Maximum number of threads (avoiding connection issues and/or DoS)
 MAX_NUMBER_OF_THREADS = 10
@@ -20,6 +19,10 @@ DEFAULT_TOR_PORT = 9050
 # Default ports used in Tor proxy bundles
 DEFAULT_PRIVOXY_PORT = 8118
 
+# Default extension file
+# Default: all available Typo3 extensions
+EXTENSION_FILE = ['all_extensions']
+
 # List with selected extensions
 EXTENSION_LIST = []
 
@@ -27,7 +30,7 @@ EXTENSION_LIST = []
 NO_VERSIONINFO = ['wt_spamshield', 'introduction'] #introduction has ChangeLog, but will use "Typo3 4.5.0" as version info!
 
 # Check only top X extensions
-# Default: all
+# Default: all extensions
 TOP_EXTENSION = 'all'
 
 # HTTP User-Agent header value. Useful to fake the HTTP User-Agent header value at each HTTP request
@@ -35,19 +38,16 @@ TOP_EXTENSION = 'all'
 user_agent = {'User-Agent' : "Mozilla/5.0"}
 
 # Maximum number of concurrent HTTP(s) requests (handled with Python threads)
-# Valid: integer
 # Default: 7
 THREADS = 7
 
 # Verbosity.
 verbose = False
 
-#Input and output queues
-in_queue = ""
-out_queue = ""
+#Input queue
+in_queue = ''
 
 # Seconds to wait before timeout connection.
-# Valid: int
 # Default: 20
 TIMEOUT = 20
 
@@ -67,7 +67,11 @@ EXTENSION_PATHS = ('/typo3conf/ext/', '/typo3/sysext/')
 # Possible version info file
 EXTENSION_VERSION_INFO = ('ChangeLog', 'README.txt')
 
+# Installed extensions on targed domain
 EXTENSIONS_FOUND = 0
+
+# Colorama is not used, if not installed
+COLORAMA = False
 
 
 

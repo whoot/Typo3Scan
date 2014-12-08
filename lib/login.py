@@ -40,11 +40,11 @@ def search_login():
 		else:
 			print 'Oops! Got unhandled code:'.ljust(32) + str(statusCode) + ': ' + str(r.raise_for_status())
 	except requests.exceptions.Timeout:
-		print Fore.RED + 'Connection timed out' + Fore.RESET
+		output('Connection timed out')
 	except requests.exceptions.TooManyRedirects:
-		print Fore.RED + 'Too many redirects' + Fore.RESET
+		output('Too many redirects')
 	except requests.exceptions.RequestException as e:
-		print Fore.RED + str(e) + Fore.RESET
+		output(str(e))
 
 # Searching for Typo3 references in title
 def check_title(response, url):
@@ -72,7 +72,7 @@ def check_main_page():
 			if 'fe_typo_user' in cookie:
 				return bad_url()
 		except KeyboardInterrupt:
-			print Fore.RED + '\nReceived keyboard interrupt.\nQuitting...' + Fore.RESET
+			output('\nReceived keyboard interrupt.\nQuitting...')
 			exit(-1)
 		except:
 			try:
@@ -91,14 +91,14 @@ def check_main_page():
 				pass
 	except Exception, e:
 		if '404' in str(e):
-			print Fore.RED + str(e) + '\nPlease ensure you entered the right url' + Fore.RESET
+			output(str(e) + '\nPlease ensure you entered the right url')
 		else:
-			print Fore.RED + str(e) + Fore.RESET
+			output(str(e))
 		return 'skip'
 	return False
 
 def bad_url():
-	print 'Typo3 Login:'.ljust(32) + Fore.GREEN + 'Typo3 is used, but could not find login' + Fore.RESET
+	print 'Typo3 Login:'.ljust(32) + 'Typo3 is used, but could not find login'
 	print ''.ljust(32) + 'This could result in \'no extensions are installed\'.'
 	print ''.ljust(32) + 'Seems like something is wrong with the given url.'
 	answer = ''
@@ -110,3 +110,11 @@ def bad_url():
 	if answer is 'y':
 		return True
 	return 'skip'
+
+# printing error messages
+def output(message):
+	if settings.COLORAMA:
+		print Fore.RED
+	print message
+	if settings.COLORAMA:
+		print Fore.RESET

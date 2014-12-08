@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 
 ############ Version information ##############
-__version__ = "0.3.2"
+__version__ = "0.3.3"
 __program__ = "Typo-Enumerator v" + __version__
 __description__ = 'Automatic Typo3 and Typo3 extensions enumeration tool'
 __author__ = "Jan Rude"
@@ -14,12 +14,15 @@ import os
 import datetime
 import argparse
 import warnings
-from colorama import init, Fore, Style
 warnings.filterwarnings(action="ignore", message=".*was already imported", category=UserWarning)
-warnings.filterwarnings(action="ignore", category=DeprecationWarning)
 from lib import settings
 from lib import update
 from lib import start
+try:
+	from colorama import init, Fore
+	settings.COLORAMA = True
+except:
+	pass
 init()
 
 
@@ -35,6 +38,7 @@ def main(argv):
 	parser.add_argument('--user_agent', dest='user_agent', metavar='USER-AGENT (default: Mozilla/5.0)')
 	extensionGroup.add_argument('--top', type=int, dest='top', metavar='VALUE', help='Check only most X downloaded extensions (default: all)')
 	extensionGroup.add_argument('-e', '--extension', type=str, dest='ext', metavar='EXTENSION', help='Check only for this extension(s)', nargs='+')
+	parser.add_argument('--state', dest='ext_state', help='Check only (experimental | alpha | beta | stable | outdated) extensions', nargs='+')
 	anonGroup.add_argument('--tor', help='using only TOR for connections', action='store_true')
 	anonGroup.add_argument('--privoxy', help='using only Privoxy for connections', action='store_true')
 	anonGroup.add_argument('--tp', help='using TOR and Privoxy for connections', action='store_true')
@@ -51,7 +55,7 @@ def main(argv):
 			return True
 
 		if args.threads > settings.MAX_NUMBER_OF_THREADS:
-			print Fore.RED + "Warning! Threads are set to", args.threads,"(max value is 10)\nThis can cause connection issues and/or DoS\nAborting...." + Fore.RESET
+			output("Warning! Threads are set to", args.threads,"(max value is 10)\nThis can cause connection issues and/or DoS\nAborting....")
 			sys.exit(-2)
 
 		if args.tor:
@@ -94,20 +98,26 @@ def main(argv):
 			for extension in args.ext:
 				settings.EXTENSION_LIST.append(extension)
 
+		if args.ext_state:
+			settings.EXTENSION_FILE = []
+			for ext_list in args.ext_state:
+				ext_file = ext_list + '_extensions'
+				settings.EXTENSION_FILE.append(ext_file)
+
 		if args.domain:
 			for dom in args.domain:
 				start.check_typo_installation(dom)
 
 		elif args.file:
 			if not isfile(args.file):
-				print(Fore.RED + "\nFile not found: " + args.file + "\nAborting..." + Fore.RESET)
+				output("\nFile not found: " + args.file + "\nAborting...")
 				sys.exit(-2)
 			else:
 				with open(args.file, 'r') as f:
 					for line in f:
 						start.check_typo_installation(line.strip('\n')[0])
 	except KeyboardInterrupt:
-		print Fore.RED + "\nReceived keyboard interrupt.\nQuitting..." + Fore.RESET
+		output("\nReceived keyboard interrupt.\nQuitting...")
 		exit(-1)
 	except Exception, e:
 		import traceback
@@ -123,15 +133,20 @@ def main(argv):
 		elif args.tp:
 			tp.stop()
 
-		print '\n'
 		now = datetime.datetime.now()
-		print __program__ + ' finished at ' + now.strftime("%Y-%m-%d %H:%M:%S") + '\n'
-		Style.RESET_ALL
+		print '\n' + __program__ + ' finished at ' + now.strftime("%Y-%m-%d %H:%M:%S") + '\n'
 		return True
+
+# print error messages
+def output(message):
+	if settings.COLORAMA:
+		print Fore.RED + message + Fore.RESET
+	else:
+		print message
 
 if __name__ == "__main__":
 	import sys
-	print(Style.BRIGHT + '\n' + 70*'*')
+	print('\n' + 70*'*')
 	print('\t' + __program__ )
 	print('\t' + __description__)
 	print('\t' + '(c)2014 by ' + __author__)

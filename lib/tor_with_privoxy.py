@@ -2,7 +2,7 @@ import socket
 import urllib2
 import os, sys
 import re
-from colorama import Fore
+
 try:
 	import socks
 except:
@@ -17,7 +17,7 @@ def start_daemon():
 	if sys.platform.startswith('linux'):
 		os.system('service tor start')
 		os.system('service privoxy start')
-		print '[' + Fore.GREEN + ' ok ' + Fore.RESET + '] Starting privoxy daemon...done.'
+		print '[ ok ] Starting privoxy daemon...done.'
 	elif sys.platform.startswith('win32') or sys.platform.startswith('cygwin'):
 		print "Please make sure TOR and Privoxy are running..."
 	else:
@@ -35,14 +35,14 @@ def connect(port):
 		response = torcheck.read()
 		torcheck.close()
 	except:
-		print Fore.RED + "Failed to connect through Privoxy and/or TOR!" + Fore.RESET
+		print "Failed to connect through Privoxy and/or TOR!"
 		print "Please make sure your configuration is right!\n"
 		sys.exit(-2)
 	try:
 		regex = re.compile('Congratulations. This browser is configured to use Tor.')
 		searchVersion = regex.search(response)
 		version = searchVersion.groups()
-		print Fore.GREEN + "Connection to TOR established" + Fore.RESET
+		print "Connection to TOR established"
 		regex = re.compile("(\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3})")
 		searchIP = regex.search(response)
 		IP = searchIP.groups()[0]
@@ -57,6 +57,6 @@ def stop():
 	if sys.platform.startswith('linux'):
 		os.system('service tor stop')
 		os.system('service privoxy stop')
-		print '[' + Fore.GREEN + ' ok ' + Fore.RESET + '] Stopping privoxy daemon...done.'
+		print '[ ok ] Stopping privoxy daemon...done.'
 	elif sys.platform.startswith('win32') or sys.platform.startswith('cygwin'):
 		print "You can close TOR and Privoxy now..."

@@ -2,7 +2,7 @@ import socket
 import urllib2
 import os, sys
 import re
-from colorama import Fore
+
 try:
 	import socks
 except:
@@ -34,14 +34,14 @@ def connect(port):
 		torcheck.close()
 	except Exception, e:
 		print e
-		print Fore.RED + "Failed to connect through TOR!" + Fore.RESET
+		print "Failed to connect through TOR!"
 		print "Please make sure your configuration is right!\n"
 		sys.exit(-2)
 	try:
 		regex = re.compile('Congratulations. This browser is configured to use Tor.')
 		searchVersion = regex.search(response)
 		version = searchVersion.groups()
-		print Fore.GREEN + "Connection to TOR established" + Fore.RESET
+		print "Connection to TOR established"
 		regex = re.compile("(\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3})")
 		searchIP = regex.search(response)
 		IP = searchIP.groups()[0]

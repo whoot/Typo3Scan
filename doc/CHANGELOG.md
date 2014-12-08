@@ -1,3 +1,9 @@
+## Version 0.3.3
+
+* Extensions are now saved into different files, separated by state (experimental | alpha | beta | stable | outdated | all). This makes it possible to check more specific ones.
+* Colorama is only used if installed. It doesn't need to be installed anymore.
+* Installed extensions are shown immediately
+
 ## Version 0.3.2
 
 * Added support for Windows and Red Hat systems
@@ -8,7 +14,7 @@
 * Domains must be specified with 'http://' or 'https://' (for example: https://127.0.0.1).
 * Login page redirections can be followed or not.
 * Fixed the 'all extensions are installed' bug in the summary when using verbose mode.
-* Set sleep between threads to 0.5, to fix time out errors when checking a huge amount of extensions.
+* Set sleep between threads to 0.5 to fix time out errors when checking a huge amount of extensions.
 
 ## Version 0.3
 
