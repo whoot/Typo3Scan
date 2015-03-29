@@ -28,8 +28,6 @@ import os.path
 import datetime
 import argparse
 from colorama import Fore, init, deinit
-
-import lib.configuration as Config
 from lib.check_installation import Typo3_Installation
 from lib.version_information import VersionInformation
 from lib.extensions import Extensions
