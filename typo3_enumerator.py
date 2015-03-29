@@ -27,7 +27,7 @@ import sys
 import os.path
 import datetime
 import argparse
-from colorama import Fore, init, deinit
+from colorama import Fore, init, deinit, Style
 from lib.check_installation import Typo3_Installation
 from lib.version_information import VersionInformation
 from lib.extensions import Extensions
@@ -102,7 +102,7 @@ class Typo3:
 						for line in f:
 							domain_list.append(Domain(line.strip('\n'), args.ext_state, args.top))
 			for domain in self.__domain_list:
-				print('\n\n' + Fore.CYAN + '[ Checking ' + domain.get_name() + ' ]' + '\n' + "-"* 73  + Fore.RESET)
+				print('\n\n' + Fore.CYAN + Style.BRIGHT '[ Checking ' + domain.get_name() + ' ]' + '\n' + "-"* 73  + Fore.RESET + Style.RESET_ALL)
 				Typo3_Installation.run(domain)
 				if not domain.get_typo3():
 					print(Fore.RED + '\n[x] Typo3 is not used on this domain' + Fore.RESET)
@@ -137,7 +137,7 @@ class Typo3:
 			print('\n\n' + __program__ + ' finished at ' + now.strftime("%Y-%m-%d %H:%M:%S") + '\n')
 		
 if __name__ == "__main__":
-	print('\n' + 73*'=')
+	print('\n' + 73*'=' + Style.BRIGHT)
 	print(Fore.BLUE + ' _______                     ______ '.center(73))
 	print('|_     _|.--.--.-----.-----.|__    |'.center(73))
 	print('  |   |  |  |  |  _  |  _  ||__    |'.center(73))
@@ -147,7 +147,7 @@ if __name__ == "__main__":
 	print('|    ___|.-----.--.--.--------.-----.----.---.-.|  |_.-----.----.'.center(73)) 
 	print('|    ___||     |  |  |        |  -__|   _|  _  ||   _|  _  |   _|'.center(73))
 	print('|_______||__|__|_____|__|__|__|_____|__| |___._||____|_____|__|  '.center(73))
-	print(Fore.RESET)
+	print(Fore.RESET + Style.RESET_ALL)
 	print(__description__.center(73))
 	print(('Version ' + __version__).center(73))
 	print((__author__).center(73))
