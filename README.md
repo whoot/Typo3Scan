@@ -51,8 +51,8 @@ Or with a file with a list of domains:
 Example:
 Test if Typo3 and top 20 downloaded extensions are installed on localhost:
 
-	python typoenum.py -d 192.168.0.24/testsite --top 200
-	[![Screenshot](https://github.com/whoot/Typo-Enumerator/tree/master/doc/Screenshot.jpg)] (https://github.com/whoot/Typo-Enumerator/tree/master/doc/Screenshot.jpg)
+python typoenum.py -d 192.168.0.24/testsite --top 200
+[![Screenshot](https://github.com/whoot/Typo-Enumerator/tree/master/doc/Screenshot.jpg)](https://github.com/whoot/Typo-Enumerator/tree/master/doc/Screenshot.jpg)
 
 Bug Reporting
 ----
