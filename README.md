@@ -68,6 +68,7 @@ Links
 # License
 
 Typo3 Enumerator - Automatic Typo3 Enumeration Tool
+
 Copyright (c) 2015 Jan Rude
 
 This program is free software: you can redistribute it and/or modify
