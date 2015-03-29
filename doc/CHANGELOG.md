@@ -1,3 +1,11 @@
+## Version 0.4
+
+* Using Python 3.x now!
+* Using classes and objects
+* Better searching algorithm
+* Better threading (fixed local network DOS when cheking a lot of extensions)
+* Clearer output
+
 ## Version 0.3.3
 
 * Extensions are now saved into different files, separated by state (experimental | alpha | beta | stable | outdated | all). This makes it possible to check more specific ones.

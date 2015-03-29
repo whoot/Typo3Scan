@@ -1,113 +1,77 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+#-------------------------------------------------------------------------------
+# Typo3 Enumerator - Automatic Typo3 Enumeration Tool
+# Copyright (c) 2015 Jan Rude
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see [http://www.gnu.org/licenses/](http://www.gnu.org/licenses/)
+#-------------------------------------------------------------------------------
 
-"""
-Copyright (c) 2014 Jan Rude
-"""
+import os.path
+from lib.request import Request
+from lib.output import Output
+from lib.thread_pool import ThreadPool
 
-import re
-import os
-import sys
-import time
-import urllib2
-from Queue import Queue
-try:
-	from colorama import Fore
-except:
-	pass
-from os.path import isfile
-from threading import Thread, Lock
-from lib import settings
+class Extensions:
+	def __init__(self, ext_state, top):
+		self.__ext_state = ext_state
+		self.__top = top
 
-def generate_list():
-	print ''
-	for ext_file in settings.EXTENSION_FILE:
-		if not isfile(os.path.join('extensions', ext_file)):
-			output("Could not find extension file " + ext_file 
-					+ "\nPossible values are: experimental | alpha | beta | stable | outdated | all", False)
-			sys.exit(-1)
+	def load_extensions(self):
+		extensions = []
+		for state in self.__ext_state:
+			ext_file = state + '_extensions'
+			if not os.path.isfile(os.path.join('extensions', ext_file)):
+				raise Exception("\n\nCould not find extension file " + ext_file + '!\nTry --update')
 
-		with open(os.path.join('extensions', ext_file), 'r') as f:
-			count = 0
-			print "[+] Loading:", ext_file
-			for extension in f:
-				if settings.TOP_EXTENSION > count:
-					settings.EXTENSION_LIST.append(extension.split('\n')[0])
-					count += 1
-				else:
-					f.close()
-					return
-
-def copy():
-	for extension in settings.EXTENSION_LIST:
-		settings.in_queue.put(extension)
-
-# Searching installed extensions
-# Check version if getting 200 or 403.
-def check_extension():
-	while True:
-		extension = settings.in_queue.get()
-		for path in settings.EXTENSION_PATHS:
-			try:
-				req = urllib2.Request(settings.DOMAIN + path + extension + '/', None, settings.user_agent)
-				connection = urllib2.urlopen(req, timeout = settings.TIMEOUT)
-				connection.close()
-				check_extension_version(path, extension)
-				settings.in_queue.task_done()
-				return
-			except urllib2.HTTPError, e:
-				if e.code == 403:
-					check_extension_version(path, extension)
-					settings.in_queue.task_done()
-					return
-			except urllib2.URLError, e:
-				pass
-				#retry = raw_input('Error on checking ' + extension + ': ' + str(e.reason) + '\nRetrying? (y/n) ')
-				#if retry is 'y':
-				#	settings.in_queue.put(extension)
-		# if extension is not in any given path, it's not installed
-		if settings.verbose:
-			output(extension.ljust(32) + 'not installed', False)
-		settings.in_queue.task_done()
-
-# Searching version of installed extension
-def check_extension_version(path, extension):
-	settings.EXTENSIONS_FOUND += 1
-	# if no version information is available, skip version search
-	if extension in settings.NO_VERSIONINFO:
-		if settings.verbose:
-			output(extension.ljust(32) + 'installed (no version information available)', True)
-		else:
-			output(extension.ljust(32) + 'installed', True)
-	else:
-		try:
-			request = urllib2.Request(settings.DOMAIN + path + extension +'/ChangeLog', None, settings.user_agent)
-			response = urllib2.urlopen(request, timeout = settings.TIMEOUT)
-			changelog = response.read(1500)
-			response.close()
-			try:
-				regex = re.compile("(\d{1,2}\.\d{1,2}\.?[0-9]?[0-9]?[' '\n])")
-				searchVersion = regex.search(changelog)
-				version = searchVersion.groups()
-				output(extension.ljust(32) + 'installed (v' + version[0].split()[0] + ')', True)
-			except:
-				try:
-					regex = re.compile("(\d{2,4}[\.\-]\d{1,2}[\.\-]\d{1,4})")
-					search = regex.search(changelog)
-					version = search.groups()
-					output(extension.ljust(32) + 'installed (last entry from ' + version[0] + ')', True)
-				except:
-					if settings.verbose:
-						output(extension.ljust(32) + 'installed (no version information found)', True)
+			with open(os.path.join('extensions', ext_file), 'r') as f:
+				count = 0
+				for extension in f:
+					if not(self.__top is None):
+						if count < self.__top:
+							extensions.append(extension.split('\n')[0])
+							count += 1
 					else:
-						output(extension.ljust(32) + 'installed', True)
-		except:
-			output(extension.ljust(32) + "installed", True)
+						extensions.append(extension.split('\n')[0])
+				f.close()
+		return extensions
 
-def output(message, status):
-	if settings.COLORAMA:
-		if status:
-			print Fore.GREEN + message + Fore.RESET
-		else:
-			print Fore.RED + message + Fore.RESET
-	else:
-		print message
+	def search_extension(self, domain, extensions):
+		thread_pool = ThreadPool()
+		for ext in extensions:
+			# search local installation path
+			thread_pool.add_job((Request.head_request, (domain.get_name(), '/typo3conf/ext/' + ext)))
+			# search global installation path
+			thread_pool.add_job((Request.head_request, (domain.get_name(), '/typo3/ext/' + ext)))
+		thread_pool.start(6)
+
+		for installed_extension in thread_pool.get_result():
+			domain.set_installed_extensions(installed_extension[1][1])
+
+	def search_ext_version(self, domain, extension_dict):
+		thread_pool = ThreadPool()
+		for extension_path in extension_dict:
+			thread_pool.add_job((Request.head_request, (domain.get_name(), extension_path + '/ChangeLog')))
+			thread_pool.add_job((Request.head_request, (domain.get_name(), extension_path + '/Readme.txt')))
+		
+		thread_pool.start(6, True)
+
+		for changelog_path in thread_pool.get_result():
+			ext, path = self.parse_extension(changelog_path)
+			domain.set_installed_extensions_version(path, ext[4])
+
+	def parse_extension(self, path):
+		ext = (path[1][1]).split('/')
+		path = ext[0] + '/' + ext[1] + '/' + ext[2] + '/' + ext[3]
+		return (ext, path)
