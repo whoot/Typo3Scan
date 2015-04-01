@@ -102,7 +102,7 @@ class Typo3:
 						for line in f:
 							domain_list.append(Domain(line.strip('\n'), args.ext_state, args.top))
 			for domain in self.__domain_list:
-				print('\n\n' + Fore.CYAN + Style.BRIGHT '[ Checking ' + domain.get_name() + ' ]' + '\n' + "-"* 73  + Fore.RESET + Style.RESET_ALL)
+				print('\n\n' + Fore.CYAN + Style.BRIGHT + '[ Checking ' + domain.get_name() + ' ]' + '\n' + "-"* 73  + Fore.RESET + Style.RESET_ALL)
 				Typo3_Installation.run(domain)
 				if not domain.get_typo3():
 					print(Fore.RED + '\n[x] Typo3 is not used on this domain' + Fore.RESET)
