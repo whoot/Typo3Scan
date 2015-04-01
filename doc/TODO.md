@@ -1,4 +1,5 @@
 # TODO
 
-* Add screenshot
+* Help message
 * Documentation
+* Stopping with ctrl-c
