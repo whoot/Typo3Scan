@@ -100,7 +100,7 @@ class Typo3:
 				else:
 					with open(args.file, 'r') as f:
 						for line in f:
-							domain_list.append(Domain(line.strip('\n'), args.ext_state, args.top))
+							self.__domain_list.append(Domain(line.strip('\n'), args.ext_state, args.top))
 			for domain in self.__domain_list:
 				print('\n\n' + Fore.CYAN + Style.BRIGHT + '[ Checking ' + domain.get_name() + ' ]' + '\n' + "-"* 73  + Fore.RESET + Style.RESET_ALL)
 				Typo3_Installation.run(domain)
