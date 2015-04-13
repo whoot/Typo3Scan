@@ -59,7 +59,7 @@ Bug reports are welcome! Please report all bugs on the [issue tracker](https://g
 Links
 ----
 
-* Download: [.tar.gz](https://github.com/whoot/Typo-Enumerator/tarball/master) or [.zip](https://github.com/whoot/Typo-Enumerator/archive/master)
+* Download: [.tar.gz](https://github.com/whoot/Typo-Enumerator/tarball/master) or [.zip](https://github.com/whoot/Typo-Enumerator/archive/master.zip)
 * Changelog: [Here](https://github.com/whoot/Typo-Enumerator/blob/master/doc/CHANGELOG.md)
 * TODO: [Here](https://github.com/whoot/Typo-Enumerator/blob/master/doc/TODO.md)
 * Issue tracker: https://github.com/whoot/Typo-Enumerator/issues
