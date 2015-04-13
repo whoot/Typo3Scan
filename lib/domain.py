@@ -39,6 +39,7 @@ class Domain(object):
 		self.__extension_config = [ext_state, top]
 		self.__extensions = None
 		self.__installed_extensions = {}
+		self.__interesing_header = {}
 
 	def get_name(self):
 		return self.__name
@@ -81,3 +82,9 @@ class Domain(object):
 
 	def set_login_found(self):
 		self.__login_found = True
+
+	def set_interesting_headers(self, header_key, header_value):
+		self.__interesing_header[header_key] = header_value
+
+	def get_interesting_headers(self):
+		return self.__interesing_header

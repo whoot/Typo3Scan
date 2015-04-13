@@ -31,12 +31,13 @@ except:
 	if sys.platform.startswith('linux'):
 		print('Please install it with: sudo apt-get install python-socksipy' + Fore.RESET)
 	else:
-		print('You can download it from http://socksipy.sourceforge.net/' + Fore.RESET)
+		print('You can download it from https://code.google.com/p/socksipy-branch/' + Fore.RESET)
 	sys.exit(-2)
 
 class Tor:
-	def __init__(self, port=9050):
+	def __init__(self, port=9150):
 		self.__port = port
+		Request.timeout = 20
 
 	def start_daemon(self):
 		if sys.platform.startswith('linux'):
@@ -51,12 +52,12 @@ class Tor:
 	def connect(self):
 		print('\nChecking connection...')
 		socks.setdefaultproxy(socks.PROXY_TYPE_SOCKS5, '127.0.0.1', self.__port, True)
+		socks.socket.setdefaulttimeout(20)
 		socket.socket = socks.socksocket
 		try:
-			request = Request.get_request('https://check.torproject.org/')
-			response = request[1]
-		except Exception, e:
-			print(e)
+			request = Request.get_request('https://check.torproject.org', '/')
+			response = request[0]
+		except:
 			print('Failed to connect through TOR!')
 			print('Please make sure your configuration is right!\n')
 			sys.exit(-2)
@@ -64,12 +65,13 @@ class Tor:
 			regex = re.compile('Congratulations. This browser is configured to use Tor.')
 			searchVersion = regex.search(response)
 			version = searchVersion.groups()
-			pprint('Connection to TOR established')
+			print('Connection to TOR established')
 			regex = re.compile("(\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3})")
 			searchIP = regex.search(response)
 			IP = searchIP.groups()[0]
 			print('Your IP is: ', IP)
-		except:
+		except Exception as e:
+			print(e)
 			print('It seems like TOR is not used.\nAborting...\n')
 			sys.exit(-2)
 

@@ -43,34 +43,31 @@ class Typo3_Installation:
 	@staticmethod
 	def check(domain):
 		response = Request.get_request(domain.get_name(), '/')
+		Request.interesting_headers(domain, response[1], response[2])
 		try:
-			print(Fore.GREEN + '[!] fe_typo_user:'.ljust(32) + response[2].cookies['fe_typo_user'] + Fore.RESET)
+			regex = re.compile('[Tt][Yy][Pp][Oo]3 (\d{1,2}\.\d{1,2}\.[0-9][0-9]?)')
+			searchVersion = regex.search(response[0])
+			version = searchVersion.groups()
 			domain.set_typo3()
+			domain.set_typo3_version(version[0].split()[0])
+			return True
 		except:
 			try:
-				regex = re.compile('[Tt][Yy][Pp][Oo]3 (\d{1,2}\.\d{1,2}\.[0-9][0-9]?)')
-				searchVersion = regex.search(response[0])
-				version = searchVersion.groups()
+				regex = re.compile('TYPO3 (\d{1,2}\.\d{1,2}) CMS')
+				searchHTML = regex.search(response[0])
+				version = searchHTML.groups()
 				domain.set_typo3()
 				domain.set_typo3_version(version[0].split()[0])
 				return True
 			except:
-				try:
-					regex = re.compile('TYPO3(.*)', re.IGNORECASE)
-					searchHTML = regex.search(response[0])
-					searchHTML.groups()[0]
-					domain.set_typo3()
-					return True
-				except:
-					return False
-
+				return False
 
 	# Searching Typo3 login page
 	@staticmethod
 	def search_login(domain):
-		response = Request.get_request(domain.get_name(), '/typo3/index.php')
-		Request.interesting_headers(response[1])
 		try:
+			response = Request.get_request(domain.get_name(), '/typo3/index.php')
+			Request.interesting_headers(domain, response[1], response[2])
 			regex = re.compile('<title>(.*)</title>', re.IGNORECASE)
 			searchTitle = regex.search(response[0])
 			title = searchTitle.groups()[0]

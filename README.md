@@ -28,10 +28,7 @@ On Redhat you can install all needed packages with easy_install:
 	easy_install requests
 	easy_install colorama
 
-If you want to use Typo-Enumerator with TOR, you need the [SocksiPy](http://socksipy.sourceforge.net/) module.
-On Debian/Ubuntu you can install it with apt-get:
-
-	sudo apt-get install python-socksipy
+If you want to use Typo-Enumerator with TOR, you need the [SocksiPy](https://code.google.com/p/socksipy-branch/) module.
 
 Usage
 ----

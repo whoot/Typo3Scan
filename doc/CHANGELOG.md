@@ -1,3 +1,10 @@
+## Version 0.4.1
+
+* Fixed link to socksipy for python 3
+* Fixed bug in versionsearch
+* Fixed TOR issues
+* Fixed some little bugs
+
 ## Version 0.4
 
 * Using Python 3.x now!

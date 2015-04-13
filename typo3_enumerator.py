@@ -18,7 +18,7 @@
 # along with this program.  If not, see [http://www.gnu.org/licenses/](http://www.gnu.org/licenses/)
 #-------------------------------------------------------------------------------
 
-__version__ = "0.4"
+__version__ = "0.4.1"
 __program__ = "Typo-Enumerator"
 __description__ = 'Automatic Typo3 enumeration tool'
 __author__ = "https://github.com/whoot"
@@ -104,6 +104,8 @@ class Typo3:
 			for domain in self.__domain_list:
 				print('\n\n' + Fore.CYAN + Style.BRIGHT + '[ Checking ' + domain.get_name() + ' ]' + '\n' + "-"* 73  + Fore.RESET + Style.RESET_ALL)
 				Typo3_Installation.run(domain)
+				for key, value in domain.get_interesting_headers().items():
+					Output.interesting_headers(key, value)
 				if not domain.get_typo3():
 					print(Fore.RED + '\n[x] Typo3 is not used on this domain' + Fore.RESET)
 				else:
@@ -120,7 +122,7 @@ class Typo3:
 							ext = Extensions(args.ext_state, args.top)
 							self.__extensions = ext.load_extensions()
 						# copy them in domain object
-						if (domain.get_extensions() is None):	
+						if (domain.get_extensions() is None):
 							domain.set_extensions(self.__extensions)
 						# search
 						print ('\n[ Searching', len(self.__extensions), 'extensions ]')

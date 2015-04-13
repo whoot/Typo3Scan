@@ -31,12 +31,13 @@ except:
 	if sys.platform.startswith('linux'):
 		print('Please install it with: sudo apt-get install python-socksipy' + Fore.RESET)
 	else:
-		print('You can download it from http://socksipy.sourceforge.net/' + Fore.RESET)
+		print('You can download it from https://code.google.com/p/socksipy-branch/' + Fore.RESET)
 	sys.exit(-2)
 
 class Tor_with_Privoxy:
 	def __init__(self, port=8118):
 		self.__port = port
+		Request.timeout = 20
 
 	def start_daemon(self):
 		if sys.platform.startswith('linux'):
@@ -53,10 +54,11 @@ class Tor_with_Privoxy:
 	def connect(self):
 		print('\nChecking connection...')
 		socks.setdefaultproxy(socks.PROXY_TYPE_HTTP, "127.0.0.1", self.__port, True)
+		socks.socket.setdefaulttimeout(20)
 		socket.socket = socks.socksocket
 		try:
 			request = Request.get_request('https://check.torproject.org/')
-			response = request[1]
+			response = str(request[0])
 		except:
 			print('Failed to connect through Privoxy and/or TOR!')
 			print('Please make sure your configuration is right!\n')
