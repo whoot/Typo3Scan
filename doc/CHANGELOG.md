@@ -12,6 +12,8 @@
 * Better searching algorithm
 * Better threading (fixed local network DOS when cheking a lot of extensions)
 * Clearer output
+* Version search for extensions is unreliable and not used atm. Isead a link to the changelog/readme will be given
+* Used threads are now always 6
 
 ## Version 0.3.3
 
@@ -58,7 +60,7 @@
   Privoxy is used to prevent dns leakage ;)<br>
   Please make sure the Privoxy config (/etc/privoxy/config) is set to something like:
  - listen-address   127.0.0.1:8118
- - forward-socks5 / 127.0.0.1:9050 .<br>
+ - forward-socks5 / 127.0.0.1:9150 .<br>
   These are the standart ports for Privoxy and TOR<br>
   If TOR is used, threads will be set to 2 in order to minimize errors
 * Version search for extensions is now more reliable
