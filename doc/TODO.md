@@ -5,4 +5,5 @@
 * Stop extension enumeration with ctrl-c
 * Privoxy check
 * --threads
-* --header (default is Mozilla/5.0)
+* --user-agent (default is Mozilla/5.0)
+* --header (customize header fields)
