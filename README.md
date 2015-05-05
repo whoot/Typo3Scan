@@ -35,20 +35,20 @@ Usage
 
 To get a list of all options use:
 
-    python typoenum.py -h
+    python3 typoenum.py -h
 
 You can use Typo3-Enumerator with domains:
 
-	python typoenum.py -d DOMAIN [DOMAIN ...] [--top VALUE]
+	python3 typoenum.py -d DOMAIN [DOMAIN ...] [--top VALUE]
 
 Or with a file with a list of domains:
 
-	python typoenum.py -f FILE [--top VALUE]
+	python3 typoenum.py -f FILE [--top VALUE]
 
 Example:
 Test if Typo3 and top 20 downloaded extensions are installed on localhost:
 
-	python typoenum.py -d 192.168.0.24/testsite --top 200
+	python3 typoenum.py -d 192.168.0.24/testsite --top 200
 	
 ![ScreenShot](/doc/Screenshot.jpg)
 
@@ -62,7 +62,7 @@ Links
 * Download: [.tar.gz](https://github.com/whoot/Typo-Enumerator/tarball/master) or [.zip](https://github.com/whoot/Typo-Enumerator/archive/master.zip)
 * Changelog: [Here](https://github.com/whoot/Typo-Enumerator/blob/master/doc/CHANGELOG.md)
 * TODO: [Here](https://github.com/whoot/Typo-Enumerator/blob/master/doc/TODO.md)
-* Issue tracker: https://github.com/whoot/Typo-Enumerator/issues
+* Issue tracker: [Here](https://github.com/whoot/Typo-Enumerator/issues)
 
 # License
 
