@@ -46,7 +46,7 @@ Or with a file with a list of domains:
 	python3 typoenum.py -f FILE [--top VALUE]
 
 Example:
-Test if Typo3 and top 20 downloaded extensions are installed on localhost:
+Test if Typo3 and top 200 downloaded extensions are installed on 192.168.0.24:
 
 	python3 typoenum.py -d 192.168.0.24/testsite --top 200
 	
