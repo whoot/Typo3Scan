@@ -30,13 +30,14 @@ class Update:
 	unpack it and sort the extensions in different files
 	"""
 	def __init__(self):
+		print('')
 		self.download_ext()
 		self.generate_list()
 
 	# Progressbar
 	def dlProgress(self, count, blockSize, totalSize):
 		percent = int(count*blockSize*100/totalSize)
-		sys.stdout.write("\r[+] Downloading extentions: " + "%d%%" % percent)
+		sys.stdout.write('\r[+] Downloading extentions: ' + '%d%%' % percent)
 		sys.stdout.flush()
 
 	# Download extensions from typo3 repository
@@ -46,7 +47,7 @@ class Update:
 			with gzip.open('extensions.gz', 'rb') as f:
 				file_content = f.read()
 			f.close()
-			outF = open("extensions.xml", 'wb')
+			outF = open('extensions.xml', 'wb')
 			outF.write(file_content)
 			outF.close()
 			os.remove('extensions.gz')
@@ -62,7 +63,7 @@ class Update:
 		outdated = {} # 'obsolete' and 'outdated'
 		allExt = {}
 
-		print ("\n[+] Parsing file...")
+		print ('\n[+] Parsing file...')
 		tree = ElementTree.parse('extensions.xml') 
 		root = tree.getroot()
 		extension = 0
@@ -89,7 +90,7 @@ class Update:
 			extension+=1
 
 		# sorting lists according to number of downloads
-		print ("[+] Sorting according to number of downloads...")
+		print ('[+] Sorting according to number of downloads...')
 		sorted_experimental = sorted(experimental.items(), key=lambda x: int(x[1]), reverse=True)
 		sorted_alpha = sorted(alpha.items(), key=lambda x: int(x[1]), reverse=True)
 		sorted_beta = sorted(beta.items(), key=lambda x: int(x[1]), reverse=True)
@@ -97,7 +98,7 @@ class Update:
 		sorted_outdated = sorted(outdated.items(), key=lambda x: int(x[1]), reverse=True)
 		sorted_allExt = sorted(allExt.items(), key=lambda x: int(x[1]), reverse=True)
 
-		print ("[+] Generating files...")
+		print ('[+] Generating files...')
 		f = open(os.path.join('extensions', 'experimental_extensions'),'w')
 		for i in range(0,len(sorted_experimental)):
 			f.write(sorted_experimental[i][0]+'\n')
@@ -128,5 +129,5 @@ class Update:
 			f.write(sorted_allExt[i][0]+'\n')
 		f.close()
 
-		print ('[+] Loaded', len(sorted_allExt), 'extensions\n')
+		print ('[+] Loaded', len(sorted_allExt), 'extensions')
 		os.remove('extensions.xml')

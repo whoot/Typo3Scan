@@ -24,9 +24,10 @@ class Domain(object):
 		name: 					URL of the domain
 		typo3:					If Typo3 is installed
 		typo3_version:			Typo3 Version
-		login_found:			determines of the default login page was found or not
+		login_found:			Determines of the default login page was found or not
 		extensions:				List of extensions to check for
 		installed_extensions:	List of all installed extensions
+		interesting_header:		List of interesting headers
 	"""
 	def __init__(self, name, ext_state, top=False):
 		if not ('http' in name):
@@ -36,6 +37,7 @@ class Domain(object):
 		self.__typo3 = False
 		self.__typo3_version = ''
 		self.__login_found = False
+		self.__path = '/'
 		self.__extension_config = [ext_state, top]
 		self.__extensions = None
 		self.__installed_extensions = {}
@@ -76,6 +78,12 @@ class Domain(object):
 
 	def get_typo3_version(self):
 		return self.__typo3_version
+
+	def set_path(self, path):
+		self.__path = path
+
+	def get_path(self):
+		return self.__path
 
 	def get_login_found(self):
 		return self.__login_found

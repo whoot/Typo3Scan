@@ -54,6 +54,8 @@ class Extensions:
 			thread_pool.add_job((Request.head_request, (domain.get_name(), '/typo3conf/ext/' + ext)))
 			# search global installation path
 			thread_pool.add_job((Request.head_request, (domain.get_name(), '/typo3/ext/' + ext)))
+			# search extensions shipped with core
+			thread_pool.add_job((Request.head_request, (domain.get_name(), '/typo3/sysext/' + ext)))
 		thread_pool.start(6)
 
 		for installed_extension in thread_pool.get_result():

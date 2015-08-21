@@ -18,10 +18,10 @@
 # along with this program.  If not, see [http://www.gnu.org/licenses/](http://www.gnu.org/licenses/)
 #-------------------------------------------------------------------------------
 
-__version__ = "0.4.1"
-__program__ = "Typo-Enumerator"
+__version__ = '0.4.2'
+__program__ = 'Typo-Enumerator'
 __description__ = 'Automatic Typo3 enumeration tool'
-__author__ = "https://github.com/whoot"
+__author__ = 'https://github.com/whoot'
 
 import sys
 import os.path
@@ -55,9 +55,9 @@ class Typo3:
 		anonGroup.add_argument('--tp', help='using TOR and Privoxy for connections', action='store_true')
 		parser.add_argument('-p', '--port', dest='port', help='Port for TOR/Privoxy (default: 9050/8118)', type=int)
 
-		parser.add_argument( "-h", "--help", action="help")
+		parser.add_argument( '-h', '--help', action='help')
 		args = parser.parse_args()
-
+		force = 'n'
 		try:
 			if args.update:
 				Update()
@@ -95,27 +95,31 @@ class Typo3:
 					self.__domain_list.append(Domain(dom, args.ext_state, args.top))
 			elif args.file:
 				if not os.path.isfile(args.file):
-					print(Fore.RED + "\n[x] File not found: " + args.file + "\n |  Aborting..." + Fore.RESET)
-					sys.exit(-2)
+					print(Fore.RED + '\n[x] File not found: ' + args.file + '\n |  Aborting...' + Fore.RESET)
+					sys.exit(-1)
 				else:
 					with open(args.file, 'r') as f:
 						for line in f:
 							self.__domain_list.append(Domain(line.strip('\n'), args.ext_state, args.top))
+
 			for domain in self.__domain_list:
-				print('\n\n' + Fore.CYAN + Style.BRIGHT + '[ Checking ' + domain.get_name() + ' ]' + '\n' + "-"* 73  + Fore.RESET + Style.RESET_ALL)
+				print('\n\n' + Fore.CYAN + Style.BRIGHT + '[ Checking ' + domain.get_name() + ' ]' + '\n' + '-'* 73  + Fore.RESET + Style.RESET_ALL)
 				Typo3_Installation.run(domain)
 				for key, value in domain.get_interesting_headers().items():
 					Output.interesting_headers(key, value)
 				if not domain.get_typo3():
-					print(Fore.RED + '\n[x] Typo3 is not used on this domain' + Fore.RESET)
+					print(Fore.RED + '\n[x] It seems that Typo3 is not used on this domain' + Fore.RESET)
 				else:
-					if domain.get_login_found():
-						# search version info
+					if len(domain.get_typo3_version()) <= 3:
 						version = VersionInformation()
 						version.search_typo3_version(domain)
+					login = Typo3_Installation.search_login(domain)
 					Output.typo3_installation(domain)
-					if not domain.get_login_found():
-						print(Fore.YELLOW + '[!] Backend login not found\n | Extension enumeration would be failing\n | Skipping...' + Fore.RESET)
+					if not login:
+						print(Fore.YELLOW + '[!] Backend login not found')
+						print(' | Extension search would fail')
+						print(' | Skipping...')
+						print(Fore.RESET)
 					else:
 						# Loading extensions
 						if (self.__extensions is None):
@@ -128,19 +132,20 @@ class Typo3:
 						print ('\n[ Searching', len(self.__extensions), 'extensions ]')
 						ext.search_extension(domain, self.__extensions)
 						ext.search_ext_version(domain, domain.get_installed_extensions())
-						Output.extension_output(domain.get_installed_extensions())
+						Output.extension_output(domain.get_path(), domain.get_installed_extensions())
 		
 		except KeyboardInterrupt:
-			print("\nReceived keyboard interrupt.\nQuitting...")
+			print('\nReceived keyboard interrupt.\nQuitting...')
 			exit(-1)
 		finally:
 			deinit()
 			now = datetime.datetime.now()
-			print('\n\n' + __program__ + ' finished at ' + now.strftime("%Y-%m-%d %H:%M:%S") + '\n')
+			print('\n\n' + __program__ + ' finished at ' + now.strftime('%Y-%m-%d %H:%M:%S') + '\n')
 		
-if __name__ == "__main__":
+if __name__ == '__main__':
 	print('\n' + 73*'=' + Style.BRIGHT)
-	print(Fore.BLUE + ' _______                     ______ '.center(73))
+	print(Fore.BLUE)
+	print(' _______                     ______ '.center(73))
 	print('|_     _|.--.--.-----.-----.|__    |'.center(73))
 	print('  |   |  |  |  |  _  |  _  ||__    |'.center(73))
 	print('  |___|  |___  |   __|_____||______|'.center(73))

@@ -19,32 +19,41 @@
 #-------------------------------------------------------------------------------
 
 import re
+import time
 from lib.request import Request
 
 class VersionInformation:
 	"""
-	This class will search for version information
+	This class will search for version information.
+		The exact version can be found in the ChangeLog,
+		less specific version information can be found in the NEWS or INSTALL file. 
 	"""
 	def search_typo3_version(self, domain):
-		ChangeLog = {'/typo3_src/ChangeLog':'(\d{1,2}\.\d{1,2}\.?[0-9]?[0-9]?)',  
-					'/ChangeLog':'(\d{1,2}\.\d{1,2}\.?[0-9]?[0-9]?)'
+		changelog = {'/typo3_src/ChangeLog':'[Tt][Yy][Pp][Oo]3 (\d{1,2}\.\d{1,2}\.?[0-9]?[0-9]?)',  
+					'/ChangeLog':'[Tt][Yy][Pp][Oo]3 (\d{1,2}\.\d{1,2}\.?[0-9]?[0-9]?)'
 					}
-		News = {'/typo3_src/NEWS.txt':'http://wiki.typo3.org/TYPO3_(\d{1,2}\.\d{1,2})', 
-				'/typo3_src/NEWS.md':"TYPO3 CMS (\d{1,2}\.\d{1,2}) - WHAT'S NEW", 
+
+		news = {'/typo3_src/NEWS.txt':'http://wiki.typo3.org/TYPO3_(\d{1,2}\.\d{1,2})', 
+				'/typo3_src/NEWS.md':'[Tt][Yy][Pp][Oo]3 [Cc][Mm][Ss] (\d{1,2}\.\d{1,2}) - WHAT\'S NEW', 
 				'/NEWS.txt':'http://wiki.typo3.org/TYPO3_(\d{1,2}\.\d{1,2})', 
-				'/NEWS.md':"TYPO3 CMS (\d{1,2}\.\d{1,2}) - WHAT'S NEW"
+				'/NEWS.md':'[Tt][Yy][Pp][Oo]3 [Cc][Mm][Ss] (\d{1,2}\.\d{1,2}) - WHAT\'S NEW',
+				'/INSTALL.md':'[Tt][Yy][Pp][Oo]3 [Cc][Mm][Ss] (\d{1,2}\.\d{1,2}) [Ll][Tt][Ss]'
 				}
 
-		version = 'could not determine'
-		for path, regex in ChangeLog.items():
+		version = 'could not be determined'
+		for path, regex in changelog.items():
 			response = Request.version_information(domain.get_name(), path, regex)
-			if not(response is None):
+			if not (response is None):
 				version = response
-				break
-		if version == 'could not determine':
-			for path, regex in News.items():
+				domain.set_typo3_version(version)
+				return True
+
+		if version == 'could not be determined':
+			for path, regex in news.items():
 				response = Request.version_information(domain.get_name(), path, regex)
-				if not(response is None):
-					version = response
-					break
+				if not (response is None):
+					if len(response) > len(domain.get_typo3_version()):
+						domain.set_typo3_version(version)
+						return True
+
 		domain.set_typo3_version(version)

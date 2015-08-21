@@ -29,21 +29,28 @@ class Output:
 
 	def typo3_installation(domain):
 		print('')
-		print('[+] Typo3 default login:'.ljust(30) + Fore.GREEN + domain.get_name() + '/typo3/index.php' + Fore.RESET)
+		if domain.get_login_found():
+			if domain.get_name().endswith('/'):
+				print('[+] Typo3 backend login:'.ljust(30) + Fore.GREEN + domain.get_name() + 'typo3/index.php' + Fore.RESET)
+			else:
+				print('[+] Typo3 backend login:'.ljust(30) + Fore.GREEN + domain.get_name() + '/typo3/index.php' + Fore.RESET)
+		else:
+			print('[+] Typo3 backend login:'.ljust(30) + Fore.RED + 'not found' + Fore.RESET)
 		print('[+] Typo3 version:'.ljust(30) + Fore.GREEN + domain.get_typo3_version() + Fore.RESET)
-		print(' | known vulnerabilities:'.ljust(30) + Fore.GREEN + 'http://www.cvedetails.com/version-search.php?vendor=&product=Typo3&version=' + domain.get_typo3_version() + Fore.RESET)
+		if (domain.get_typo3_version() != 'could not be determined'):
+			print(' | known vulnerabilities:'.ljust(30) + Fore.GREEN + 'http://www.cvedetails.com/version-search.php?vendor=&product=Typo3&version=' + domain.get_typo3_version() + Fore.RESET)
 		print('')
 
 	def interesting_headers(name, value):
 		string = '[!] ' + name + ':'
 		print(string.ljust(30) + value)
 
-	def extension_output(extens):
+	def extension_output(path, extens):
 		if not extens:
 			print(Fore.RED + ' | No extension found' + Fore.RESET)
 		else:
 			for extension in extens:
-				print(Fore.BLUE + '\n[+] Name: ' + extension.split('/')[3] + '\n' + "-"* 25  + Fore.RESET)
-				print(' | Location:'.ljust(16) + extension)
+				print(Fore.BLUE + '\n[+] Name: ' + extension.split('/')[3] + '\n' + "-"* 31  + Fore.RESET)
+				print(' | Location:'.ljust(16) + path + extension[1:])
 				if not (extens[extension] == False):
-					print(' | ' + extens[extension].split('.')[0] + ':'.ljust(4) + (extension + '/'+ extens[extension]))
+					print(' | ' + extens[extension].split('.')[0] + ':'.ljust(4) + (path + extension[1:] + '/'+ extens[extension]))

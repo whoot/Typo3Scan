@@ -44,7 +44,7 @@ class Request:
 		except requests.exceptions.Timeout:
 			print(Fore.RED + '[x] Connection timed out' + Fore.RESET)
 		except requests.exceptions.ConnectionError as e: 
-			print(Fore.RED + '[x] Connection aborted.\n    Please make sure you provided the right URL' + Fore.RESET)
+			print(Fore.RED + '[x] Connection error\n | Please make sure you provided the right URL' + Fore.RESET)
 		except requests.exceptions.RequestException as e:
 			print(Fore.RED + str(e) + Fore.RESET)
 
@@ -65,32 +65,36 @@ class Request:
 			print(Fore.RED + str(e) + Fore.RESET)
 
 	@staticmethod
-	def interesting_headers(domain, headers, cookies):
+	def interesting_headers(headers, cookies):
+		found_headers = {}
 		for header in headers:
 			if header == 'server':
-				domain.set_interesting_headers('Server', headers.get('server'))
+				found_headers['Server'] = headers.get('server')
 			elif header == 'x-powered-by':
-				domain.set_interesting_headers('X-Powered-By', headers.get('x-powered-by'))
+				found_headers['X-Powered-By'] = headers.get('x-powered-by')
 			elif header == 'via':
-				domain.set_interesting_headers('Via', headers.get('via'))
+				found_headers['Via'] = headers.get('via')
 		try:
 			typo_cookie = cookies['be_typo_user']
-			domain.set_interesting_headers('be_typo_user',typo_cookie)
+			found_headers['be_typo_user'] = typo_cookie
 		except:
 			pass
 		try:
 			typo_cookie = cookies['fe_typo_user']
-			domain.set_interesting_headers('fe_typo_user', typo_cookie)
+			found_headers['fe_typo_user'] = typo_cookie
 		except:
 			pass
+		return found_headers
 
 	@staticmethod
-	# not used atm because unreliable
 	def version_information(domain_name, path, regex):
 		r = requests.get(domain_name + path, stream=True, timeout=timeout, headers=header, verify=False)
 		if r.status_code == 200:
-			for content in r.iter_content(chunk_size=400, decode_unicode=False):
-				regex = re.compile(regex)
-				search = regex.search(str(content))
-				version = search.groups()[0]
-				return version
+			try:
+				for content in r.iter_content(chunk_size=400, decode_unicode=False):
+					regex = re.compile(regex)
+					search = regex.search(str(content))
+					version = search.groups()[0]
+					return version
+			except:
+				return None
