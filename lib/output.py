@@ -51,6 +51,6 @@ class Output:
 		else:
 			for extension in extens:
 				print(Fore.BLUE + '\n[+] Name: ' + extension.split('/')[3] + '\n' + "-"* 31  + Fore.RESET)
-				print(' | Location:'.ljust(16) + path + extension[1:])
+				print(' | Location:'.ljust(16) + path + extension)
 				if not (extens[extension] == False):
-					print(' | ' + extens[extension].split('.')[0] + ':'.ljust(4) + (path + extension[1:] + '/'+ extens[extension]))
+					print(' | ' + extens[extension].split('.')[0] + ':'.ljust(4) + (path + extension + '/'+ extens[extension]))

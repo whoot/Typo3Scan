@@ -1,6 +1,5 @@
 ## Version 0.4.2
 
-* Extensions installed with core are searched too
 * Added new algorithms for Typo3 installation and used path
 * Bugfixes
 

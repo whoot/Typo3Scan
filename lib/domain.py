@@ -37,7 +37,7 @@ class Domain(object):
 		self.__typo3 = False
 		self.__typo3_version = ''
 		self.__login_found = False
-		self.__path = '/'
+		self.__path = ''
 		self.__extension_config = [ext_state, top]
 		self.__extensions = None
 		self.__installed_extensions = {}

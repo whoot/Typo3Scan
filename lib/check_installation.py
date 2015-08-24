@@ -74,10 +74,10 @@ class Typo3_Installation:
 			if not (path.groups()[1] == '"' or '"../' in path.groups()[1]):
 				real_path = (path.groups()[1].split('"')[1])
 				if 'http' in real_path:
-					domain.set_name(real_path)
+					domain.set_name(real_path[0:len(real_path)-1])
 				else:
-					domain.set_name(domain.get_name() + real_path)
-				domain.set_path(real_path)
+					domain.set_name(domain.get_name() + real_path[0:len(real_path)-1])
+				domain.set_path(real_path[0:len(real_path)-1])
 			domain.set_typo3()
 			return True
 		except:

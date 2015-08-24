@@ -53,9 +53,9 @@ class Extensions:
 			# search local installation path
 			thread_pool.add_job((Request.head_request, (domain.get_name(), '/typo3conf/ext/' + ext)))
 			# search global installation path
-			thread_pool.add_job((Request.head_request, (domain.get_name(), '/typo3/ext/' + ext)))
+			#thread_pool.add_job((Request.head_request, (domain.get_name(), '/typo3/ext/' + ext)))
 			# search extensions shipped with core
-			thread_pool.add_job((Request.head_request, (domain.get_name(), '/typo3/sysext/' + ext)))
+			#thread_pool.add_job((Request.head_request, (domain.get_name(), '/typo3/sysext/' + ext)))
 		thread_pool.start(6)
 
 		for installed_extension in thread_pool.get_result():
@@ -65,7 +65,10 @@ class Extensions:
 		thread_pool = ThreadPool()
 		for extension_path in extension_dict:
 			thread_pool.add_job((Request.head_request, (domain.get_name(), extension_path + '/ChangeLog')))
+			thread_pool.add_job((Request.head_request, (domain.get_name(), extension_path + '/ChangeLog.txt')))
 			thread_pool.add_job((Request.head_request, (domain.get_name(), extension_path + '/Readme.txt')))
+			thread_pool.add_job((Request.head_request, (domain.get_name(), extension_path + '/README.md')))
+			thread_pool.add_job((Request.head_request, (domain.get_name(), extension_path + '/README.rst')))
 		
 		thread_pool.start(6, True)
 
@@ -75,5 +78,5 @@ class Extensions:
 
 	def parse_extension(self, path):
 		ext = (path[1][1]).split('/')
-		path = ext[0] + '/' + ext[1] + '/' + ext[2] + '/' + ext[3]
+		path = '/' + ext[1] + '/' + ext[2] + '/' + ext[3]
 		return (ext, path)
