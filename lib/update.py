@@ -36,12 +36,18 @@ class Update:
 
 	# Progressbar
 	def dlProgress(self, count, blockSize, totalSize):
+		"""
+			Progressbar for extension download
+		"""
 		percent = int(count*blockSize*100/totalSize)
 		sys.stdout.write('\r[+] Downloading extentions: ' + '%d%%' % percent)
 		sys.stdout.flush()
 
 	# Download extensions from typo3 repository
 	def download_ext(self):
+		"""
+			Download extensions from server and unpack the ZIP
+		"""
 		try:	
 			urllib.request.urlretrieve('http://ter.sitedesign.dk/ter/extensions.xml.gz', 'extensions.gz', reporthook=self.dlProgress)
 			with gzip.open('extensions.gz', 'rb') as f:
@@ -56,6 +62,10 @@ class Update:
 
 	# Parse extensions.xml and save extensions in files
 	def generate_list(self):
+		"""
+			Parse the extension file and 
+			sort them according to state and download count
+		"""
 		experimental = {} # 'experimental' and 'test'
 		alpha = {}
 		beta = {}

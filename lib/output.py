@@ -22,18 +22,19 @@ from colorama import Fore
 
 class Output:
 	"""
-	This class handles the output
+		This class handles the output
 	"""
 	def __init__(self):
 		pass
 
 	def typo3_installation(domain):
+		"""
+			If TYPO3 is installed and the backend login was found, a link to a backend is printed.
+			Additionally, if the version search was successful, the version and a link to cvedetails is given.
+		"""
 		print('')
 		if domain.get_login_found():
-			if domain.get_name().endswith('/'):
-				print('[+] Typo3 backend login:'.ljust(30) + Fore.GREEN + domain.get_name() + 'typo3/index.php' + Fore.RESET)
-			else:
-				print('[+] Typo3 backend login:'.ljust(30) + Fore.GREEN + domain.get_name() + '/typo3/index.php' + Fore.RESET)
+			print('[+] Typo3 backend login:'.ljust(30) + Fore.GREEN + domain.get_name() + '/typo3/index.php' + Fore.RESET)
 		else:
 			print('[+] Typo3 backend login:'.ljust(30) + Fore.RED + 'not found' + Fore.RESET)
 		print('[+] Typo3 version:'.ljust(30) + Fore.GREEN + domain.get_typo3_version() + Fore.RESET)
@@ -42,10 +43,17 @@ class Output:
 		print('')
 
 	def interesting_headers(name, value):
+		"""
+			This method prints interesting headers
+		"""
 		string = '[!] ' + name + ':'
 		print(string.ljust(30) + value)
 
 	def extension_output(path, extens):
+		"""
+			This method prints every found extension.
+			If a Readme or ChangeLog is found, it will print a link to the file.
+		"""
 		if not extens:
 			print(Fore.RED + ' | No extension found' + Fore.RESET)
 		else:

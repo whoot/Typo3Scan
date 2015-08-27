@@ -18,7 +18,7 @@
 # along with this program.  If not, see [http://www.gnu.org/licenses/](http://www.gnu.org/licenses/)
 #-------------------------------------------------------------------------------
 
-__version__ = '0.4.2'
+__version__ = '0.4.3'
 __program__ = 'Typo-Enumerator'
 __description__ = 'Automatic Typo3 enumeration tool'
 __author__ = 'https://github.com/whoot'
@@ -27,6 +27,7 @@ import sys
 import os.path
 import datetime
 import argparse
+import json
 from colorama import Fore, init, deinit, Style
 from lib.check_installation import Typo3_Installation
 from lib.version_information import VersionInformation
@@ -41,54 +42,81 @@ class Typo3:
 		self.__domain_list = []
 		self.__extensions = None
 
+	def print_help():
+		print(
+"""\nUsage: python3 typoenum.py [options]
+
+Options:
+  -h, --help 		Show this help message and exit
+
+  Target:
+   At least one of these options has to be provided to define the target(s)
+
+    -d [DOMAIN, ...], --domain [DOMAIN, ...] Target domain(s)
+    -f FILE, --file FILE 		     Parse targets from file (one domain per line)
+
+
+  Optional:
+   You dont need to specify this arguments, but you may want to
+
+    --top TOP 		Test if top [TOP] downloaded extensions are installed
+			  Default: every in list
+    --state STATE 	Extension state [all, experimental, alpha, beta, stable, outdated]
+			  Default: all
+    --timeout TIMEOUT 	The timeout for all requests
+			  Default: 10 seconds
+    --agent USER_AGENT 	The user-agent used for all requests
+			  Default: Mozilla/5.0 (Windows NT 6.1; WOW64; rv:40.0) Gecko/20100101 Firefox/40.0
+    --threads THREADS 	The number of threads used for enumerating the extensions
+			  Default: 5
+
+
+  Anonymity:
+   This options can be used to proxy all requests through TOR/Privoxy
+
+    --tor 	    	Using only TOR for connections
+    --port PORT     	Port for TOR 
+    			  Default: 9050
+
+  General:
+    -u, --update        Update TYPO3 extensions
+""")
+
 	def run(self):
-		parser = argparse.ArgumentParser(usage='typoenum.py [options]', add_help=False)
+		parser = argparse.ArgumentParser(add_help=False)
 		group = parser.add_mutually_exclusive_group()
 		anonGroup = parser.add_mutually_exclusive_group()
+		help = parser.add_mutually_exclusive_group()
 		group.add_argument('-f', '--file', dest='file')
 		group.add_argument('-d', '--domain', dest='domain', type=str, nargs='+')
 		group.add_argument('-u', '--update', dest='update', action='store_true')
 		parser.add_argument('--top', type=int, dest='top', metavar='VALUE')
 		parser.add_argument('--state', dest='ext_state', choices = ['all', 'experimental', 'alpha', 'beta', 'stable', 'outdated'], nargs='+', default = ['all'])
-		anonGroup.add_argument('--tor', help='using only TOR for connections', action='store_true')
-		anonGroup.add_argument('--privoxy', help='using only Privoxy for connections', action='store_true')
-		anonGroup.add_argument('--tp', help='using TOR and Privoxy for connections', action='store_true')
-		parser.add_argument('-p', '--port', dest='port', help='Port for TOR/Privoxy (default: 9050/8118)', type=int)
-
-		parser.add_argument( '-h', '--help', action='help')
+		anonGroup.add_argument('--tor', action='store_true')
+		parser.add_argument('-p', '--port', dest='port', type=int)
+		parser.add_argument('--threads', dest='threads', type=int, default = 5)
+		parser.add_argument('--agent', dest='agent', type=str, default = 'Mozilla/5.0 (Windows NT 6.1; WOW64; rv:40.0) Gecko/20100101 Firefox/40.0')
+		parser.add_argument('--timeout', dest='timeout', type=int, default = 10)
+		help.add_argument( '-h', '--help', action='store_true')
 		args = parser.parse_args()
-		force = 'n'
+
+		if args.help:
+			Typo3.print_help()
+			return True
+
 		try:
 			if args.update:
 				Update()
 				return True
 
 			if args.tor:
-				from lib.tor_only import Tor
+				from lib.tor import Tor
 				if args.port:
 					tor = Tor(args.port)
 				else:
 					tor = Tor()
 				tor.start_daemon()
 				tor.connect()
-
-			elif args.privoxy:
-				from lib.privoxy_only import Privoxy
-				if args.port:
-					privoxy = Privoxy(args.port)
-				else:
-					privoxy = Privoxy()
-				privoxy.start_daemon()
-				privoxy.connect()
-
-			elif args.tp:
-				from lib.tor_with_privoxy import Tor_with_Privoxy
-				if args.port:
-					tp = Tor_with_Privoxy(args.port)
-				else:
-					tp = Tor_with_Privoxy()
-				tp.start_daemon()
-				tp.connect()
 
 			if args.domain:
 				for dom in args.domain:
@@ -101,6 +129,9 @@ class Typo3:
 					with open(args.file, 'r') as f:
 						for line in f:
 							self.__domain_list.append(Domain(line.strip('\n'), args.ext_state, args.top))
+
+			config = {'threads':args.threads, 'agent':args.agent, 'timeout':args.timeout}
+			json.dump(config, open('lib/config.json', 'w'))
 
 			for domain in self.__domain_list:
 				print('\n\n' + Fore.CYAN + Style.BRIGHT + '[ Checking ' + domain.get_name() + ' ]' + '\n' + '-'* 73  + Fore.RESET + Style.RESET_ALL)

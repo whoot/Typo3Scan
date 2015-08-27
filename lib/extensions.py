@@ -19,16 +19,24 @@
 #-------------------------------------------------------------------------------
 
 import os.path
+import json
 from lib.request import Request
 from lib.output import Output
 from lib.thread_pool import ThreadPool
 
 class Extensions:
+	"""
+	Extension class
+	"""
 	def __init__(self, ext_state, top):
 		self.__ext_state = ext_state
 		self.__top = top
 
 	def load_extensions(self):
+		"""
+			This method loads the defined extensions from the extension file.
+			IF the extension file is not found, an error is raised.
+		"""
 		extensions = []
 		for state in self.__ext_state:
 			ext_file = state + '_extensions'
@@ -48,20 +56,29 @@ class Extensions:
 		return extensions
 
 	def search_extension(self, domain, extensions):
+		"""
+			This method searches for installed extensions.
+				/typo3conf/ext/:		Local installation path. This is where extensions get usually installed.
+				/typo3/ext/:			Global installation path (not used atm)
+				/typo3/sysext/:			Extensions shipped with core (not used atm)
+		"""
+		config = json.load(open('lib/config.json'))
 		thread_pool = ThreadPool()
 		for ext in extensions:
-			# search local installation path
 			thread_pool.add_job((Request.head_request, (domain.get_name(), '/typo3conf/ext/' + ext)))
-			# search global installation path
 			#thread_pool.add_job((Request.head_request, (domain.get_name(), '/typo3/ext/' + ext)))
-			# search extensions shipped with core
 			#thread_pool.add_job((Request.head_request, (domain.get_name(), '/typo3/sysext/' + ext)))
-		thread_pool.start(6)
+		thread_pool.start(config['threads'])
 
 		for installed_extension in thread_pool.get_result():
 			domain.set_installed_extensions(installed_extension[1][1])
 
 	def search_ext_version(self, domain, extension_dict):
+		"""
+			This method adds a job for every installed extension.
+			The goal is to find a ChangeLog or Readme in order to determine the version.
+		"""
+		config = json.load(open('lib/config.json'))
 		thread_pool = ThreadPool()
 		for extension_path in extension_dict:
 			thread_pool.add_job((Request.head_request, (domain.get_name(), extension_path + '/ChangeLog')))
@@ -70,7 +87,7 @@ class Extensions:
 			thread_pool.add_job((Request.head_request, (domain.get_name(), extension_path + '/README.md')))
 			thread_pool.add_job((Request.head_request, (domain.get_name(), extension_path + '/README.rst')))
 		
-		thread_pool.start(6, True)
+		thread_pool.start(config['threads'], True)
 
 		for changelog_path in thread_pool.get_result():
 			ext, path = self.parse_extension(changelog_path)

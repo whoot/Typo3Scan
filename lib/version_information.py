@@ -25,8 +25,8 @@ from lib.request import Request
 class VersionInformation:
 	"""
 	This class will search for version information.
-		The exact version can be found in the ChangeLog,
-		less specific version information can be found in the NEWS or INSTALL file. 
+		The exact version can be found in the ChangeLog, therefore it will be requested first.
+		Less specific version information can be found in the NEWS or INSTALL file. 
 	"""
 	def search_typo3_version(self, domain):
 		changelog = {'/typo3_src/ChangeLog':'[Tt][Yy][Pp][Oo]3 (\d{1,2}\.\d{1,2}\.?[0-9]?[0-9]?)',  

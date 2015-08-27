@@ -1,3 +1,11 @@
+## Version 0.4.3
+
+* Added --threads
+* Added --user-agent
+* Added --timeout
+* Added help message (-h, --help)
+* No support for privoxy anymore
+
 ## Version 0.4.2
 
 * Added new algorithms for Typo3 installation and used path
@@ -8,7 +16,7 @@
 * Fixed link to socksipy for python 3
 * Fixed bug in versionsearch
 * Fixed TOR issues
-* Fixed some little bugs
+* Fixed some bugs
 
 ## Version 0.4
 
@@ -23,7 +31,6 @@
 ## Version 0.3.3
 
 * Extensions are now saved into different files, separated by state (experimental | alpha | beta | stable | outdated | all). This makes it possible to check more specific ones.
-* Colorama is only used if installed. It doesn't need to be installed anymore.
 * Installed extensions are shown immediately
 
 ## Version 0.3.2
