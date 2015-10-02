@@ -17,10 +17,14 @@ Preferably, you can download Type-Enumerator by cloning the [Git](https://github
 
 Typo-Enumerator works with [Python](http://www.python.org/download/) version **3.x** on Debian/Ubuntu, RedHat and Windows platforms.
 
-On Windows you might need to install following packages:
+You might need to install following packages:
 
 * [Requests](https://pypi.python.org/pypi/requests/)
 * [Colorama](https://pypi.python.org/pypi/colorama)
+
+On Debian/Ubuntu you can install the packages with apt-get:
+
+	apt-get install python3-requests python3-colorama
 
 On Redhat you can install all needed packages with easy_install:
 

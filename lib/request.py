@@ -31,14 +31,14 @@ class Request:
 	"""
 	@staticmethod
 	def get_request(domain_name, path):
-	"""
+		"""
 		All GET requests are done in this method.
 			This method is not used, when searching for extensions and their Readmes/ChangeLogs
 			There are three error types which can occur:
 				Connection timeout
 				Connection error
 				anything else
-	"""
+		"""
 		try:
 			config = json.load(open('lib/config.json'))
 			r = requests.get(domain_name + path, timeout=config['timeout'], headers={'User-Agent' : config['agent']}, verify=False)
@@ -57,14 +57,14 @@ class Request:
 
 	@staticmethod
 	def head_request(domain_name, path):
-	"""
+		"""
 		All HEAD requests are done in this method.
 			HEAD requests are used when searching for extensions and their Readmes/ChangeLogs
 			There are three error types which can occur:
 				Connection timeout
 				Connection error
 				anything else
-	"""
+		"""
 		try:
 			config = json.load(open('lib/config.json'))
 			r = requests.head(domain_name + path, timeout=config['timeout'], headers={'User-Agent' : config['agent']}, allow_redirects=False, verify=False)
@@ -82,7 +82,7 @@ class Request:
 
 	@staticmethod
 	def interesting_headers(headers, cookies):
-	"""
+		"""
 		This method searches for interesing headers in the HTTP response.
 			Server:			Displays the name of the server
 			X-Powered-By:	Information about Frameworks (e.g. ASP, PHP, JBoss) used by the web application
@@ -90,7 +90,7 @@ class Request:
 			Via:			Informs the client of proxies through which the response was sent.
 			be_typo_user:	Backend cookie for TYPO3
 			fe_typo_user:	Frontend cookie for TYPO3
-	"""
+		"""
 		found_headers = {}
 		for header in headers:
 			if header == 'server':

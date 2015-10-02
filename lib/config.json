@@ -1,1 +1,1 @@
-{"threads": 5, "timeout": 10, "agent": "Mozilla/5.0 (Windows NT 6.1; WOW64; rv:40.0) Gecko/20100101 Firefox/40.0"}
+{"timeout": 10, "threads": 5, "agent": "Mozilla/5.0 (Windows NT 6.1; WOW64; rv:40.0) Gecko/20100101 Firefox/40.0"}
