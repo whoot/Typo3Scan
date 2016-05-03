@@ -1,3 +1,9 @@
+## Version 0.4.4
+
+* Added support for Typo3 version 8
+* Clean-up
+* Updated extension download URL
+
 ## Version 0.4.3
 
 * Added --threads
@@ -31,7 +37,6 @@
 ## Version 0.3.3
 
 * Extensions are now saved into different files, separated by state (experimental | alpha | beta | stable | outdated | all). This makes it possible to check more specific ones.
-* Installed extensions are shown immediately
 
 ## Version 0.3.2
 

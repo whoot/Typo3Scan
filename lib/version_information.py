@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 #-------------------------------------------------------------------------------
 # Typo3 Enumerator - Automatic Typo3 Enumeration Tool
-# Copyright (c) 2015 Jan Rude
+# Copyright (c) 2016 Jan Rude
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -29,31 +29,20 @@ class VersionInformation:
 		Less specific version information can be found in the NEWS or INSTALL file. 
 	"""
 	def search_typo3_version(self, domain):
-		changelog = {'/typo3_src/ChangeLog':'[Tt][Yy][Pp][Oo]3 (\d{1,2}\.\d{1,2}\.?[0-9]?[0-9]?)',  
-					'/ChangeLog':'[Tt][Yy][Pp][Oo]3 (\d{1,2}\.\d{1,2}\.?[0-9]?[0-9]?)'
-					}
-
-		news = {'/typo3_src/NEWS.txt':'http://wiki.typo3.org/TYPO3_(\d{1,2}\.\d{1,2})', 
+		files = {'/typo3_src/ChangeLog':'[Tt][Yy][Pp][Oo]3 (\d{1,2}\.\d{1,2}\.?[0-9]?[0-9]?)',  
+				'/ChangeLog':'[Tt][Yy][Pp][Oo]3 (\d{1,2}\.\d{1,2}\.?[0-9]?[0-9]?)',
+				'/typo3_src/NEWS.txt':'http://wiki.typo3.org/TYPO3_(\d{1,2}\.\d{1,2})', 
 				'/typo3_src/NEWS.md':'[Tt][Yy][Pp][Oo]3 [Cc][Mm][Ss] (\d{1,2}\.\d{1,2}) - WHAT\'S NEW', 
 				'/NEWS.txt':'http://wiki.typo3.org/TYPO3_(\d{1,2}\.\d{1,2})', 
 				'/NEWS.md':'[Tt][Yy][Pp][Oo]3 [Cc][Mm][Ss] (\d{1,2}\.\d{1,2}) - WHAT\'S NEW',
-				'/INSTALL.md':'[Tt][Yy][Pp][Oo]3 [Cc][Mm][Ss] (\d{1,2}\.\d{1,2}) [Ll][Tt][Ss]'
+				'/INSTALL.md':'[Tt][Yy][Pp][Oo]3 [Cc][Mm][Ss] (\d{1,2}(.\d{1,2})?)'
 				}
 
 		version = 'could not be determined'
-		for path, regex in changelog.items():
+		for path, regex in files.items():
 			response = Request.version_information(domain.get_name(), path, regex)
-			if not (response is None):
-				version = response
-				domain.set_typo3_version(version)
+			if not (response is None) and (len(response) > len(domain.get_typo3_version())):
+				domain.set_typo3_version(response)
 				return True
-
-		if version == 'could not be determined':
-			for path, regex in news.items():
-				response = Request.version_information(domain.get_name(), path, regex)
-				if not (response is None):
-					if len(response) > len(domain.get_typo3_version()):
-						domain.set_typo3_version(version)
-						return True
 
 		domain.set_typo3_version(version)

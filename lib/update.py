@@ -48,8 +48,9 @@ class Update:
 		"""
 			Download extensions from server and unpack the ZIP
 		"""
-		try:	
-			urllib.request.urlretrieve('http://ter.sitedesign.dk/ter/extensions.xml.gz', 'extensions.gz', reporthook=self.dlProgress)
+		try:
+			# Maybe someday we need to use mirrors: https://repositories.typo3.org/mirrors.xml.gz
+			urllib.request.urlretrieve('https://typo3.org/fileadmin/ter/extensions.xml.gz', 'extensions.gz', reporthook=self.dlProgress)
 			with gzip.open('extensions.gz', 'rb') as f:
 				file_content = f.read()
 			f.close()

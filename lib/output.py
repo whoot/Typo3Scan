@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 #-------------------------------------------------------------------------------
 # Typo3 Enumerator - Automatic Typo3 Enumeration Tool
-# Copyright (c) 2015 Jan Rude
+# Copyright (c) 2016 Jan Rude
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -33,13 +33,12 @@ class Output:
 			Additionally, if the version search was successful, the version and a link to cvedetails is given.
 		"""
 		print('')
-		if domain.get_login_found():
-			print('[+] Typo3 backend login:'.ljust(30) + Fore.GREEN + domain.get_name() + '/typo3/index.php' + Fore.RESET)
-		else:
-			print('[+] Typo3 backend login:'.ljust(30) + Fore.RED + 'not found' + Fore.RESET)
-		print('[+] Typo3 version:'.ljust(30) + Fore.GREEN + domain.get_typo3_version() + Fore.RESET)
+		print('[+] Typo3 backend login:'.ljust(30) + Fore.GREEN + domain.get_name() + '/typo3/index.php' + Fore.RESET)
 		if (domain.get_typo3_version() != 'could not be determined'):
+			print('[+] Typo3 version:'.ljust(30) + Fore.GREEN + domain.get_typo3_version() + Fore.RESET)
 			print(' | known vulnerabilities:'.ljust(30) + Fore.GREEN + 'http://www.cvedetails.com/version-search.php?vendor=&product=Typo3&version=' + domain.get_typo3_version() + Fore.RESET)
+		else:
+			print('[+] Typo3 version:'.ljust(30) + Fore.RED + domain.get_typo3_version() + Fore.RESET)
 		print('')
 
 	def interesting_headers(name, value):

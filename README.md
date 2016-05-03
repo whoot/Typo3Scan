@@ -32,7 +32,7 @@ On Redhat you can install all needed packages with easy_install:
 	easy_install requests
 	easy_install colorama
 
-If you want to use Typo-Enumerator with TOR, you need the [SocksiPy](https://code.google.com/p/socksipy-branch/) module.
+If you want to use Typo-Enumerator with TOR, you need the [SocksiPy](https://sourceforge.net/projects/socksipy/) module.
 
 Usage
 ----
@@ -72,7 +72,7 @@ Links
 
 Typo3 Enumerator - Automatic Typo3 Enumeration Tool
 
-Copyright (c) 2015 Jan Rude
+Copyright (c) 2016 Jan Rude
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
