@@ -35,7 +35,8 @@ class VersionInformation:
 				'/typo3_src/NEWS.md':'[Tt][Yy][Pp][Oo]3 [Cc][Mm][Ss] (\d{1,2}\.\d{1,2}) - WHAT\'S NEW', 
 				'/NEWS.txt':'http://wiki.typo3.org/TYPO3_(\d{1,2}\.\d{1,2})', 
 				'/NEWS.md':'[Tt][Yy][Pp][Oo]3 [Cc][Mm][Ss] (\d{1,2}\.\d{1,2}) - WHAT\'S NEW',
-				'/INSTALL.md':'[Tt][Yy][Pp][Oo]3 [Cc][Mm][Ss] (\d{1,2}(.\d{1,2})?)'
+				'/INSTALL.md':'[Tt][Yy][Pp][Oo]3 [Cc][Mm][Ss] (\d{1,2}(.\d{1,2})?)',
+				'/INSTALL.md':'[Tt][Yy][Pp][Oo]3 v(\d{1})'
 				}
 
 		version = 'could not be determined'

@@ -1,3 +1,8 @@
+## Version 0.4.5
+
+* Version search for Typo3 v8
+* Updated Extensions
+
 ## Version 0.4.4
 
 * Added support for Typo3 version 8
