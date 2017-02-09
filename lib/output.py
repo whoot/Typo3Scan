@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 #-------------------------------------------------------------------------------
 # Typo3 Enumerator - Automatic Typo3 Enumeration Tool
-# Copyright (c) 2016 Jan Rude
+# Copyright (c) 2014-2017 Jan Rude
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -33,7 +33,7 @@ class Output:
 			Additionally, if the version search was successful, the version and a link to cvedetails is given.
 		"""
 		print('')
-		print('[+] Typo3 backend login:'.ljust(30) + Fore.GREEN + domain.get_name() + '/typo3/index.php' + Fore.RESET)
+		print('[+] Typo3 backend login:'.ljust(30) + domain.get_login_found())
 		if (domain.get_typo3_version() != 'could not be determined'):
 			print('[+] Typo3 version:'.ljust(30) + Fore.GREEN + domain.get_typo3_version() + Fore.RESET)
 			print(' | known vulnerabilities:'.ljust(30) + Fore.GREEN + 'http://www.cvedetails.com/version-search.php?vendor=&product=Typo3&version=' + domain.get_typo3_version() + Fore.RESET)

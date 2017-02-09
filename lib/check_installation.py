@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 #-------------------------------------------------------------------------------
 # Typo3 Enumerator - Automatic Typo3 Enumeration Tool
-# Copyright (c) 2016 Jan Rude
+# Copyright (c) 2014-2017 Jan Rude
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -27,13 +27,12 @@ from lib.output import Output
 class Typo3_Installation:
 	"""
 	This class checks, if Typo3 is used on the domain with different approaches.
-	If Typo3 is used, a link to the login page is shown.
+	If Typo3 is used, a link to the default login page is shown.
 	"""
 	@staticmethod
 	def run(domain):
-		root = Typo3_Installation.check_root(domain)
-		check_installation = Typo3_Installation.check_installation(domain)
-		if not root:
+		check_on_root = Typo3_Installation.check_root(domain)
+		if not check_on_root:
 			default_files = Typo3_Installation.check_default_files(domain)
 			if not default_files:
 				typo = Typo3_Installation.check_404(domain)
@@ -42,58 +41,46 @@ class Typo3_Installation:
 	This method requests the root page
 		and searches for a specific string in the response.
 		Usually there are some TYPO3 notes in the HTML comments.
-	"""
-	@staticmethod
-	def check_root(domain):
-		try:
-			response = Request.get_request(domain.get_name(), '/')
-			regex = re.compile('[Tt][Yy][Pp][Oo]3 (\d{1,2}\.\d{1,2}\.?[0-9]?[0-9]?)')
-			searchVersion = regex.search(response[0])
-			version = searchVersion.groups()[0]
-			domain.set_typo3()
-			domain.set_typo3_version(version)
-			return True
-		except:
-			return False
 
-	"""
-	This method requests the homepage
-		and searches for a Typo3 path reference
+		If found, it searches for a Typo3 path reference
 		in order to determine the Typo3 installation path.
 	"""
 	@staticmethod
-	def check_installation(domain):
+	def check_root(domain):
 		response = Request.get_request(domain.get_name(), '/')
-		if not response:
-			exit(-1)
-		headers = Request.interesting_headers(response[1], response[2])
-		for key in headers:
-			domain.set_interesting_headers(key, headers[key])
-		try:
-			path = re.search('(href|src|content)=(.{0,35})(typo3temp/|typo3conf/)', response[0])
-			if not (path.groups()[1] == '"' or '"../' in path.groups()[1]):
-				real_path = (path.groups()[1].split('"')[1])
-				if 'http' in real_path:
-					domain.set_name(real_path[0:len(real_path)-1])
-				else:
-					domain.set_name(domain.get_name() + real_path[0:len(real_path)-1])
-				domain.set_path(real_path[0:len(real_path)-1])
+		if re.search('[Tt][Yy][Pp][Oo]3', response[0]):
 			domain.set_typo3()
+			headers = Request.interesting_headers(response[1], response[2])
+			for key in headers:
+				domain.set_interesting_headers(key, headers[key])
+
+			try:
+				path = re.search('(href|src|content)=(.{0,35})(typo3temp/|typo3conf/)', response[0])
+				if not (path.groups()[1] == '"' or '"../' in path.groups()[1]):
+					real_path = (path.groups()[1].split('"')[1])
+					if 'http' in real_path:
+						domain.set_name(real_path[0:len(real_path)-1])
+					else:
+						domain.set_name(domain.get_name() + real_path[0:len(real_path)-1])
+					domain.set_path(real_path[0:len(real_path)-1])
+			except:
+				pass
 			return True
-		except:
+		else:
 			return False
 
 	"""
 	This method requests different files, which are generated on installation.
 		Usually they are not deleted by admins 
-		and can be used as an idicator of a TYPO3 installation.
+		and can be used as an indicator of a TYPO3 installation.
 	"""
 	@staticmethod
 	def check_default_files(domain):
-		files = {'/README.md':'[Tt][Yy][Pp][Oo]3 [Cc][Mm][Ss]',
-				'/README.txt':'[Tt][Yy][Pp][Oo]3 [Cc][Mm][Ss]',
-				'/INSTALL.txt':'INSTALLING [Tt][Yy][Pp][Oo]3',
-				'/typo3_src/LICENSE.txt':'The [Tt][Yy][Pp][Oo]3 licensing conditions'
+		files = {'/typo3_src/README.md':'[Tt][Yy][Pp][Oo]3 [Cc][Mm][Ss]',
+				'/typo3_src/README.txt':'[Tt][Yy][Pp][Oo]3 [Cc][Mm][Ss]',
+				'/typo3_src/INSTALL.txt':'INSTALLING [Tt][Yy][Pp][Oo]3',
+				'/typo3_src/INSTALL.md':'INSTALLING [Tt][Yy][Pp][Oo]3',
+				'/typo3_src/LICENSE.txt':'[Tt][Yy][Pp][Oo]3'
 			}
 
 		for path, regex in files.items():
@@ -138,10 +125,17 @@ class Typo3_Installation:
 			regex = re.compile('<title>(.*)</title>', re.IGNORECASE)
 			searchTitle = regex.search(response[0])
 			title = searchTitle.groups()[0]
-			if ('TYPO3' in title) or ('TYPO3 CMS' in response[0]) or (response[3] == 403):
-				domain.set_typo3()
-				domain.set_login_found()
-				return True
+
+			login_text = Fore.GREEN + domain.get_name() + '/typo3/index.php' + Fore.RESET
+			login_text += '\n | Accessible?'.ljust(30)  
+			
+			if ('TYPO3 Backend access denied: The IP address of your client' in response[0]) or (response[3] == 403):
+				login_text += (Fore.YELLOW + ' Forbidden (IP Address Restriction)' + Fore.RESET)
+			elif ('TYPO3 Login' in title):
+				login_text += Fore.GREEN + ' Yes' + Fore.RESET
+			else:
+				login_text = Fore.RED + 'Could not be found' + Fore.RESET
+			domain.set_login_found(login_text)
+			return True
 		except:
-			pass
-		return False
+			return False

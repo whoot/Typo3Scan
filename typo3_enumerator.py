@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 #-------------------------------------------------------------------------------
 # Typo3 Enumerator - Automatic Typo3 Enumeration Tool
-# Copyright (c) 2016 Jan Rude
+# Copyright (c) 2014-2017 Jan Rude
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -18,7 +18,7 @@
 # along with this program.  If not, see [http://www.gnu.org/licenses/](http://www.gnu.org/licenses/)
 #-------------------------------------------------------------------------------
 
-__version__ = '0.4.5'
+__version__ = '0.4.5.1'
 __program__ = 'Typo-Enumerator'
 __description__ = 'Automatic Typo3 enumeration tool'
 __author__ = 'https://github.com/whoot'
@@ -28,6 +28,7 @@ import os.path
 import datetime
 import argparse
 import json
+import inspect
 from colorama import Fore, init, deinit, Style
 from lib.check_installation import Typo3_Installation
 from lib.version_information import VersionInformation
@@ -41,10 +42,11 @@ class Typo3:
 	def __init__(self):
 		self.__domain_list = []
 		self.__extensions = None
+		self.__path = path = os.path.dirname(os.path.abspath(__file__))
 
 	def print_help():
 		print(
-"""\nUsage: python3 typoenum.py [options]
+"""\nUsage: python3 typo3_enumerator.py [options]
 
 Options:
   -h, --help 		Show this help message and exit
@@ -106,7 +108,7 @@ Options:
 
 		try:
 			if args.update:
-				Update()
+				Update(self.__path)
 				return True
 
 			if args.tor:
@@ -131,7 +133,7 @@ Options:
 							self.__domain_list.append(Domain(line.strip('\n'), args.ext_state, args.top))
 
 			config = {'threads':args.threads, 'agent':args.agent, 'timeout':args.timeout}
-			json.dump(config, open('lib/config.json', 'w'))
+			json.dump(config, open(os.path.join(self.__path, 'lib', 'config.json'), 'w'))
 
 			for domain in self.__domain_list:
 				print('\n\n' + Fore.CYAN + Style.BRIGHT + '[ Checking ' + domain.get_name() + ' ]' + '\n' + '-'* 73  + Fore.RESET + Style.RESET_ALL)
@@ -141,29 +143,22 @@ Options:
 				if not domain.get_typo3():
 					print(Fore.RED + '\n[x] It seems that Typo3 is not used on this domain' + Fore.RESET)
 				else:
-					if len(domain.get_typo3_version()) <= 3:
-						version = VersionInformation()
-						version.search_typo3_version(domain)
+					version = VersionInformation()
+					version.search_typo3_version(domain)
 					login = Typo3_Installation.search_login(domain)
 					Output.typo3_installation(domain)
-					if not login:
-						print(Fore.YELLOW + '[!] Backend login not found')
-						print(' | Extension search would fail')
-						print(' | Skipping...')
-						print(Fore.RESET)
-					else:
-						# Loading extensions
-						if (self.__extensions is None):
-							ext = Extensions(args.ext_state, args.top)
-							self.__extensions = ext.load_extensions()
-						# copy them in domain object
-						if (domain.get_extensions() is None):
-							domain.set_extensions(self.__extensions)
-						# search
-						print ('\n[ Searching', len(self.__extensions), 'extensions ]')
-						ext.search_extension(domain, self.__extensions)
-						ext.search_ext_version(domain, domain.get_installed_extensions())
-						Output.extension_output(domain.get_path(), domain.get_installed_extensions())
+					# Loading extensions
+					if (self.__extensions is None):
+						ext = Extensions(args.ext_state, args.top, self.__path)
+						self.__extensions = ext.load_extensions()
+					# copy them in domain object
+					if (domain.get_extensions() is None):
+						domain.set_extensions(self.__extensions)
+					# search
+					print ('\n[ Searching', len(self.__extensions), 'extensions ]')
+					ext.search_extension(domain, self.__extensions)
+					ext.search_ext_version(domain, domain.get_installed_extensions())
+					Output.extension_output(domain.get_path(), domain.get_installed_extensions())
 		
 		except KeyboardInterrupt:
 			print('\nReceived keyboard interrupt.\nQuitting...')

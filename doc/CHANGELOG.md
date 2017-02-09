@@ -1,3 +1,10 @@
+## Version 0.4.5.1
+
+* Fixed error on launch when launching from different directory
+* IP address restriction for backend login is now shown
+* Code cleanup
+* Suppress InsecureRequestWarning
+
 ## Version 0.4.5
 
 * Version search for Typo3 v8

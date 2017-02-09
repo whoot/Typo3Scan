@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 #-------------------------------------------------------------------------------
 # Typo3 Enumerator - Automatic Typo3 Enumeration Tool
-# Copyright (c) 2016 Jan Rude
+# Copyright (c) 2014-2017 Jan Rude
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -28,9 +28,10 @@ class Extensions:
 	"""
 	Extension class
 	"""
-	def __init__(self, ext_state, top):
+	def __init__(self, ext_state, top, path):
 		self.__ext_state = ext_state
 		self.__top = top
+		self.__path = path
 
 	def load_extensions(self):
 		"""
@@ -40,10 +41,10 @@ class Extensions:
 		extensions = []
 		for state in self.__ext_state:
 			ext_file = state + '_extensions'
-			if not os.path.isfile(os.path.join('extensions', ext_file)):
+			if not os.path.isfile(os.path.join(self.__path, 'extensions', ext_file)):
 				raise Exception("\n\nCould not find extension file " + ext_file + '!\nTry --update')
 
-			with open(os.path.join('extensions', ext_file), 'r') as f:
+			with open(os.path.join(self.__path, 'extensions', ext_file), 'r') as f:
 				count = 0
 				for extension in f:
 					if not(self.__top is None):
@@ -62,7 +63,7 @@ class Extensions:
 				/typo3/ext/:			Global installation path (not used atm)
 				/typo3/sysext/:			Extensions shipped with core (not used atm)
 		"""
-		config = json.load(open('lib/config.json'))
+		config = json.load(open(os.path.join(self.__path, 'lib', 'config.json')))
 		thread_pool = ThreadPool()
 		for ext in extensions:
 			thread_pool.add_job((Request.head_request, (domain.get_name(), '/typo3conf/ext/' + ext)))

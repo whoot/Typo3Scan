@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 #-------------------------------------------------------------------------------
 # Typo3 Enumerator - Automatic Typo3 Enumeration Tool
-# Copyright (c) 2016 Jan Rude
+# Copyright (c) 2014-2017 Jan Rude
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -36,7 +36,7 @@ class Domain(object):
 			self.__name = name
 		self.__typo3 = False
 		self.__typo3_version = ''
-		self.__login_found = False
+		self.__login_found = ''
 		self.__path = ''
 		self.__extension_config = [ext_state, top]
 		self.__extensions = None
@@ -88,8 +88,8 @@ class Domain(object):
 	def get_login_found(self):
 		return self.__login_found
 
-	def set_login_found(self):
-		self.__login_found = True
+	def set_login_found(self, path):
+		self.__login_found = path
 
 	def set_interesting_headers(self, header_key, header_value):
 		self.__interesing_header[header_key] = header_value

@@ -22,9 +22,9 @@ You might need to install following packages:
 * [Requests](https://pypi.python.org/pypi/requests/)
 * [Colorama](https://pypi.python.org/pypi/colorama)
 
-On Debian/Ubuntu you can install the packages with apt-get:
+You can install the packages with pip3 on Debian/Ubuntu and Windows:
 
-	apt-get install python3-requests python3-colorama
+	pip3 install requests colorama
 
 On Redhat you can install all needed packages with easy_install:
 
@@ -39,22 +39,23 @@ Usage
 
 To get a list of all options use:
 
-    python3 typoenum.py -h
+    python3 typo3_enumerator.py -h
 
 You can use Typo3-Enumerator with domains:
 
-	python3 typoenum.py -d DOMAIN [DOMAIN ...] [--top VALUE]
+	python3 typo3_enumerator.py -d DOMAIN [DOMAIN ...] [--top VALUE]
 
 Or with a file with a list of domains:
 
-	python3 typoenum.py -f FILE [--top VALUE]
+	python3 typo3_enumerator.py -f FILE [--top VALUE]
 
 Example:
 Test if Typo3 and top 200 downloaded extensions are installed on 192.168.0.24:
 
-	python3 typoenum.py -d 192.168.0.24/testsite --top 200
+	python3 typo3_enumerator.py -d 192.168.0.24/testsite --top 200
 	
 ![ScreenShot](/doc/Screenshot.jpg)
+
 
 Bug Reporting
 ----
@@ -72,7 +73,7 @@ Links
 
 Typo3 Enumerator - Automatic Typo3 Enumeration Tool
 
-Copyright (c) 2016 Jan Rude
+Copyright (c) 2015-2017 Jan Rude
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by

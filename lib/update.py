@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 #-------------------------------------------------------------------------------
 # Typo3 Enumerator - Automatic Typo3 Enumeration Tool
-# Copyright (c) 2016 Jan Rude
+# Copyright (c) 2014-2017 Jan Rude
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -18,7 +18,7 @@
 # along with this program.  If not, see [http://www.gnu.org/licenses/](http://www.gnu.org/licenses/)
 #-------------------------------------------------------------------------------
 
-import os, sys, gzip, urllib.request
+import os, sys, gzip, urllib.request, inspect
 from collections import OrderedDict
 import xml.etree.ElementTree as ElementTree
 
@@ -29,8 +29,9 @@ class Update:
 	It will download the extension file from the official repository, 
 	unpack it and sort the extensions in different files
 	"""
-	def __init__(self):
+	def __init__(self, path):
 		print('')
+		self.__path = path
 		self.download_ext()
 		self.generate_list()
 
@@ -54,7 +55,7 @@ class Update:
 			with gzip.open('extensions.gz', 'rb') as f:
 				file_content = f.read()
 			f.close()
-			outF = open('extensions.xml', 'wb')
+			outF = open('/extensions.xml', 'wb')
 			outF.write(file_content)
 			outF.close()
 			os.remove('extensions.gz')
@@ -110,32 +111,32 @@ class Update:
 		sorted_allExt = sorted(allExt.items(), key=lambda x: int(x[1]), reverse=True)
 
 		print ('[+] Generating files...')
-		f = open(os.path.join('extensions', 'experimental_extensions'),'w')
+		f = open(os.path.join(self.__path, 'extensions', 'experimental_extensions'), 'w')
 		for i in range(0,len(sorted_experimental)):
 			f.write(sorted_experimental[i][0]+'\n')
 		f.close()
 
-		f = open(os.path.join('extensions', 'alpha_extensions'),'w')
+		f = open(os.path.join(self.__path, 'extensions', 'alpha_extensions'), 'w')
 		for i in range(0,len(sorted_alpha)):
 			f.write(sorted_alpha[i][0]+'\n')
 		f.close()
 
-		f = open(os.path.join('extensions', 'beta_extensions'),'w')
+		f = open(os.path.join(self.__path, 'extensions', 'beta_extensions'),'w')
 		for i in range(0,len(sorted_beta)):
 			f.write(sorted_beta[i][0]+'\n')
 		f.close()
 
-		f = open(os.path.join('extensions', 'stable_extensions'),'w')
+		f = open(os.path.join(self.__path, 'extensions', 'stable_extensions'), 'w')
 		for i in range(0,len(sorted_stable)):
 			f.write(sorted_stable[i][0]+'\n')
 		f.close()
 
-		f = open(os.path.join('extensions', 'outdated_extensions'),'w')
+		f = open(os.path.join(self.__path, 'extensions', 'outdated_extensions'), 'w')
 		for i in range(0,len(sorted_outdated)):
 			f.write(sorted_outdated[i][0]+'\n')
 		f.close()
 
-		f = open(os.path.join('extensions', 'all_extensions'),'w')
+		f = open(os.path.join(self.__path, 'extensions', 'all_extensions'), 'w')
 		for i in range(0,len(sorted_allExt)):
 			f.write(sorted_allExt[i][0]+'\n')
 		f.close()
