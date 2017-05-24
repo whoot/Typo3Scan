@@ -70,7 +70,8 @@ Options:
 			  Default: 10 seconds
     --agent USER_AGENT 	The user-agent used for all requests
 			  Default: Mozilla/5.0 (Windows NT 6.1; WOW64; rv:40.0) Gecko/20100101 Firefox/40.0
-	--auth USER:PASS 	Username and Password for HTTP Basic Authorization
+    --auth USER:PASS 	Username and Password for HTTP Basic Authorization
+			  Default: admin:admin
     --threads THREADS 	The number of threads used for enumerating the extensions
 			  Default: 5
 
@@ -79,7 +80,7 @@ Options:
    This options can be used to proxy all requests through TOR/Privoxy
 
     --tor 	    	Using only TOR for connections
-    --port PORT     	Port for TOR 
+    --port PORT     	Port for TOR
     			  Default: 9050
 
   General:
@@ -100,7 +101,7 @@ Options:
 		parser.add_argument('-p', '--port', dest='port', type=int)
 		parser.add_argument('--threads', dest='threads', type=int, default = 5)
 		parser.add_argument('--agent', dest='agent', type=str, default = 'Mozilla/5.0 (Windows NT 6.1; WOW64; rv:40.0) Gecko/20100101 Firefox/40.0')
-		parser.add_argument('--auth', dest='auth', type=str, default = 'No:ne')
+		parser.add_argument('--auth', dest='auth', type=str, default = 'admin:admin')
 		parser.add_argument('--timeout', dest='timeout', type=int, default = 10)
 		help.add_argument( '-h', '--help', action='store_true')
 		args = parser.parse_args()
