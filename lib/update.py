@@ -51,18 +51,17 @@ class Update:
 		"""
 		try:
 			# Maybe someday we need to use mirrors: https://repositories.typo3.org/mirrors.xml.gz
-			urllib.request.urlretrieve('https://typo3.org/fileadmin/ter/extensions.xml.gz', 'extensions.gz', reporthook=self.dlProgress)
-			with gzip.open('extensions.gz', 'rb') as f:
-				file_content = f.read()
-			f.close()
-			outF = open('/extensions.xml', 'wb')
-			outF.write(file_content)
-			outF.close()
-			os.remove('extensions.gz')
+			urllib.request.urlretrieve('https://typo3.org/fileadmin/ter/extensions.xml.gz', 'extensions.xml.gz', reporthook=self.dlProgress)
+			with gzip.open('extensions.xml.gz', 'rb') as infile:
+				with open('extensions.xml', 'wb') as outfile:
+					for line in infile:
+						outfile.write(line)
+			infile.close()
+			outfile.close()
 		except Exception as e:
 			print ('\n', e)
 
-	# Parse extensions.xml and save extensions in files
+	# Parse extension file and save extensions in files
 	def generate_list(self):
 		"""
 			Parse the extension file and 
@@ -142,4 +141,5 @@ class Update:
 		f.close()
 
 		print ('[+] Loaded', len(sorted_allExt), 'extensions')
+		os.remove('extensions.xml.gz')
 		os.remove('extensions.xml')
