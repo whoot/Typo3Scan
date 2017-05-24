@@ -42,7 +42,7 @@ class Request:
 		"""
 		try:
 			config = json.load(open('lib/config.json'))
-			r = requests.get(domain_name + path, timeout=config['timeout'], headers={'User-Agent' : config['agent']}, verify=False)
+			r = requests.get(domain_name + path, timeout=config['timeout'], headers={'User-Agent' : config['agent']}, auth=(config['user'], config['pass']), verify=False)
 			httpResponse = str((r.text).encode('utf-8'))
 			headers = r.headers
 			cookies = r.cookies
@@ -50,8 +50,10 @@ class Request:
 			response = [httpResponse, headers, cookies, status_code]
 			return response
 		except requests.exceptions.Timeout:
+			print(e)
 			print(Fore.RED + '[x] Connection timed out' + Fore.RESET)
 		except requests.exceptions.ConnectionError as e: 
+			print(e)
 			print(Fore.RED + '[x] Connection error\n | Please make sure you provided the right URL' + Fore.RESET)
 		except requests.exceptions.RequestException as e:
 			print(Fore.RED + str(e) + Fore.RESET)
@@ -68,7 +70,7 @@ class Request:
 		"""
 		try:
 			config = json.load(open('lib/config.json'))
-			r = requests.head(domain_name + path, timeout=config['timeout'], headers={'User-Agent' : config['agent']}, allow_redirects=False, verify=False)
+			r = requests.head(domain_name + path, timeout=config['timeout'], headers={'User-Agent' : config['agent']}, auth=(config['user'], config['pass']), allow_redirects=False, verify=False)
 			status_code = str(r.status_code)
 			if status_code == '405':
 				print("WARNING, (HEAD) method not allowed!!")
@@ -126,7 +128,7 @@ class Request:
 			because usually the TYPO3 version is in the first few lines of the response.
 		"""
 		config = json.load(open('lib/config.json'))
-		r = requests.get(domain_name + path, stream=True, timeout=config['timeout'], headers={'User-Agent' : config['agent']}, verify=False)
+		r = requests.get(domain_name + path, stream=True, timeout=config['timeout'], headers={'User-Agent' : config['agent']}, auth=(config['user'], config['pass']), verify=False)
 		if r.status_code == 200:
 			try:
 				for content in r.iter_content(chunk_size=400, decode_unicode=False):

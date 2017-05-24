@@ -1,3 +1,10 @@
+## Version 0.4.5.2
+
+* Fixed error on update
+* Fixed version search
+* Path to version file(s) is printed
+* Support for HTTP Basic Auth is now added (--auth)
+
 ## Version 0.4.5.1
 
 * Fixed error on launch when launching from different directory

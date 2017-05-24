@@ -42,8 +42,14 @@ class VersionInformation:
 		version = 'could not be determined'
 		for path, regex in files.items():
 			response = Request.version_information(domain.get_name(), path, regex)
-			if not (response is None) and (len(response) > len(domain.get_typo3_version())):
-				domain.set_typo3_version(response)
-				return True
+
+			if not (response is None):
+				string = '[!] ' + 'Found version file:'
+				print(string.ljust(30) + path)
+
+				if (version is 'could not be determined'):
+					version = response
+				elif (len(response) > len(version)):
+					version = response
 
 		domain.set_typo3_version(version)

@@ -131,7 +131,7 @@ class Typo3_Installation:
 			
 			if ('TYPO3 Backend access denied: The IP address of your client' in response[0]) or (response[3] == 403):
 				login_text += (Fore.YELLOW + ' Forbidden (IP Address Restriction)' + Fore.RESET)
-			elif ('TYPO3 Login' in title):
+			elif (('TYPO3 Login' in title) or ('TYPO3 CMS Login') in title):
 				login_text += Fore.GREEN + ' Yes' + Fore.RESET
 			else:
 				login_text = Fore.RED + 'Could not be found' + Fore.RESET

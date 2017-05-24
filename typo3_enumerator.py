@@ -18,7 +18,7 @@
 # along with this program.  If not, see [http://www.gnu.org/licenses/](http://www.gnu.org/licenses/)
 #-------------------------------------------------------------------------------
 
-__version__ = '0.4.5.1'
+__version__ = '0.4.5.2'
 __program__ = 'Typo-Enumerator'
 __description__ = 'Automatic Typo3 enumeration tool'
 __author__ = 'https://github.com/whoot'
@@ -29,6 +29,7 @@ import datetime
 import argparse
 import json
 import inspect
+import base64
 from colorama import Fore, init, deinit, Style
 from lib.check_installation import Typo3_Installation
 from lib.version_information import VersionInformation
@@ -69,6 +70,7 @@ Options:
 			  Default: 10 seconds
     --agent USER_AGENT 	The user-agent used for all requests
 			  Default: Mozilla/5.0 (Windows NT 6.1; WOW64; rv:40.0) Gecko/20100101 Firefox/40.0
+	--auth USER:PASS 	Username and Password for HTTP Basic Authorization
     --threads THREADS 	The number of threads used for enumerating the extensions
 			  Default: 5
 
@@ -98,6 +100,7 @@ Options:
 		parser.add_argument('-p', '--port', dest='port', type=int)
 		parser.add_argument('--threads', dest='threads', type=int, default = 5)
 		parser.add_argument('--agent', dest='agent', type=str, default = 'Mozilla/5.0 (Windows NT 6.1; WOW64; rv:40.0) Gecko/20100101 Firefox/40.0')
+		parser.add_argument('--auth', dest='auth', type=str, default = 'No:ne')
 		parser.add_argument('--timeout', dest='timeout', type=int, default = 10)
 		help.add_argument( '-h', '--help', action='store_true')
 		args = parser.parse_args()
@@ -132,7 +135,7 @@ Options:
 						for line in f:
 							self.__domain_list.append(Domain(line.strip('\n'), args.ext_state, args.top))
 
-			config = {'threads':args.threads, 'agent':args.agent, 'timeout':args.timeout}
+			config = {'threads':args.threads, 'agent':args.agent, 'timeout':args.timeout, 'user': (args.auth).split(':')[0], 'pass': (args.auth).split(':')[1]}
 			json.dump(config, open(os.path.join(self.__path, 'lib', 'config.json'), 'w'))
 
 			for domain in self.__domain_list:
