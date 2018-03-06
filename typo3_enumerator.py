@@ -72,6 +72,7 @@ Options:
 			  Default: Mozilla/5.0 (Windows NT 6.1; WOW64; rv:40.0) Gecko/20100101 Firefox/40.0
     --auth USER:PASS 	Username and Password for HTTP Basic Authorization
 			  Default: admin:admin
+    --cookie COOKIE     Cookie
     --threads THREADS 	The number of threads used for enumerating the extensions
 			  Default: 5
 
@@ -102,6 +103,7 @@ Options:
 		parser.add_argument('--threads', dest='threads', type=int, default = 5)
 		parser.add_argument('--agent', dest='agent', type=str, default = 'Mozilla/5.0 (Windows NT 6.1; WOW64; rv:40.0) Gecko/20100101 Firefox/40.0')
 		parser.add_argument('--auth', dest='auth', type=str, default = 'admin:admin')
+		parser.add_argument('--cookie', dest='cookie', type=str, default = '')
 		parser.add_argument('--timeout', dest='timeout', type=int, default = 10)
 		help.add_argument( '-h', '--help', action='store_true')
 		args = parser.parse_args()
@@ -136,7 +138,7 @@ Options:
 						for line in f:
 							self.__domain_list.append(Domain(line.strip('\n'), args.ext_state, args.top))
 
-			config = {'threads':args.threads, 'agent':args.agent, 'timeout':args.timeout, 'user': (args.auth).split(':')[0], 'pass': (args.auth).split(':')[1]}
+			config = {'threads':args.threads, 'agent':args.agent, 'timeout':args.timeout, 'cookie':args.cookie, 'user': (args.auth).split(':')[0], 'pass': (args.auth).split(':')[1]}
 			json.dump(config, open(os.path.join(self.__path, 'lib', 'config.json'), 'w'))
 
 			for domain in self.__domain_list:
