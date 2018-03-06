@@ -42,7 +42,8 @@ class Request:
 		"""
 		try:
 			config = json.load(open('lib/config.json'))
-			r = requests.get(domain_name + path, timeout=config['timeout'], headers={'User-Agent' : config['agent']}, cookies=config['cookie'], auth=(config['user'], config['pass']), verify=False)
+			cookie = {config['cookie'].split('=')[0]:config['cookie'].split('=')[1]}
+			r = requests.get(domain_name + path, timeout=config['timeout'], headers={'User-Agent' : config['agent']}, cookies=cookie, auth=(config['user'], config['pass']), verify=False)
 			httpResponse = str((r.text).encode('utf-8'))
 			headers = r.headers
 			cookies = r.cookies
