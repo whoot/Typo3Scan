@@ -103,7 +103,7 @@ Options:
 		parser.add_argument('--threads', dest='threads', type=int, default = 5)
 		parser.add_argument('--agent', dest='agent', type=str, default = 'Mozilla/5.0 (Windows NT 6.1; WOW64; rv:40.0) Gecko/20100101 Firefox/40.0')
 		parser.add_argument('--auth', dest='auth', type=str, default = 'admin:admin')
-		parser.add_argument('--cookie', dest='cookie', type=str, default = '')
+		parser.add_argument('--cookie', dest='cookie', type=str, default = 'typo3enum=none')
 		parser.add_argument('--timeout', dest='timeout', type=int, default = 10)
 		help.add_argument( '-h', '--help', action='store_true')
 		args = parser.parse_args()
