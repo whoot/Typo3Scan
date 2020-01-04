@@ -1,5 +1,4 @@
 # Typo3Scan
-===============
 
 Typo3Scan is an open source penetration testing tool that I wrote to automate the process of detecting the [Typo3](https://typo3.org) CMS and it's installed [extensions](https://extensions.typo3.org/).
 It also has a database with known vulnerabilities for core and extensions. 
@@ -14,7 +13,6 @@ For these reasons this tool will probably *not receive further major releases*.
 
 
 ## Installation
-----
 
 You can download the latest tarball by clicking [here](https://github.com/whoot/Typo3Scan/tarball/master) or latest zipball by clicking  [here](https://github.com/whoot/Typo3Scan/zipball/master).
 
@@ -29,7 +27,6 @@ You can install all required packages with pip3:
 	pip install -r requirements.txt
 
 ## Usage
-----
 
 To get a list of all options use:
 
@@ -46,14 +43,11 @@ Or with a file with a list of domains:
 Example:
 
 	python typo3scan.py -d http://dev001.vm-typo3.loc --vuln
-	
-![core_vulns](/doc/core_vulns.jpg)
 
-![ext_vulns](/doc/ext_vulns.jpg)
-
+<img src="./doc/core_vulns.jpg" width="450">
+<img src="./doc/ext_vulns.jpg" width="450">
 
 ## Bug Reporting
-----
 
 Bug reports are welcome! Please report all bugs on the [issue tracker](https://github.com/whoot/Typo3Scan/issues).
 
@@ -63,14 +57,12 @@ I´m developing this in my spare time. If you like my work, please consider supp
 
 
 ## Links
-----
 
 * Download: [.tar.gz](https://github.com/whoot/Typo3Scan/tarball/master) or [.zip](https://github.com/whoot/Typo3Scan/archive/master.zip)
 * Changelog: [Here](https://github.com/whoot/Typo3Scan/blob/master/doc/CHANGELOG.md)
 * Issue tracker: [Here](https://github.com/whoot/Typo3Scan/issues)
 
 # License
-----
 
 Typo3Scan - Automatic Typo3 Enumeration Tool
 
