@@ -1,1 +1,1 @@
-{"threads": 5, "pass": "ne", "user": "No", "timeout": 10, "agent": "Mozilla/5.0 (Windows NT 6.1; WOW64; rv:40.0) Gecko/20100101 Firefox/40.0"}
+{"threads": 5, "timeout": 10, "cookie": "", "auth": "", "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_9_3) AppleWebKit/537.75.14 (KHTML, like Gecko) Version/7.0.3 Safari/7046A194A"}

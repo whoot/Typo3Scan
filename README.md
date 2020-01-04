@@ -1,79 +1,80 @@
-Typo3-Enumerator
+# Typo3Scan
 ===============
 
-Typo3-Enumerator is an open source penetration testing tool that automates the process of detecting the [Typo3](https://typo3.org) CMS and it's installed [extensions](https://typo3.org/extensions/repository/?id=23&L=0&q=&tx_solr[filter][outdated]=outdated%3AshowOutdated) (also the outdated ones).
-If the --top parameter is set to a value, only the specified most downloaded extensions are tested.
+Typo3Scan is an open source penetration testing tool that I wrote to automate the process of detecting the [Typo3](https://typo3.org) CMS and it's installed [extensions](https://extensions.typo3.org/).
+It also has a database with known vulnerabilities for core and extensions. 
 
-It is possible to do all requests through the [TOR Hidden Service](https://www.torproject.org/) network.
+Typo3Scan does not exploit any vulnerabilities! It´s soley purpose was to enumerate version info and installed extensions in penetration tests ever since.
 
-Installation
+**Note:** 
+When I started this project many years ago, the version information could be easily read from text files (Readmes, Changelogs, etc.). Since then a lot has changed.
+Typo3 now restricts access to directories and files by default and since the use of [Composer](https://github.com/composer/composer), version information of extensions are not available in files anymore.
+In addition, various basic functions have changed over time.
+For these reasons this tool will probably *not receive further major releases*.
+
+
+## Installation
 ----
 
-You can download the latest tarball by clicking [here](https://github.com/whoot/Typo-Enumerator/tarball/master) or latest zipball by clicking  [here](https://github.com/whoot/Typo-Enumerator/zipball/master).
+You can download the latest tarball by clicking [here](https://github.com/whoot/Typo3Scan/tarball/master) or latest zipball by clicking  [here](https://github.com/whoot/Typo3Scan/zipball/master).
 
-Preferably, you can download Type-Enumerator by cloning the [Git](https://github.com/whoot/Typo-Enumerator) repository:
+Preferably, you can download Type3Scan by cloning the [Git](https://github.com/whoot/Typo3Scan) repository:
 
-    git clone https://github.com/whoot/Typo-Enumerator.git
+    git clone https://github.com/whoot/Typo3Scan.git
 
-Typo-Enumerator works with [Python](http://www.python.org/download/) version **3.x** on Debian/Ubuntu, RedHat and Windows platforms.
+Typo3Scan works with [Python 3](http://www.python.org/download/) version **3.7** on Debian/Ubuntu and Windows platforms.
 
-You might need to install following packages:
+You can install all required packages with pip3:
 
-* [Requests](https://pypi.python.org/pypi/requests/)
-* [Colorama](https://pypi.python.org/pypi/colorama)
+	pip install -r requirements.txt
 
-You can install the packages with pip3 on Debian/Ubuntu and Windows:
-
-	pip3 install requests colorama
-
-On Redhat you can install all needed packages with easy_install:
-
-	easy_install argparse
-	easy_install requests
-	easy_install colorama
-
-If you want to use Typo-Enumerator with TOR, you need the [SocksiPy](https://sourceforge.net/projects/socksipy/) module.
-
-Usage
+## Usage
 ----
 
 To get a list of all options use:
 
-    python3 typo3_enumerator.py -h
+    python typo3scan.py -h
 
-You can use Typo3-Enumerator with domains:
+You can use Typo3Scan with domains:
 
-	python3 typo3_enumerator.py -d DOMAIN [DOMAIN ...] [--top VALUE]
+	python typo3scan.py -d DOMAIN [DOMAIN ...] [--vuln]
 
 Or with a file with a list of domains:
 
-	python3 typo3_enumerator.py -f FILE [--top VALUE]
+	python typo3scan.py -f FILE [--vuln]
 
 Example:
-Test if Typo3 and top 200 downloaded extensions are installed on 192.168.0.24:
 
-	python3 typo3_enumerator.py -d 192.168.0.24/testsite --top 200
+	python typo3scan.py -d http://dev001.vm-typo3.loc --vuln
 	
-![ScreenShot](/doc/Screenshot.jpg)
+![core_vulns](/doc/core_vulns.jpg)
+
+![ext_vulns](/doc/ext_vulns.jpg)
 
 
-Bug Reporting
-----
-Bug reports are welcome! Please report all bugs on the [issue tracker](https://github.com/whoot/Typo-Enumerator/issues).
-
-Links
+## Bug Reporting
 ----
 
-* Download: [.tar.gz](https://github.com/whoot/Typo-Enumerator/tarball/master) or [.zip](https://github.com/whoot/Typo-Enumerator/archive/master.zip)
-* Changelog: [Here](https://github.com/whoot/Typo-Enumerator/blob/master/doc/CHANGELOG.md)
-* TODO: [Here](https://github.com/whoot/Typo-Enumerator/blob/master/doc/TODO.md)
-* Issue tracker: [Here](https://github.com/whoot/Typo-Enumerator/issues)
+Bug reports are welcome! Please report all bugs on the [issue tracker](https://github.com/whoot/Typo3Scan/issues).
+
+I´m developing this in my spare time. If you like my work, please consider supporting my coffee consume:
+
+[![Buy me a coffee](https://www.buymeacoffee.com/assets/img/custom_images/orange_img.png)](https://www.buymeacoffee.com/whoot)
+
+
+## Links
+----
+
+* Download: [.tar.gz](https://github.com/whoot/Typo3Scan/tarball/master) or [.zip](https://github.com/whoot/Typo3Scan/archive/master.zip)
+* Changelog: [Here](https://github.com/whoot/Typo3Scan/blob/master/doc/CHANGELOG.md)
+* Issue tracker: [Here](https://github.com/whoot/Typo3Scan/issues)
 
 # License
+----
 
-Typo3 Enumerator - Automatic Typo3 Enumeration Tool
+Typo3Scan - Automatic Typo3 Enumeration Tool
 
-Copyright (c) 2015-2017 Jan Rude
+Copyright (c) 2015-2020 Jan Rude
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -86,4 +87,4 @@ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License
-along with this program.  If not, see [http://www.gnu.org/licenses/](http://www.gnu.org/licenses/)
+along with this program. If not, see [http://www.gnu.org/licenses/](http://www.gnu.org/licenses/)

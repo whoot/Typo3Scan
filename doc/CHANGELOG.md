@@ -1,3 +1,13 @@
+## Version 0.5
+
+* Rename to Typo3Scan
+* Code cleanup
+* Many improvements
+* Using Database to store extensions, version info and vulnerabilities (Core and Extensions)
+* TOR support dropped
+* *--top* parameter support dropped. Can not be used anymore, because download counter is not used anymore.
+  Instead *--vuln* parameter can be used to check for extensions with known vulnerabilities.
+
 ## Version 0.4.5.2
 
 * Fixed error on update
@@ -41,11 +51,11 @@
 * Fixed link to socksipy for python 3
 * Fixed bug in versionsearch
 * Fixed TOR issues
-* Fixed some bugs
+* Bugfixes
 
 ## Version 0.4
 
-* Using Python 3.x now!
+* Using Python 3 now!
 * Using classes and objects
 * Better searching algorithm
 * Better threading (fixed local network DOS when cheking a lot of extensions)
@@ -72,7 +82,7 @@
 ## Version 0.3
 
 * Using modules instead of one class
-* Accepting now strg+c when in multithreaded mode
+* Accepting now strg+c when in multi-threaded mode
 * Update function will now generate a list with extensions instead of an xml. This list is sorted by default (download count). Loading this file is much faster than parsing the xml everytime.
 * It is now possible to use only TOR, Privoxy, or TOR with Privoxy (in order to prevent DNS leakage).
 * Max. threads are set to 10 to prevent connection issues and DoS, default threads are now 7.

@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 #-------------------------------------------------------------------------------
 # Typo3 Enumerator - Automatic Typo3 Enumeration Tool
-# Copyright (c) 2014-2017 Jan Rude
+# Copyright (c) 2014-2020 Jan Rude
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -15,12 +15,15 @@
 # GNU General Public License for more details.
 #
 # You should have received a copy of the GNU General Public License
-# along with this program.  If not, see [http://www.gnu.org/licenses/](http://www.gnu.org/licenses/)
+# along with this program. If not, see [http://www.gnu.org/licenses/](http://www.gnu.org/licenses/)
 #-------------------------------------------------------------------------------
 
 import threading
 from queue import Queue
+from progressbar import Bar, AdaptiveETA, Percentage, ProgressBar
 
+bar = None
+number = 1
 class ThreadPoolSentinel:
 	pass
 
@@ -34,6 +37,8 @@ class ThreadPool:
 		thread_list:			List of worker threads
 	"""
 	def __init__(self):
+		global number
+		number = 1
 		self.__work_queue = Queue()
 		self.__result_queue = Queue()
 		self.__active_threads = 0
@@ -51,35 +56,33 @@ class ThreadPool:
 				active_threads -= 1
 				self.__result_queue.task_done()
 				continue
-
 			else: # Getting an actual result
 				self.__result_queue.task_done()
 				yield result
 
 	def start(self, threads, version_search=False):
+		global bar
+		toolbar_width = (self.__work_queue).qsize()
+		widgets = ['  \u251c Processed: ', Percentage(),' ', Bar(),' ', AdaptiveETA()]
+		bar = ProgressBar(widgets=widgets, maxval=toolbar_width).start()
 		if self.__active_threads:
 			raise Exception('Threads already started.')
-
-		if not version_search:
-			 # Create thread pool
+		try:
+			# Create thread pool
 			for _ in range(threads):
 				worker = threading.Thread(
 					target=_work_function,
-					args=(self.__work_queue, self.__result_queue))
-				worker.start()
-				self.__thread_list.append(worker)
-				self.__active_threads += 1
-		else:
-			for _ in range(threads):
-				worker = threading.Thread(
-					target=_work_function_version,
-					args=(self.__work_queue, self.__result_queue))
+					args=(self.__work_queue, self.__result_queue, version_search))
+				worker.daemon = True
 				worker.start()
 				self.__thread_list.append(worker)
 				self.__active_threads += 1
 
-		# Put sentinels to let the threads know when there's no more jobs
-		[self.__work_queue.put(ThreadPoolSentinel()) for worker in self.__thread_list]
+			# Put sentinels to let the threads know when there's no more jobs
+			[self.__work_queue.put(ThreadPoolSentinel()) for worker in self.__thread_list]
+		except KeyboardInterrupt:
+			print('\nReceived keyboard interrupt.\nQuitting...')
+			exit(-1)
 
 	def join(self): # Clean exit
 		self.__work_queue.join()
@@ -87,11 +90,11 @@ class ThreadPool:
 		self.__active_threads = 0
 		self.__result_queue.join()
 
-def _work_function(job_q, result_q):
+def _work_function(job_q, result_q, version_search):
 	"""Work function expected to run within threads."""
+	global number
 	while True:
 		job = job_q.get()
-
 		if isinstance(job, ThreadPoolSentinel): # All the work is done, get out
 			result_q.put(ThreadPoolSentinel())
 			job_q.task_done()
@@ -100,33 +103,17 @@ def _work_function(job_q, result_q):
 		function = job[0]
 		args = job[1]
 		try:
-			result = function(*args)
+			if version_search:
+				result = function(*args)
+			else:
+				result = function(args)
+			if not version_search and (result == '403' or result == '200'):
+				result_q.put((job))
+			elif version_search and result:
+				result_q.put((args, result))
 		except Exception as e:
 			print(e)
-		else:
-			if result == ('301' or '200' or '403'):
-				result_q.put((job))
 		finally:
-			job_q.task_done()
-
-def _work_function_version(job_q, result_q):
-	"""Work function expected to run within threads."""
-	while True:
-		job = job_q.get()
-
-		if isinstance(job, ThreadPoolSentinel): # All the work is done, get out
-			result_q.put(ThreadPoolSentinel())
-			job_q.task_done()
-			break
-
-		function = job[0]
-		args = job[1]
-		try:
-			result = function(*args)
-		except Exception as e:
-			print(e)
-		else:
-			if result == ('200'):
-				result_q.put((job))
-		finally:
+			bar.update(number)
+			number = number+1
 			job_q.task_done()
