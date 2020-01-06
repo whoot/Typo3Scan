@@ -232,4 +232,4 @@ class Domain:
                         print('      \u251c Subcomponent:'.ljust(29), vuln[2])
                         print('      \u2514 Affected Versions:'.ljust(29), '{} - {}\n'.format(vuln[3], vuln[4]))
         else:
-            print('  \u251c', Fore.RED + 'No version information found' + Fore.RESET)
+            print('  \u2514', Fore.RED + 'No version information found.' + Fore.RESET)

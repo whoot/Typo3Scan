@@ -123,6 +123,8 @@ def version_information(url, regex):
     else:
         r = requests.get(url, stream=True, timeout=config['timeout'], headers=custom_headers, verify=False)
     if r.status_code == 200:
+        if 'manual.sxw' in url:
+            return 'check manually'
         try:
             for content in r.iter_content(chunk_size=400, decode_unicode=False):
                 search = re.search(regex, str(content))
@@ -130,5 +132,11 @@ def version_information(url, regex):
                 r.close()
                 return version
         except:
-            r.close()
-            return None
+            try:
+                search = re.search('([0-9]+-[0-9]+-[0-9]+)', str(content))
+                version = search.group(1)
+                r.close()
+                return version
+            except:
+                r.close()
+                return None

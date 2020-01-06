@@ -23,7 +23,7 @@ from queue import Queue
 from progressbar import Bar, AdaptiveETA, Percentage, ProgressBar
 
 bar = None
-number = 1
+number = 0
 class ThreadPoolSentinel:
 	pass
 
@@ -38,7 +38,7 @@ class ThreadPool:
 	"""
 	def __init__(self):
 		global number
-		number = 1
+		number = 0
 		self.__work_queue = Queue()
 		self.__result_queue = Queue()
 		self.__active_threads = 0
@@ -114,6 +114,6 @@ def _work_function(job_q, result_q, version_search):
 		except Exception as e:
 			print(e)
 		finally:
-			bar.update(number)
 			number = number+1
+			bar.update(number)
 			job_q.task_done()

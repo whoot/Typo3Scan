@@ -1,3 +1,7 @@
+## Version 0.5.1
+
+* Output and version detection fix
+
 ## Version 0.5
 
 * Rename to Typo3Scan

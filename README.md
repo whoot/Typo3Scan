@@ -7,7 +7,7 @@ Typo3Scan does not exploit any vulnerabilities! It´s soley purpose was to enume
 
 **Note:** 
 When I started this project many years ago, the version information could be easily read from text files (Readmes, Changelogs, etc.). Since then a lot has changed.
-Typo3 now restricts access to directories and files by default and since the use of [Composer](https://github.com/composer/composer), version information of extensions are not available in files anymore.
+Typo3 now restricts access to directories and files by default and version information of extensions may not available in files anymore.
 In addition, various basic functions have changed over time.
 For these reasons this tool will probably *not receive further major releases*.
 

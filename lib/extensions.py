@@ -36,7 +36,7 @@ class Extensions:
             This method loads the extensions from the database and searches for installed extensions.
                 /typo3conf/ext/:        Local installation path. This is where extensions usually get installed.
                 /typo3/ext/:            Global installation path (not used atm)
-                /typo3/sysext/:            Extensions shipped with core
+                /typo3/sysext/:         Extensions shipped with core
         """
         found_extensions = {}
         thread_pool = ThreadPool()
@@ -60,12 +60,15 @@ class Extensions:
         thread_pool = ThreadPool()
         for extension,values in found_extensions.items():
             thread_pool.add_job((request.version_information, (values['url'] + 'Documentation/ChangeLog/Index.rst', None)))
+            thread_pool.add_job((request.version_information, (values['url'] + 'Documentation/Changelog/Index.rst', None)))
             thread_pool.add_job((request.version_information, (values['url'] + 'Documentation/Settings.cfg', None)))
-            thread_pool.add_job((request.version_information, (values['url'] + 'Documentation/Settings.yml', None)))
-            thread_pool.add_job((request.version_information, (values['url'] + 'Settings.yml', None)))
+            thread_pool.add_job((request.version_information, (values['url'] + 'Documentation/Settings.yml', '(?:release:)\s?([0-9]+\.[0-9]+\.?[0-9]?[0-9]?)')))
+            thread_pool.add_job((request.version_information, (values['url'] + 'Settings.yml', '(?:release:)\s?([0-9]+\.[0-9]+\.?[0-9]?[0-9]?)')))
+            thread_pool.add_job((request.version_information, (values['url'] + 'Documentation/ChangeLog', None)))
             thread_pool.add_job((request.version_information, (values['url'] + 'Documentation/Index.rst', None)))
             thread_pool.add_job((request.version_information, (values['url'] + 'composer.json', '(?:"dev-master":|"version":)\s?"([0-9]+\.[0-9]+\.[0-9x][0-9x]?)')))
             thread_pool.add_job((request.version_information, (values['url'] + 'Index.rst', None)))
+            thread_pool.add_job((request.version_information, (values['url'] + 'doc/manual.sxw', None)))
             thread_pool.add_job((request.version_information, (values['url'] + 'ChangeLog', None)))
             thread_pool.add_job((request.version_information, (values['url'] + 'CHANGELOG.md', None)))
             thread_pool.add_job((request.version_information, (values['url'] + 'ChangeLog.txt', None)))
@@ -81,6 +84,8 @@ class Extensions:
             name = version_path[0][0]
             if 'Documentation/' in name:
                 name = name[:name.rfind('Documentation/')+1]
+            if 'doc/' in name:
+                name = name[:name.rfind('doc/')+1] 
             name = name[name.find('ext/')+4:name.rfind('/')]
             found_extensions[name]['version'] = version
             found_extensions[name]['file'] = path
@@ -90,7 +95,7 @@ class Extensions:
     def output(self, extension_dict, database):
         conn = sqlite3.connect(database)
         c = conn.cursor()
-        print('\n\n [+] Extension information\n  \\')
+        print('\n  |\n [+] Extension information\n  \\')
         for extension,info in extension_dict.items():
             c.execute('SELECT title FROM extensions where extensionkey=?', (extension,))
             title = c.fetchone()[0]
