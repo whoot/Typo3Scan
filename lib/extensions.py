@@ -66,15 +66,15 @@ class Extensions:
             thread_pool.add_job((request.version_information, (values['url'] + 'Settings.yml', '(?:release:)\s?([0-9]+\.[0-9]+\.?[0-9]?[0-9]?)')))
             thread_pool.add_job((request.version_information, (values['url'] + 'Documentation/ChangeLog', None)))
             thread_pool.add_job((request.version_information, (values['url'] + 'Documentation/Index.rst', None)))
-            thread_pool.add_job((request.version_information, (values['url'] + 'composer.json', '(?:"dev-master":|"version":)\s?"([0-9]+\.[0-9]+\.[0-9x][0-9x]?)')))
+            thread_pool.add_job((request.version_information, (values['url'] + 'composer.json', '(?:"dev-master":|"version":)\s?"([0-9]+\.[0-9]+\.?[0-9x]?[0-9x]?)')))
             thread_pool.add_job((request.version_information, (values['url'] + 'Index.rst', None)))
             thread_pool.add_job((request.version_information, (values['url'] + 'doc/manual.sxw', None)))
             thread_pool.add_job((request.version_information, (values['url'] + 'ChangeLog', None)))
             thread_pool.add_job((request.version_information, (values['url'] + 'CHANGELOG.md', None)))
             thread_pool.add_job((request.version_information, (values['url'] + 'ChangeLog.txt', None)))
-            thread_pool.add_job((request.version_information, (values['url'] + 'Readme.txt', None)))
-            thread_pool.add_job((request.version_information, (values['url'] + 'README.md', None)))
-            thread_pool.add_job((request.version_information, (values['url'] + 'README.rst', None)))
+            #thread_pool.add_job((request.version_information, (values['url'] + 'Readme.txt', None)))
+            #thread_pool.add_job((request.version_information, (values['url'] + 'README.md', None)))
+            #thread_pool.add_job((request.version_information, (values['url'] + 'README.rst', None)))
         
         thread_pool.start(threads, version_search=True)
 
@@ -95,24 +95,27 @@ class Extensions:
     def output(self, extension_dict, database):
         conn = sqlite3.connect(database)
         c = conn.cursor()
-        print('\n  |\n [+] Extension information\n  \\')
+        print('\n\n [+] Extension information')
+        print(' -------------------------')
         for extension,info in extension_dict.items():
-            c.execute('SELECT title FROM extensions where extensionkey=?', (extension,))
-            title = c.fetchone()[0]
+            c.execute('SELECT title,state FROM extensions where extensionkey=?', (extension,))
+            data = c.fetchone()
             print('  [+] Name: {}'.format(Fore.GREEN + extension + Fore.RESET))
-            print('   \u251c Title: {}'.format(title))
+            print('   \u251c Title: {}'.format(data[0]))
+            print('   \u251c State (of current version): {}'.format(data[1]))
             if info['version']:
                 c.execute('SELECT advisory, vulnerability, affected_version_max, affected_version_min FROM extension_vulns WHERE (extensionkey=? AND ?<=affected_version_max AND ?>=affected_version_min)', (extension, info['version'], info['version'],))
                 data = c.fetchall()
                 print('   \u251c Version: {}'.format(Fore.GREEN + info['version'] + Fore.RESET))
                 if data:
                     print('   \u251c see: {}'.format(info['file']))
-                    print('   \u2514 Known vulnerabilities\n      \\')
+                    print('   \u2514 Known vulnerabilities:\n')
                     for vuln in data:
                         if parse_version(info['version']) <= parse_version(vuln[2]):
                             print('     [!] {}'.format(Fore.RED + vuln[0] + Fore.RESET))
                             print('      \u251c Vulnerability Type:'.ljust(29), vuln[1])
                             print('      \u2514 Affected Versions:'.ljust(29), '{} - {}'.format(vuln[2], vuln[3]))
+                            print()
                 else:
                     print('   \u2514 see: {}'.format(info['file']))
             else:

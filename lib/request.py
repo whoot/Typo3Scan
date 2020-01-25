@@ -29,7 +29,7 @@ requests.packages.urllib3.disable_warnings(InsecureRequestWarning)
 def get_request(url):
     """
     All GET requests are done in this method.
-        This method is not used, when searching for extensions and their Readmes/ChangeLogs
+        This method is not used, when searching for extensions and their version info
         There are three error types which can occur:
             Connection timeout
             Connection error
@@ -55,12 +55,9 @@ def get_request(url):
         response['headers'] = r.headers
         response['cookies'] = r.cookies
         return response
-    except requests.exceptions.Timeout:
+    except requests.exceptions.Timeout as e:
         print(e)
-        print(Fore.RED + '[x] Connection timed out' + Fore.RESET)
-    except requests.exceptions.ConnectionError as e: 
-        print(e)
-        print(Fore.RED + '[x] Connection error\n | Please make sure you provided the right URL' + Fore.RESET)
+        print(Fore.RED + '[x] Connection error\n    Please make sure you provided the right URL\n' + Fore.RESET)
         exit(-1)
     except requests.exceptions.RequestException as e:
         print(Fore.RED + str(e) + Fore.RESET)
@@ -68,7 +65,7 @@ def get_request(url):
 def head_request(url):
     """
     All HEAD requests are done in this method.
-        HEAD requests are used when searching for extensions and their Readmes/ChangeLogs
+        HEAD requests are used when searching for extensions and their version info
         There are three error types which can occur:
             Connection timeout
             Connection error
@@ -91,13 +88,11 @@ def head_request(url):
             r = requests.head(url, timeout=config['timeout'], headers=custom_headers, allow_redirects=False, verify=False)
         status_code = str(r.status_code)
         if status_code == '405':
-            print('[x] WARNING: \'HEAD\' method not allowed!')
+            print(' [x] WARNING: \'HEAD\' method not allowed!')
             exit(-1)
         return status_code
     except requests.exceptions.Timeout:
-        print(Fore.RED + '[x] Connection timed out' + Fore.RESET)
-    except requests.exceptions.ConnectionError as e: 
-        print(Fore.RED + '[x] Connection aborted.\n    Please make sure you provided the right URL' + Fore.RESET)
+        print(Fore.RED + ' [x] Connection timed out on "{}"'.format(url) + Fore.RESET)
     except requests.exceptions.RequestException as e:
         print(Fore.RED + str(e) + Fore.RESET)
 
@@ -114,29 +109,34 @@ def version_information(url, regex):
     auth = config['auth']
     cookie = config['cookie']
     custom_headers = {'User-Agent' : config['User-Agent']}
-    if cookie != '':
-        name = cookie.split('=')[0]
-        value = cookie.split('=')[1]
-        custom_headers[name] = value
-    if auth != '':
-        r = requests.get(url, stream=True, timeout=config['timeout'], headers=custom_headers, auth=(auth.split(':')[0], auth.split(':')[1]), verify=False)
-    else:
-        r = requests.get(url, stream=True, timeout=config['timeout'], headers=custom_headers, verify=False)
-    if r.status_code == 200:
-        if 'manual.sxw' in url:
-            return 'check manually'
-        try:
-            for content in r.iter_content(chunk_size=400, decode_unicode=False):
-                search = re.search(regex, str(content))
-                version = search.group(1)
-                r.close()
-                return version
-        except:
+    try:
+        if cookie != '':
+            name = cookie.split('=')[0]
+            value = cookie.split('=')[1]
+            custom_headers[name] = value
+        if auth != '':
+            r = requests.get(url, stream=True, timeout=config['timeout'], headers=custom_headers, auth=(auth.split(':')[0], auth.split(':')[1]), verify=False)
+        else:
+            r = requests.get(url, stream=True, timeout=config['timeout'], headers=custom_headers, verify=False)
+        if r.status_code == 200:
+            if ('manual.sxw' in url) and not ('Page Not Found' in r.text):
+                return 'check manually'
             try:
-                search = re.search('([0-9]+-[0-9]+-[0-9]+)', str(content))
-                version = search.group(1)
-                r.close()
-                return version
+                for content in r.iter_content(chunk_size=400, decode_unicode=False):
+                    search = re.search(regex, str(content))
+                    version = search.group(1)
+                    r.close()
+                    return version
             except:
-                r.close()
-                return None
+                try:
+                    search = re.search('([0-9]+-[0-9]+-[0-9]+)', str(content))
+                    version = search.group(1)
+                    r.close()
+                    return version
+                except:
+                    r.close()
+                    return None
+    except requests.exceptions.Timeout:
+        print(Fore.RED + ' [x] Connection timed out on "{}"'.format(url) + Fore.RESET)
+    except requests.exceptions.RequestException as e:
+        print(Fore.RED + str(e) + Fore.RESET)    

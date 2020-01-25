@@ -33,7 +33,6 @@ class Domain:
         typo3_version:          Typo3 Version
         path:                   Full path to Typo3 installation
         installed_extensions:   List of all installed extensions
-        interesting_header:     List of interesting headers
     """
     def __init__(self, name):
         if not ('http' in name):
@@ -44,7 +43,6 @@ class Domain:
         self.__typo3_version = ''
         self.__path = ''
         self.__installed_extensions = {}
-        self.__interesting_header = {}
         
     def get_name(self):
         return self.__name
@@ -70,39 +68,6 @@ class Domain:
     def get_path(self):
         return self.__path
 
-    def set_interesting_headers(self, headers, cookies):
-        """
-        This method searches for interesing headers in the HTTP response
-            Server:           Displays the name of the server
-            X-Powered-By:     Information about Frameworks (e.g. ASP, PHP, JBoss) used by the web application
-            X-*:              Version information in other technologies
-            Via:              Informs the client of proxies through which the response was sent
-            X-Forwarded-For:  Originating IP address of a client connecting through an HTTP proxy or load balancer
-            fe_typo_user:     Frontend cookie for TYPO3
-        """
-        for header in headers:
-            if header == 'Server':
-                self.__interesting_header['Server'] = headers.get('Server')
-            elif header == 'X-Powered-By':
-                self.__interesting_header['X-Powered-By'] = headers.get('X-Powered-By')
-            elif header == 'X-Runtime':
-                self.__interesting_header['X-Runtime'] = headers.get('X-Runtime')
-            elif header == 'X-Version':
-                self.__interesting_header['X-Version'] = headers.get('X-Version')
-            elif header == 'X-AspNet-Version':
-                self.__interesting_header['X-AspNet-Version'] = headers.get('X-AspNet-Version')
-            elif header == 'Via':
-                self.__interesting_header['Via'] = headers.get('Via')
-            elif header == 'X-Forwarded-For':
-                self.__interesting_header['X-Forwarded-For'] = headers.get('X-Forwarded-For')
-            
-        if 'fe_typo_user' in cookies.keys():
-            self.__interesting_header['fe_typo_user'] = cookies['fe_typo_user']
-            self.set_typo3()
-
-    def get_interesting_headers(self):
-        return self.__interesting_header
-
     def check_root(self):
         """
         This method requests the root page and searches for a specific string.
@@ -112,7 +77,6 @@ class Domain:
         """
         response = request.get_request('{}'.format(self.get_name()))
         full_path = self.get_name()
-        self.set_interesting_headers(response['headers'], response['cookies'])
         if re.search('powered by TYPO3', response['html']):
             self.set_typo3()
             path = re.search('="/?(\S*?)/?(?:typo3temp|typo3conf)/'.format(self.get_name()), response['html'])
@@ -166,17 +130,17 @@ class Domain:
             and searches for a specific string in the title or the response.
             If the access is forbidden (403), extension search is still possible.
         """
-        print(' \\\n [+] Backend Login')
+        print('[+] Backend Login')
         # maybe /typo3_src/typo3/index.php too?
         response = request.get_request('{}/typo3/index.php'.format(self.get_path()))
         searchTitle = re.search('<title>(.*)</title>', response['html'])
         if searchTitle and 'Login' in searchTitle.group(0):
-            print('  \u2514', Fore.GREEN + '{}/typo3/index.php'.format(self.get_path()) + Fore.RESET)
+            print(' \u251c', Fore.GREEN + '{}/typo3/index.php'.format(self.get_path()) + Fore.RESET)
         elif ('Backend access denied: The IP address of your client' in response['html']) or (response['status_code'] == 403):
-            print('  \u251c', Fore.GREEN + '{}/typo3/index.php'.format(self.get_path()) + Fore.RESET)
-            print('  \u2514', Fore.YELLOW + 'But access is forbidden (IP Address Restriction)' + Fore.RESET)
+            print(' \u251c', Fore.GREEN + '{}/typo3/index.php'.format(self.get_path()) + Fore.RESET)
+            print(' \u251c', Fore.YELLOW + 'But access is forbidden (IP Address Restriction)' + Fore.RESET)
         else:
-            print('  \u251c', Fore.RED + 'Could not be found' + Fore.RESET)
+            print(' \u251c', Fore.RED + 'Could not be found' + Fore.RESET)
 
     def search_typo3_version(self):
         """
@@ -204,32 +168,32 @@ class Domain:
                 version = response
                 version_path = path
 
-        print('\n [+] Version Information')
+        print(' |\n[+] Version Information')
         if not (version is None):
-            print('  \u251c {}'.format(Fore.GREEN + version + Fore.RESET))
-            print('  \u251c see: {}{}'.format(self.get_path(), version_path))
+            print(' \u251c {}'.format(Fore.GREEN + version + Fore.RESET))
+            print(' \u251c see: {}{}'.format(self.get_path(), version_path))
             if len(version) == 3:
-                print('  \u251c Could not identify exact version.')
-                react = input('  \u251c Do you want to print all vulnerabilities for branch {}? (y/n): '.format(version))
+                print(' \u251c Could not identify exact version.')
+                react = input(' \u251c Do you want to print all vulnerabilities for branch {}? (y/n): '.format(version))
                 if react.startswith('y'):
                     version = version + '.0'
                 else:
                 	return False
-            print('  \u2514 Known vulnerabilities\n     \\')
+            print(' \u2514 Known vulnerabilities:\n')
             # sqlite stuff
             conn = sqlite3.connect('lib/typo3scan.db')
             c = conn.cursor()
             c.execute('SELECT advisory, vulnerability, subcomponent, affected_version_max, affected_version_min FROM core_vulns WHERE (?<=affected_version_max AND ?>=affected_version_min)', (version, version,))
             data = c.fetchall()
             if not data:
-                print('     \u251c None.')
+                print('    \u251c None.')
             else:
                 for vuln in data:
                     # maybe instead use this: https://oraerr.com/database/sql/how-to-compare-version-string-x-y-z-in-mysql-2/
                     if parse_version(version) <= parse_version(vuln[3]):
-                        print('     [!] {}'.format(Fore.RED + vuln[0] + Fore.RESET))
-                        print('      \u251c Vulnerability Type:'.ljust(29), vuln[1])
-                        print('      \u251c Subcomponent:'.ljust(29), vuln[2])
-                        print('      \u2514 Affected Versions:'.ljust(29), '{} - {}\n'.format(vuln[3], vuln[4]))
+                        print('    [!] {}'.format(Fore.RED + vuln[0] + Fore.RESET))
+                        print('     \u251c Vulnerability Type:'.ljust(29), vuln[1])
+                        print('     \u251c Subcomponent:'.ljust(29), vuln[2])
+                        print('     \u2514 Affected Versions:'.ljust(29), '{} - {}\n'.format(vuln[3], vuln[4]))
         else:
-            print('  \u2514', Fore.RED + 'No version information found.' + Fore.RESET)
+            print(' \u2514', Fore.RED + 'No version information found.' + Fore.RESET)

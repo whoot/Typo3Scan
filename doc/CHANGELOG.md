@@ -1,3 +1,10 @@
+## Version 0.5.2
+
+* Removed 'interesting header' output
+* Added output of extension state
+* Bugfixes
+* Cosmetic output changes
+
 ## Version 0.5.1
 
 * Output and version detection fix
