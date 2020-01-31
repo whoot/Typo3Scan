@@ -19,7 +19,7 @@
 #-------------------------------------------------------------------------------
 
 import sqlite3
-from colorama import Fore
+from colorama import Fore, Style
 import lib.request as request
 from lib.thread_pool import ThreadPool
 from pkg_resources import parse_version
@@ -72,9 +72,6 @@ class Extensions:
             thread_pool.add_job((request.version_information, (values['url'] + 'ChangeLog', None)))
             thread_pool.add_job((request.version_information, (values['url'] + 'CHANGELOG.md', None)))
             thread_pool.add_job((request.version_information, (values['url'] + 'ChangeLog.txt', None)))
-            #thread_pool.add_job((request.version_information, (values['url'] + 'Readme.txt', None)))
-            #thread_pool.add_job((request.version_information, (values['url'] + 'README.md', None)))
-            #thread_pool.add_job((request.version_information, (values['url'] + 'README.rst', None)))
         
         thread_pool.start(threads, version_search=True)
 
@@ -95,30 +92,35 @@ class Extensions:
     def output(self, extension_dict, database):
         conn = sqlite3.connect(database)
         c = conn.cursor()
-        print('\n\n [+] Extension information')
+        print('\n\n [+] Extension Information')
         print(' -------------------------')
         for extension,info in extension_dict.items():
-            c.execute('SELECT title,state FROM extensions where extensionkey=?', (extension,))
+            c.execute('SELECT title,version,state FROM extensions where extensionkey=?', (extension,))
             data = c.fetchone()
-            print('  [+] Name: {}'.format(Fore.GREEN + extension + Fore.RESET))
-            print('   \u251c Title: {}'.format(data[0]))
-            print('   \u251c State (of current version): {}'.format(data[1]))
+            print(Style.BRIGHT + '  [+] {}'.format(Fore.GREEN  + extension + Style.RESET_ALL))
+            print('   \u251c Extension Title: '.ljust(28) + '{}'.format(data[0]))
+            print('   \u251c Extension Repo: '.ljust(28) + 'https://extensions.typo3.org/extension/{}'.format(extension))
+            print('   \u251c Current Version: '.ljust(28) + '{} ({})'.format(data[1], data[2]))
             if info['version']:
                 c.execute('SELECT advisory, vulnerability, affected_version_max, affected_version_min FROM extension_vulns WHERE (extensionkey=? AND ?<=affected_version_max AND ?>=affected_version_min)', (extension, info['version'], info['version'],))
                 data = c.fetchall()
-                print('   \u251c Version: {}'.format(Fore.GREEN + info['version'] + Fore.RESET))
+                print('   \u251c Identified Version: '.ljust(28) + '{}'.format(Style.BRIGHT + Fore.GREEN + info['version'] + Style.RESET_ALL))
+                vuln_list = []
                 if data:
-                    print('   \u251c see: {}'.format(info['file']))
-                    print('   \u2514 Known vulnerabilities:\n')
-                    for vuln in data:
-                        if parse_version(info['version']) <= parse_version(vuln[2]):
-                            print('     [!] {}'.format(Fore.RED + vuln[0] + Fore.RESET))
-                            print('      \u251c Vulnerability Type:'.ljust(29), vuln[1])
-                            print('      \u2514 Affected Versions:'.ljust(29), '{} - {}'.format(vuln[2], vuln[3]))
-                            print()
+                    for vulnerability in data:
+                        if parse_version(info['version']) <= parse_version(vulnerability[2]):
+                            vuln_list.append(Style.BRIGHT + '     [!] {}'.format(Fore.RED + vulnerability[0] + Style.RESET_ALL))
+                            vuln_list.append('      \u251c Vulnerability Type: '.ljust(28) + vulnerability[1])
+                            vuln_list.append('      \u251c Affected Versions: '.ljust(28) + '{} - {}'.format(vulnerability[2], vulnerability[3]))
+                            vuln_list.append('      \u2514 Advisory URL:'.ljust(28) + 'https://typo3.org/security/advisory/{}\n'.format(vulnerability[0].lower()))
+                if vuln_list:
+                    print('   \u251c Version File: '.ljust(28) + '{}'.format(info['file']))
+                    print('   \u2514 Known Vulnerabilities:\n')
+                    for vulnerability in vuln_list:
+                        print(vulnerability)
                 else:
-                    print('   \u2514 see: {}'.format(info['file']))
+                    print('   \u2514 Version File: '.ljust(28) + '{}'.format(info['file']))
             else:
-            	print('   \u2514 Version: -unknown-')
+            	print('   \u2514 Identified Version: '.ljust(28) + '-unknown-')
             print()
         conn.close()

@@ -1,3 +1,8 @@
+## Version 0.6
+
+* Added version regex for composer installations
+* Output bugfix
+
 ## Version 0.5.2
 
 * Removed 'interesting header' output

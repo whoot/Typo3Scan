@@ -21,7 +21,7 @@ import re
 import string
 import random
 import sqlite3
-from colorama import Fore
+from colorama import Fore, Style
 import lib.request as request
 from pkg_resources import parse_version
 
@@ -98,7 +98,8 @@ class Domain:
                 'typo3_src/INSTALL.md':'INSTALLING TYPO3',
                 'typo3_src/INSTALL.txt':'INSTALLING TYPO3',
                 'typo3_src/LICENSE.txt':'TYPO3',
-                'typo3_src/CONTRIBUTING.md':'TYPO3 CMS'
+                'typo3_src/CONTRIBUTING.md':'TYPO3 CMS',
+                'typo3_src/composer.json':'TYPO3'
             }
         for path, regex in files.items():
             try:
@@ -135,12 +136,12 @@ class Domain:
         response = request.get_request('{}/typo3/index.php'.format(self.get_path()))
         searchTitle = re.search('<title>(.*)</title>', response['html'])
         if searchTitle and 'Login' in searchTitle.group(0):
-            print(' \u251c', Fore.GREEN + '{}/typo3/index.php'.format(self.get_path()) + Fore.RESET)
+            print(' \u251c {}'.format(Fore.GREEN + '{}/typo3/index.php'.format(self.get_path()) + Fore.RESET))
         elif ('Backend access denied: The IP address of your client' in response['html']) or (response['status_code'] == 403):
-            print(' \u251c', Fore.GREEN + '{}/typo3/index.php'.format(self.get_path()) + Fore.RESET)
-            print(' \u251c', Fore.YELLOW + 'But access is forbidden (IP Address Restriction)' + Fore.RESET)
+            print(' \u251c {}'.format(Fore.GREEN + '{}/typo3/index.php'.format(self.get_path()) + Fore.RESET))
+            print(' \u251c {}'.format(Fore.YELLOW + 'But access is forbidden (IP Address Restriction)' + Fore.RESET))
         else:
-            print(' \u251c', Fore.RED + 'Could not be found' + Fore.RESET)
+            print(' \u251c {}'.format(Fore.RED + 'Could not be found' + Fore.RESET))
 
     def search_typo3_version(self):
         """
@@ -148,30 +149,37 @@ class Domain:
             The exact version can be found in the ChangeLog, therefore it will be requested first.
             Less specific version information can be found in the NEWS or INSTALL file. 
         """           
-        files = {'/typo3_src/ChangeLog': '[Tt][Yy][Pp][Oo]3 (\d{1,2}\.\d{1,2}\.?[0-9]?[0-9]?)',  
+        files = {'/typo3_src/composer.json': '(?:"typo3/cms-core":|"typo3/cms-backend":)\s?"([0-9]+\.[0-9]+\.?[0-9x]?[0-9x]?)"',
+                '/typo3_src/public/typo3/sysext/install/composer.json': '(?:"typo3/cms-core":|"typo3/cms-backend":)\s?"([0-9]+\.[0-9]+\.?[0-9x]?[0-9x]?)"',
+                '/typo3_src/typo3/sysext/adminpanel/composer.json': '(?:"typo3/cms-core":|"typo3/cms-backend":)\s?"([0-9]+\.[0-9]+\.?[0-9x]?[0-9x]?)"',
+                '/typo3_src/typo3/sysext/backend/composer.json': '(?:"typo3/cms-core":|"typo3/cms-backend":)\s?"(\d{1,2}\.\d{1,2}\.?[0-9]?[0-9]?)"',
+                '/typo3_src/typo3/sysext/info/composer.json': '(?:"typo3/cms-core":|"typo3/cms-backend":)\s?"(\d{1,2}\.\d{1,2}\.?[0-9]?[0-9]?)"',
+                '/typo3_src/ChangeLog': '[Tt][Yy][Pp][Oo]3 (\d{1,2}\.\d{1,2}\.?[0-9]?[0-9]?)',
                 '/ChangeLog': '[Tt][Yy][Pp][Oo]3 (\d{1,2}\.\d{1,2}\.?[0-9]?[0-9]?)',
+                '/typo3/sysext/backend/ext_emconf.php': '(?:CMS |typo3_src-)(\d{1,2}\.\d{1,2}\.?[0-9]?[0-9]?)',
                 '/typo3_src/typo3/sysext/install/Start/Install.php': '(?:CMS |typo3_src-)(\d{1,2}\.\d{1,2}\.?[0-9]?[0-9]?)',
                 '/typo3/sysext/install/Start/Install.php': '(?:CMS |typo3_src-)(\d{1,2}\.\d{1,2}\.?[0-9]?[0-9]?)',
-                '/typo3_src/typo3/sysext/backend/composer.json': '"typo3/cms-core": "(\d{1,2}\.\d{1,2}\.?[0-9]?[0-9]?)"',
                 '/typo3_src/NEWS.txt': 'http://wiki.typo3.org/TYPO3_(\d{1,2}\.\d{1,2})', 
-                '/typo3_src/NEWS.md': '[Tt][Yy][Pp][Oo]3 [Cc][Mm][Ss] (\d{1,2}\.\d{1,2}) - WHAT\'S NEW', 
-                '/NEWS.txt': 'http://wiki.typo3.org/TYPO3_(\d{1,2}\.\d{1,2})', 
+                '/typo3_src/NEWS.md': '[Tt][Yy][Pp][Oo]3 [Cc][Mm][Ss] (\d{1,2}\.\d{1,2}) - WHAT\'S NEW',
+                '/NEWS.txt': 'http://wiki.typo3.org/TYPO3_(\d{1,2}\.\d{1,2})',
                 '/NEWS.md': '[Tt][Yy][Pp][Oo]3 [Cc][Mm][Ss] (\d{1,2}\.\d{1,2}) - WHAT\'S NEW',
-                '/INSTALL.md': '[Tt][Yy][Pp][Oo]3 [Cc][Mm][Ss] (\d{1,2}(.\d{1,2})?)',
-                '/INSTALL.txt': '[Tt][Yy][Pp][Oo]3 v(\d{1})'
+                '/typo3_src/INSTALL.md': '(?:typo3_src-)(\d{1,2}\.\d{1,2}\.?[0-9x]?[0-9]?)',
+                '/typo3_src/INSTALL.txt': '(?:typo3_src-)(\d{1,2}\.\d{1,2}\.?[0-9x]?[0-9]?)',
+                '/INSTALL.md': '(?:typo3_src-)(\d{1,2}\.\d{1,2}\.?[0-9x]?[0-9]?)',
+                '/INSTALL.txt': '(?:typo3_src-)(\d{1,2}\.\d{1,2}\.?[0-9x]?[0-9]?)'
                 }
 
         version = None
         for path, regex in files.items():
             response = request.version_information(self.get_path()+path, regex)
-            if not (response is None) and (version is None or (len(response) > len(version))):
+            if response and (version is None or (len(response) > len(version))):
                 version = response
                 version_path = path
 
         print(' |\n[+] Version Information')
-        if not (version is None):
-            print(' \u251c {}'.format(Fore.GREEN + version + Fore.RESET))
-            print(' \u251c see: {}{}'.format(self.get_path(), version_path))
+        if version:
+            print(' \u251c Identified Version: '.ljust(28) + '{}'.format(Style.BRIGHT + Fore.GREEN + version + Style.RESET_ALL))
+            print(' \u251c Version File: '.ljust(28) + '{}{}'.format(self.get_path(), version_path))
             if len(version) == 3:
                 print(' \u251c Could not identify exact version.')
                 react = input(' \u251c Do you want to print all vulnerabilities for branch {}? (y/n): '.format(version))
@@ -179,21 +187,26 @@ class Domain:
                     version = version + '.0'
                 else:
                 	return False
-            print(' \u2514 Known vulnerabilities:\n')
             # sqlite stuff
             conn = sqlite3.connect('lib/typo3scan.db')
             c = conn.cursor()
             c.execute('SELECT advisory, vulnerability, subcomponent, affected_version_max, affected_version_min FROM core_vulns WHERE (?<=affected_version_max AND ?>=affected_version_min)', (version, version,))
             data = c.fetchall()
-            if not data:
-                print('    \u251c None.')
-            else:
-                for vuln in data:
+            vuln_list = []
+            if data:
+                for vulnerability in data:
                     # maybe instead use this: https://oraerr.com/database/sql/how-to-compare-version-string-x-y-z-in-mysql-2/
-                    if parse_version(version) <= parse_version(vuln[3]):
-                        print('    [!] {}'.format(Fore.RED + vuln[0] + Fore.RESET))
-                        print('     \u251c Vulnerability Type:'.ljust(29), vuln[1])
-                        print('     \u251c Subcomponent:'.ljust(29), vuln[2])
-                        print('     \u2514 Affected Versions:'.ljust(29), '{} - {}\n'.format(vuln[3], vuln[4]))
+                    if parse_version(version) <= parse_version(vulnerability[3]):
+                        vuln_list.append(Style.BRIGHT + '    [!] {}'.format(Fore.RED + vulnerability[0] + Style.RESET_ALL))
+                        vuln_list.append('     \u251c Vulnerability Type:'.ljust(28) + vulnerability[1])
+                        vuln_list.append('     \u251c Subcomponent:'.ljust(28) + vulnerability[2])
+                        vuln_list.append('     \u251c Affected Versions:'.ljust(28) + '{} - {}'.format(vulnerability[3], vulnerability[4]))
+                        vuln_list.append('     \u2514 Advisory URL:'.ljust(28) + 'https://typo3.org/security/advisory/{}\n'.format(vulnerability[0].lower()))
+            if vuln_list:
+                    print(' \u2514 Known Vulnerabilities:\n')
+                    for vulnerability in vuln_list:
+                        print(vulnerability)
+            else:
+                print(' \u2514 No Known Vulnerabilities')
         else:
-            print(' \u2514', Fore.RED + 'No version information found.' + Fore.RESET)
+            print(' \u2514', Fore.RED + 'No Version Information Found.' + Fore.RESET)

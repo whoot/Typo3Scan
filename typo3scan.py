@@ -18,7 +18,7 @@
 # along with this program. If not, see [http://www.gnu.org/licenses/](http://www.gnu.org/licenses/)
 #-------------------------------------------------------------------------------
 
-__version__ = '0.5.2'
+__version__ = '0.'
 __program__ = 'Typo3Scan'
 __description__ = 'Automatic Typo3 enumeration tool'
 __author__ = 'https://github.com/whoot'
@@ -31,7 +31,7 @@ import argparse
 from lib.domain import Domain
 from lib.extensions import Extensions
 from colorama import Fore, init, deinit, Style
-init()
+init(strip=False)
 
 class Typo3:
     def __init__(self):
@@ -90,12 +90,12 @@ class Typo3:
                             for row in c.execute('SELECT extensionkey FROM extensions'):
                                 self.__extensions.append(row[0])
                         conn.close()
-                    print ('  \u251c Brute-Forcing {} extensions'.format(len(self.__extensions)))
+                    print ('  \u251c Brute-Forcing {} Extensions'.format(len(self.__extensions)))
                     extensions = Extensions()
                     ext_list = extensions.search_extension(check.get_path(), self.__extensions, args.threads)
                     if ext_list:
                         print ('\n  \u251c Found {} extensions'.format(len(ext_list)))
-                        print ('  |\n  \u251c Brute-Forcing version information'.format(len(self.__extensions)))
+                        print ('  \u251c Brute-Forcing Version Information'.format(len(self.__extensions)))
                         ext_list = extensions.search_ext_version(ext_list, args.threads)
                         extensions.output(ext_list, database)
                     else:
