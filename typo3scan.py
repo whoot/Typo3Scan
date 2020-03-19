@@ -40,12 +40,15 @@ class Typo3:
         self.__extensions = []
 
     def run(self):
-        database = os.path.join(self.__path, 'lib', 'typo3scan.db')
-        conn = sqlite3.connect(database)
-        c = conn.cursor()       
-        c.execute('SELECT * FROM UserAgents ORDER BY RANDOM() LIMIT 1;')
-        user_agent = c.fetchone()[0]
-        c.close()
+        if (args.user_agent):
+            user_agent = args.user_agent
+        else:
+            database = os.path.join(self.__path, 'lib', 'typo3scan.db')
+            conn = sqlite3.connect(database)
+            c = conn.cursor()       
+            c.execute('SELECT * FROM UserAgents ORDER BY RANDOM() LIMIT 1;')
+            user_agent = c.fetchone()[0]
+            c.close()
         config = {'threads': args.threads, 'timeout': args.timeout, 'cookie': args.cookie, 'auth': args.auth, 'User-Agent': user_agent}
         json.dump(config, open(os.path.join(self.__path, 'lib', 'config.json'), 'w'))
         try:
@@ -139,7 +142,6 @@ Options:
    You dont need to specify this arguments, but you may want to
 
     --vuln              Check for extensions with known vulnerabilities only.
-                        Default: all
               
     --timeout TIMEOUT   Request Timeout.
                         Default: 10 seconds
@@ -147,6 +149,8 @@ Options:
     --auth USER:PASS    Username and Password for HTTP Basic Authorization.
     
     --cookie NAME=VALUE Can be used for authenticiation based on cookies.
+
+    --agent USER-AGENT  Set custom User-Agent for requests.
          
     --threads THREADS   The number of threads to use for enumerating extensions.
                         Default: 5
@@ -167,6 +171,7 @@ Options:
     parser.add_argument('--threads', dest='threads', type=int, default=5)
     parser.add_argument('--auth', dest='auth', type=str, default='')
     parser.add_argument('--cookie', dest='cookie', type=str, default='')
+    parser.add_argument('--agent', dest='user_agent', type=str, default='')
     parser.add_argument('--timeout', dest='timeout', type=int, default=10)
     help.add_argument( '-h', '--help', action='store_true')
     args = parser.parse_args()
