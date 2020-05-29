@@ -1,3 +1,8 @@
+## Version 0.6.1
+
+* Bugfix of URL determination
+* Support for JSON output
+
 ## Version 0.6
 
 * Added version regex for composer installations

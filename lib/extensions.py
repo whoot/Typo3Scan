@@ -94,6 +94,7 @@ class Extensions:
         c = conn.cursor()
         print('\n\n [+] Extension Information')
         print(' -------------------------')
+        json_list = {}
         for extension,info in extension_dict.items():
             c.execute('SELECT title,version,state FROM extensions where extensionkey=?', (extension,))
             data = c.fetchone()
@@ -101,18 +102,23 @@ class Extensions:
             print('   \u251c Extension Title: '.ljust(28) + '{}'.format(data[0]))
             print('   \u251c Extension Repo: '.ljust(28) + 'https://extensions.typo3.org/extension/{}'.format(extension))
             print('   \u251c Current Version: '.ljust(28) + '{} ({})'.format(data[1], data[2]))
+            json_list[extension] = {'Title': data[0], 'Repo': 'https://extensions.typo3.org/extension/{}'.format(extension), 'Current': '{} ({})'.format(data[1], data[2]), 'Version': '', 'Vulnerabilities':''}
             if info['version']:
+                json_list[extension].update(Version = info['version'])
                 c.execute('SELECT advisory, vulnerability, affected_version_max, affected_version_min FROM extension_vulns WHERE (extensionkey=? AND ?<=affected_version_max AND ?>=affected_version_min)', (extension, info['version'], info['version'],))
                 data = c.fetchall()
                 print('   \u251c Identified Version: '.ljust(28) + '{}'.format(Style.BRIGHT + Fore.GREEN + info['version'] + Style.RESET_ALL))
                 vuln_list = []
                 if data:
+                    vuln = {}
                     for vulnerability in data:
                         if parse_version(info['version']) <= parse_version(vulnerability[2]):
                             vuln_list.append(Style.BRIGHT + '     [!] {}'.format(Fore.RED + vulnerability[0] + Style.RESET_ALL))
                             vuln_list.append('      \u251c Vulnerability Type: '.ljust(28) + vulnerability[1])
                             vuln_list.append('      \u251c Affected Versions: '.ljust(28) + '{} - {}'.format(vulnerability[2], vulnerability[3]))
                             vuln_list.append('      \u2514 Advisory URL:'.ljust(28) + 'https://typo3.org/security/advisory/{}\n'.format(vulnerability[0].lower()))
+                            vuln[vulnerability[0]] = {'Type': vulnerability[1], 'Affected': '{} - {}'.format(vulnerability[2], vulnerability[3]), 'Advisory': 'https://typo3.org/security/advisory/{}'.format(vulnerability[0].lower())}
+                    json_list[extension].update(Vulnerabilities = vuln)
                 if vuln_list:
                     print('   \u251c Version File: '.ljust(28) + '{}'.format(info['file']))
                     print('   \u2514 Known Vulnerabilities:\n')
@@ -121,6 +127,7 @@ class Extensions:
                 else:
                     print('   \u2514 Version File: '.ljust(28) + '{}'.format(info['file']))
             else:
-            	print('   \u2514 Identified Version: '.ljust(28) + '-unknown-')
+                print('   \u2514 Identified Version: '.ljust(28) + '-unknown-')
             print()
         conn.close()
+        return json_list

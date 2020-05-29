@@ -54,6 +54,7 @@ def get_request(url):
         response['html'] = r.text
         response['headers'] = r.headers
         response['cookies'] = r.cookies
+        response['url'] = r.url
         return response
     except requests.exceptions.Timeout as e:
         print(e)

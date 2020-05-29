@@ -18,7 +18,7 @@
 # along with this program. If not, see [http://www.gnu.org/licenses/](http://www.gnu.org/licenses/)
 #-------------------------------------------------------------------------------
 
-__version__ = '0.6'
+__version__ = '0.6.1'
 __program__ = 'Typo3Scan'
 __description__ = 'Automatic Typo3 enumeration tool'
 __author__ = 'https://github.com/whoot'
@@ -100,9 +100,13 @@ class Typo3:
                         print ('\n  \u251c Found {} extensions'.format(len(ext_list)))
                         print ('  \u251c Brute-Forcing Version Information'.format(len(self.__extensions)))
                         ext_list = extensions.search_ext_version(ext_list, args.threads)
-                        extensions.output(ext_list, database)
+                        json_ext = extensions.output(ext_list, database)
                     else:
                         print ('\n  [!] No extensions found.\n')
+                    if args.json:
+                        json_log = {}
+                        json_log[check.get_name()] = {'Backend': check.get_backend(), 'Version': check.get_typo3_version(), 'Vulnerabilities':check.get_typo3_vulns(), 'Extensions': json_ext}
+                        json.dump(json_log, open('typo3scan.json', 'w'))
         except KeyboardInterrupt:
             print('\nReceived keyboard interrupt.\nQuitting...')
             exit(-1)
@@ -155,6 +159,8 @@ Options:
     --threads THREADS   The number of threads to use for enumerating extensions.
                         Default: 5
 
+    --json              Output results to json file
+
   General:
     -u | --update       Update the database.
     -r | --reset        Reset the database.
@@ -173,6 +179,7 @@ Options:
     parser.add_argument('--cookie', dest='cookie', type=str, default='')
     parser.add_argument('--agent', dest='user_agent', type=str, default='')
     parser.add_argument('--timeout', dest='timeout', type=int, default=10)
+    parser.add_argument('--json', dest='json', action='store_true')
     help.add_argument( '-h', '--help', action='store_true')
     args = parser.parse_args()
 
