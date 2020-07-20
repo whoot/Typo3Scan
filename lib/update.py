@@ -153,19 +153,18 @@ class Update:
                     exit(-1)
 
                 # Add vulnerability details to database
-                for ext_vuln in vulnerabilities:
-                    c.execute('SELECT * FROM core_vulns WHERE advisory=? AND vulnerability=? AND subcomponent=? AND affected_version_max=? AND affected_version_min=? AND cve=?', (ext_vuln[0], ext_vuln[1], ext_vuln[2], ext_vuln[3], ext_vuln[4], ext_vuln[5],))
+                for core_vuln in vulnerabilities:
+                    c.execute('SELECT * FROM core_vulns WHERE advisory=? AND vulnerability=? AND subcomponent=? AND affected_version_max=? AND affected_version_min=? AND cve=?', (core_vuln[0], core_vuln[1], core_vuln[2], core_vuln[3], core_vuln[4], core_vuln[5],))
                     data = c.fetchall()
                     if not data:
                         update_counter+=1
-                        c.execute('INSERT INTO core_vulns VALUES (?,?,?,?,?,?)', (ext_vuln[0], ext_vuln[1], ext_vuln[2], ext_vuln[3], ext_vuln[4], ext_vuln[5],))
+                        c.execute('INSERT INTO core_vulns VALUES (?,?,?,?,?,?)', (core_vuln[0], core_vuln[1], core_vuln[2], core_vuln[3], core_vuln[4], core_vuln[5]))
                         conn.commit()
                     else:
                         if update_counter == 0:
                             print('[!] Already up-to-date.\n')
                         else:
-                            print('[+] Done.')
-                            print('[!] Added {} new CORE vulnerabilities to database.\n'.format(update_counter))
+                            print(' \u2514 Done. Added {} new CORE vulnerabilities to database.\n'.format(update_counter))
                         return True
 
     def dlProgress(self, count, blockSize, totalSize):
@@ -191,7 +190,7 @@ class Update:
             infile.close()
             outfile.close()
         except Exception as e:
-            print ('\n', e)
+            print('\n', e)
 
     def load_extensions(self):
         """
@@ -275,10 +274,14 @@ class Update:
                         extensionkey = re.findall('Extension[s]?:\s?(.*?)<', beauty_html)
                         # Sometimes there are multiple extensions in an advisory
                         if len(extensionkey) == 0: # If only one extension affected
-                            extensionkey = [advisory_info[advisory_info.find('('):]]
+                            if not '(' in advisory_info:
+                                extensionkey = [advisory_info[advisory_info.rfind(' ')+1:]]
+                            else:
+                                extensionkey = [advisory_info[advisory_info.find('('):]]
                         for item in range (0, len(extensionkey)):
                             extensionkey_item = extensionkey[item]
-                            extensionkey_item = extensionkey_item[extensionkey_item.rfind('(')+1:extensionkey_item.rfind(')')]
+                            if '(' in extensionkey_item:
+                                extensionkey_item = extensionkey_item[extensionkey_item.rfind('(')+1:extensionkey_item.rfind(')')]
                             description = vulnerability[item]
                             version_item = affected_versions[item]
                             version_item = version_item.replace("and all versions below", "- 0.0.0")

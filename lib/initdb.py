@@ -33,7 +33,7 @@ class DB_Init:
             c.execute('''DROP TABLE IF EXISTS extensions''')
             c.execute('''DROP TABLE IF EXISTS extension_vulns''')
             c.execute('''DROP TABLE IF EXISTS core_vulns''')
-            c.execute('''DROP TABLE IF EXISTS settings''')
+            c.execute('''DROP TABLE IF EXISTS UserAgents''')
             conn.commit()
 
             # Create table extensions
@@ -42,11 +42,11 @@ class DB_Init:
 
             # Create table extension_vulns
             c.execute('''CREATE TABLE IF NOT EXISTS extension_vulns
-                         (advisory text, extensionkey text, vulnerability text, branch_max integer, affected_version_max text, branch_max integer, affected_version_min text)''')
+                         (advisory text, extensionkey text, vulnerability text, affected_version_max text, affected_version_min text)''')
 
             # Create table core_vulns
             c.execute('''CREATE TABLE IF NOT EXISTS core_vulns
-                         (advisory text, vulnerability text, subcomponent text, branch_max integer, affected_version_max text, branch_max integer, affected_version_min text, cve text)''')
+                         (advisory text, vulnerability text, subcomponent text, affected_version_max text, affected_version_min text, cve text)''')
 
             # Create table UserAgents
             c.execute('''CREATE TABLE IF NOT EXISTS UserAgents
@@ -83,7 +83,7 @@ class DB_Init:
             if conn:
                 conn.rollback()
             print(e)
-            sys.exit(-1)
+            exit(-1)
 
         finally:
             if conn:

@@ -1,3 +1,8 @@
+## Version 0.6.2
+
+* Bugfix in extension vulnerability parsing
+* Bugfix on database reset
+
 ## Version 0.6.1
 
 * Bugfix of URL determination
