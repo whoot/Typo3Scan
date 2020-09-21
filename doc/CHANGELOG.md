@@ -1,6 +1,7 @@
 ## Version 0.6.3
 
 * Fixed advisory URLs
+* Fixed rootCheck
 
 ## Version 0.6.2
 

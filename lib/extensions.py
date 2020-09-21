@@ -35,7 +35,6 @@ class Extensions:
         """
             This method loads the extensions from the database and searches for installed extensions.
                 /typo3conf/ext/:        Local installation path. This is where extensions usually get installed.
-                /typo3/ext/:            Global installation path (not used atm)
                 /typo3/sysext/:         Extensions shipped with core
         """
         found_extensions = {}
@@ -43,7 +42,6 @@ class Extensions:
         for ext in extensions:
             thread_pool.add_job((request.head_request, ('{}/typo3conf/ext/{}/'.format(domain, ext))))
             thread_pool.add_job((request.head_request, ('{}/typo3/sysext/{}/'.format(domain, ext))))
-            #thread_pool.add_job((request.head_request, ('{}/typo3/ext/{}/'.format(domain, ext))))
         thread_pool.start(threads)
 
         for installed_extension in thread_pool.get_result():

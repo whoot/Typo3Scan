@@ -75,8 +75,8 @@ class Typo3:
                     print(Fore.RED + '\n[x] It seems that Typo3 is not used on this domain\n' + Fore.RESET)
                 else:
                     # check for typo3 information
-                    print('\n[+] Typo3 Installation')
-                    print('----------------------')
+                    print('\n [+] Core Information')
+                    print(' --------------------')
                     check.search_login()
                     check.search_typo3_version()
 

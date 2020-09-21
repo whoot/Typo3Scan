@@ -91,14 +91,13 @@ class Domain:
             If found, it searches for a Typo3 path reference
             in order to determine the Typo3 installation path.
         """
-        response = request.get_request('{}'.format(self.get_name()))
-        self.set_name(response['url'][:-1])
         full_path = self.get_name()
+        response = request.get_request('{}'.format(self.get_name()))
         if re.search('powered by TYPO3', response['html']):
             self.set_typo3()
             path = re.search('="(?:{})/?(\S*?)/?(?:typo3temp|typo3conf)/'.format(self.get_name()), response['html'])
             if path and path.group(1) != '':
-                full_path = '{}/{}'.format(self.get_name(), path)
+                full_path = '{}/{}'.format(self.get_name(), path)            
         self.set_path(full_path)
 
     def check_default_files(self):
@@ -144,19 +143,19 @@ class Domain:
             and searches for a specific string in the title or the response.
             If the access is forbidden (403), extension search is still possible.
         """
-        print('[+] Backend Login')
+        print(' [+] Backend Login')
         # maybe /typo3_src/typo3/index.php too?
         response = request.get_request('{}/typo3/index.php'.format(self.get_path()))
         searchTitle = re.search('<title>(.*)</title>', response['html'])
         if searchTitle and 'Login' in searchTitle.group(0):
-            print(' \u251c {}'.format(Fore.GREEN + '{}/typo3/index.php'.format(self.get_path()) + Fore.RESET))
+            print('  \u251c {}'.format(Fore.GREEN + '{}/typo3/index.php'.format(self.get_path()) + Fore.RESET))
             self.set_backend('{}/typo3/index.php'.format(self.get_path()))
         elif ('Backend access denied: The IP address of your client' in response['html']) or (response['status_code'] == 403):
-            print(' \u251c {}'.format(Fore.GREEN + '{}/typo3/index.php'.format(self.get_path()) + Fore.RESET))
-            print(' \u251c {}'.format(Fore.YELLOW + 'But access is forbidden (IP Address Restriction)' + Fore.RESET))
+            print('  \u251c {}'.format(Fore.GREEN + '{}/typo3/index.php'.format(self.get_path()) + Fore.RESET))
+            print('  \u251c {}'.format(Fore.YELLOW + 'But access is forbidden (IP Address Restriction)' + Fore.RESET))
             self.set_backend('{}/typo3/index.php'.format(self.get_path()))
         else:
-            print(' \u251c {}'.format(Fore.RED + 'Could not be found' + Fore.RESET))
+            print('  \u251c {}'.format(Fore.RED + 'Could not be found' + Fore.RESET))
 
     def search_typo3_version(self):
         """
@@ -185,19 +184,20 @@ class Domain:
                 }
 
         version = None
+        version_path = None
         for path, regex in files.items():
             response = request.version_information('{}/{}'.format(self.get_path(), path), regex)
             if response and (version is None or (len(response) > len(version))):
                 version = response
                 version_path = path
 
-        print(' |\n[+] Version Information')
+        print('  | \n [+] Version Information')
         if version:
-            print(' \u251c Identified Version: '.ljust(28) + '{}'.format(Style.BRIGHT + Fore.GREEN + version + Style.RESET_ALL))
-            print(' \u251c Version File: '.ljust(28) + '{}{}'.format(self.get_path(), version_path))
+            print('  \u251c Identified Version: '.ljust(28) + '{}'.format(Style.BRIGHT + Fore.GREEN + version + Style.RESET_ALL))
+            print('  \u251c Version File: '.ljust(28) + '{}{}'.format(self.get_path(), version_path))
             if len(version) == 3:
-                print(' \u251c Could not identify exact version.')
-                react = input(' \u251c Do you want to print all vulnerabilities for branch {}? (y/n): '.format(version))
+                print('  \u251c Could not identify exact version.')
+                react = input('  \u251c Do you want to print all vulnerabilities for branch {}? (y/n): '.format(version))
                 if react.startswith('y'):
                     version = version + '.0'
                 else:
@@ -216,14 +216,14 @@ class Domain:
                         json_list[vulnerability[0]] = {'Type': vulnerability[1], 'Subcomponent': vulnerability[2], 'Affected': '{} - {}'.format(vulnerability[3], vulnerability[4]), 'Advisory': 'https://typo3.org/security/advisory/{}'.format(vulnerability[0].lower())}
                 if json_list:
                     self.set_typo3_vulns(json_list)
-                    print(' \u2514 Known Vulnerabilities:\n')
+                    print('  \u2514 Known Vulnerabilities:\n')
                     for vulnerability in json_list.keys():
-                        print(Style.BRIGHT + '    [!] {}'.format(Fore.RED + vulnerability + Style.RESET_ALL))
-                        print('     \u251c Vulnerability Type:'.ljust(28) + json_list[vulnerability]['Type'])
-                        print('     \u251c Subcomponent:'.ljust(28) + json_list[vulnerability]['Subcomponent'])
-                        print('     \u251c Affected Versions:'.ljust(28) + json_list[vulnerability]['Affected'])
-                        print('     \u2514 Advisory URL:'.ljust(28) + json_list[vulnerability]['Advisory'] + '\n')
+                        print(Style.BRIGHT + '     [!] {}'.format(Fore.RED + vulnerability + Style.RESET_ALL))
+                        print('      \u251c Vulnerability Type:'.ljust(28) + json_list[vulnerability]['Type'])
+                        print('      \u251c Subcomponent:'.ljust(28) + json_list[vulnerability]['Subcomponent'])
+                        print('      \u251c Affected Versions:'.ljust(28) + json_list[vulnerability]['Affected'])
+                        print('      \u2514 Advisory URL:'.ljust(28) + json_list[vulnerability]['Advisory'] + '\n')
                 else:
-                    print(' \u2514 No Known Vulnerabilities')
+                    print('  \u2514 No Known Vulnerabilities')
         else:
-            print(' \u2514', Fore.RED + 'No Version Information Found.' + Fore.RESET)
+            print('  \u2514', Fore.RED + 'Could not be determined.' + Fore.RESET)
