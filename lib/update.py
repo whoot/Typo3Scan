@@ -57,13 +57,13 @@ class Update:
         """
         print('\n[+] Searching for new CORE vulnerabilities...')
         update_counter = 0
-        response = requests.get('https://typo3.org/help/security-advisories/typo3-cms/1')
-        pages = re.findall('<a class=\"page-link\" href=\"/help/security-advisories/typo3-cms/([0-9]+)\">', response.text)
+        response = requests.get('https://typo3.org/help/security-advisories/typo3-cms/page-1')
+        pages = re.findall('<a class=\"page-link\" href=\"/help/security-advisories/typo3-cms/page-([0-9]+)\">', response.text)
         last_page = int(pages[-1])
 
         for current_page in range(1, last_page+1):
             print(' \u251c Page {}/{}'.format(current_page, last_page))
-            response = requests.get('https://typo3.org/help/security-advisories/typo3-cms/{}'.format(current_page), timeout=6)
+            response = requests.get('https://typo3.org/help/security-advisories/typo3-cms/page-{}'.format(current_page), timeout=6)
             advisories = re.findall('TYPO3-CORE-SA-[0-9][0-9][0-9][0-9]-[0-9][0-9][0-9]', response.text)
             for advisory in advisories:
                 vulnerabilities = []
@@ -238,13 +238,13 @@ class Update:
         """
         print('\n[+] Searching for new extension vulnerabilities...')
         update_counter = 0
-        response = requests.get('https://typo3.org/help/security-advisories/typo3-extensions/1')
-        pages = re.findall('<a class=\"page-link\" href=\"/help/security-advisories/typo3-extensions/([0-9]+)\">', response.text)
+        response = requests.get('https://typo3.org/help/security-advisories/typo3-extensions/page-1')
+        pages = re.findall('<a class=\"page-link\" href=\"/help/security-advisories/typo3-extensions/page-([0-9]+)\">', response.text)
         last_page = int(pages[-1])
 
         for current_page in range(1, last_page+1):
             print(' \u251c Page {}/{}'.format(current_page, last_page))
-            response = requests.get('https://typo3.org/help/security-advisories/typo3-extensions/{}'.format(current_page), timeout=6)
+            response = requests.get('https://typo3.org/help/security-advisories/typo3-extensions/page-{}'.format(current_page), timeout=6)
             advisories = re.findall('TYPO3-EXT-SA-[0-9][0-9][0-9][0-9]-[0-9][0-9][0-9]', response.text)
             for advisory in advisories:
                 vulnerabilities = []

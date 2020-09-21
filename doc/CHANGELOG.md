@@ -1,3 +1,7 @@
+## Version 0.6.3
+
+* Fixed advisory URLs
+
 ## Version 0.6.2
 
 * Bugfix in extension vulnerability parsing
