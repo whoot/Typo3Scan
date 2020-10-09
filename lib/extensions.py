@@ -96,13 +96,16 @@ class Extensions:
         for extension,info in extension_dict.items():
             c.execute('SELECT title,version,state FROM extensions where extensionkey=?', (extension,))
             data = c.fetchone()
-            print(Style.BRIGHT + '  [+] {}'.format(Fore.GREEN  + extension + Style.RESET_ALL))
+            print(Style.BRIGHT + '  [+] {}'.format(Fore.GREEN + extension + Style.RESET_ALL))
             if data is None:
                 print('   \u251c Extension ({}) is unknown'.format(extension))
                 continue
             print('   \u251c Extension Title: '.ljust(28) + '{}'.format(data[0]))
             print('   \u251c Extension Repo: '.ljust(28) + 'https://extensions.typo3.org/extension/{}'.format(extension))
-            print('   \u251c Current Version: '.ljust(28) + '{} ({})'.format(data[1], data[2]))
+            if not 'stable' in data[2]:
+            	print('   \u251c Current Version: '.ljust(28) + '{} ({})'.format(data[1], Fore.RED + data[2] + Style.RESET_ALL))
+            else:
+            	print('   \u251c Current Version: '.ljust(28) + '{} ({})'.format(data[1], data[2]))
             json_list[extension] = {'Title': data[0], 'Repo': 'https://extensions.typo3.org/extension/{}'.format(extension), 'Current': '{} ({})'.format(data[1], data[2]), 'Version': '', 'Vulnerabilities':''}
             if info['version']:
                 json_list[extension].update(Version = info['version'])
