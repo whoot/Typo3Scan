@@ -18,7 +18,7 @@
 # along with this program. If not, see [http://www.gnu.org/licenses/](http://www.gnu.org/licenses/)
 #-------------------------------------------------------------------------------
 
-__version__ = '0.6.3'
+__version__ = '0.6.2'
 __program__ = 'Typo3Scan'
 __description__ = 'Automatic Typo3 enumeration tool'
 __author__ = 'https://github.com/whoot'
@@ -39,7 +39,45 @@ class Typo3:
         self.__path = os.path.dirname(os.path.abspath(__file__))
         self.__extensions = []
 
+    def run_magic(self,check,database,conn):
+            # check for typo3 information
+            print('\n[+] Typo3 Installation')
+            print('----------------------')
+            check.search_login()
+            check.search_typo3_version()
+
+            # Search extensions
+            print('\n [+] Extension Search')
+            if not self.__extensions:
+                conn = sqlite3.connect(database)
+                c = conn.cursor()
+                if args.vuln:
+                    for row in c.execute('SELECT extensionkey FROM extension_vulns'):
+                        self.__extensions.append(row[0])
+                    self.__extensions = set(self.__extensions)
+                else:
+                    for row in c.execute('SELECT extensionkey FROM extensions'):
+                        self.__extensions.append(row[0])
+                conn.close()
+            print ('  \u251c Brute-Forcing {} Extensions'.format(len(self.__extensions)))
+            extensions = Extensions()
+            ext_list = extensions.search_extension(check.get_path(), self.__extensions, args.threads)
+            if ext_list:
+                print ('\n  \u251c Found {} extensions'.format(len(ext_list)))
+                print ('  \u251c Brute-Forcing Version Information'.format(len(self.__extensions)))
+                ext_list = extensions.search_ext_version(ext_list, args.threads)
+                json_ext = extensions.output(ext_list, database)
+            else:
+                print ('\n  [!] No extensions found.\n')
+            if args.json:
+                json_log = {}
+                json_log[check.get_name()] = {'Backend': check.get_backend(), 'Version': check.get_typo3_version(), 'Vulnerabilities':check.get_typo3_vulns(), 'Extensions': json_ext}
+                json.dump(json_log, open('typo3scan.json', 'w'))
+
     def run(self):
+        # use the force!
+        mightyForce = args.d4rkf0rce
+
         if (args.user_agent):
             user_agent = args.user_agent
         else:
@@ -69,44 +107,19 @@ class Typo3:
                 check = Domain(domain)
                 check.check_root()
                 default_files = check.check_default_files()
+                print(default_files)
                 if not default_files:
                     check_404 = check.check_404()
+
                 if not check.is_typo3():
                     print(Fore.RED + '\n[x] It seems that Typo3 is not used on this domain\n' + Fore.RESET)
                 else:
-                    # check for typo3 information
-                    print('\n [+] Core Information')
-                    print(' --------------------')
-                    check.search_login()
-                    check.search_typo3_version()
+                    self.run_magic()
 
-                    # Search extensions
-                    print('\n [+] Extension Search')
-                    if not self.__extensions:
-                        conn = sqlite3.connect(database)
-                        c = conn.cursor()
-                        if args.vuln:
-                            for row in c.execute('SELECT extensionkey FROM extension_vulns'):
-                                self.__extensions.append(row[0])
-                            self.__extensions = set(self.__extensions)
-                        else:
-                            for row in c.execute('SELECT extensionkey FROM extensions'):
-                                self.__extensions.append(row[0])
-                        conn.close()
-                    print ('  \u251c Brute-Forcing {} Extensions'.format(len(self.__extensions)))
-                    extensions = Extensions()
-                    ext_list = extensions.search_extension(check.get_path(), self.__extensions, args.threads)
-                    if ext_list:
-                        print ('\n  \u251c Found {} extensions'.format(len(ext_list)))
-                        print ('  \u251c Brute-Forcing Version Information'.format(len(self.__extensions)))
-                        ext_list = extensions.search_ext_version(ext_list, args.threads)
-                        json_ext = extensions.output(ext_list, database)
-                    else:
-                        print ('\n  [!] No extensions found.\n')
-                    if args.json:
-                        json_log = {}
-                        json_log[check.get_name()] = {'Backend': check.get_backend(), 'Version': check.get_typo3_version(), 'Vulnerabilities':check.get_typo3_vulns(), 'Extensions': json_ext}
-                        json.dump(json_log, open('typo3scan.json', 'w'))
+                if mightyForce==True:
+                    print(Fore.RED + '\n[!] I don\'t care and know what i do mode! Yeahhhhhh! Force!!!\n' + Fore.RESET)
+                    self.run_magic(check,database,conn)
+                        
         except KeyboardInterrupt:
             print('\nReceived keyboard interrupt.\nQuitting...')
             exit(-1)
@@ -159,6 +172,7 @@ Options:
     --threads THREADS   The number of threads to use for enumerating extensions.
                         Default: 5
 
+    --force             I know what i do mode. Test for typo3 anyways.
     --json              Output results to json file
 
   General:
@@ -179,6 +193,7 @@ Options:
     parser.add_argument('--cookie', dest='cookie', type=str, default='')
     parser.add_argument('--agent', dest='user_agent', type=str, default='')
     parser.add_argument('--timeout', dest='timeout', type=int, default=10)
+    parser.add_argument('--force', dest='d4rkf0rce', action="store_true", default=False)
     parser.add_argument('--json', dest='json', action='store_true')
     help.add_argument( '-h', '--help', action='store_true')
     args = parser.parse_args()
