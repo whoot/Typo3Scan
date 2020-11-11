@@ -33,6 +33,8 @@ from lib.extensions import Extensions
 from colorama import Fore, init, deinit, Style
 init(strip=False)
 
+from IPython import embed
+
 class Typo3:
     def __init__(self):
         self.__domain_list = []
@@ -63,6 +65,7 @@ class Typo3:
             extensions = Extensions()
             ext_list = extensions.search_extension(check.get_path(), self.__extensions, args.threads)
             if ext_list:
+                #embed()
                 print ('\n  \u251c Found {} extensions'.format(len(ext_list)))
                 print ('  \u251c Brute-Forcing Version Information'.format(len(self.__extensions)))
                 ext_list = extensions.search_ext_version(ext_list, args.threads)
@@ -74,15 +77,20 @@ class Typo3:
                 json_log[check.get_name()] = {'Backend': check.get_backend(), 'Version': check.get_typo3_version(), 'Vulnerabilities':check.get_typo3_vulns(), 'Extensions': json_ext}
                 json.dump(json_log, open('typo3scan.json', 'w'))
 
+    def open_database(self):
+            database = os.path.join(self.__path, 'lib', 'typo3scan.db')
+            conn = sqlite3.connect(database)
+            return database, conn
+
     def run(self):
         # use the force!
         mightyForce = args.d4rkf0rce
 
         if (args.user_agent):
             user_agent = args.user_agent
+            database, conn = self.open_database()
         else:
-            database = os.path.join(self.__path, 'lib', 'typo3scan.db')
-            conn = sqlite3.connect(database)
+            database, conn = self.open_database()
             c = conn.cursor()       
             c.execute('SELECT * FROM UserAgents ORDER BY RANDOM() LIMIT 1;')
             user_agent = c.fetchone()[0]
@@ -107,18 +115,20 @@ class Typo3:
                 check = Domain(domain)
                 check.check_root()
                 default_files = check.check_default_files()
-                print(default_files)
                 if not default_files:
                     check_404 = check.check_404()
 
-                if not check.is_typo3():
+                if not check.is_typo3() and not mightyForce:
                     print(Fore.RED + '\n[x] It seems that Typo3 is not used on this domain\n' + Fore.RESET)
+                elif not check.is_typo3() and mightyForce:
+                    print(Fore.RED + '\n[x] It seems that Typo3 is not used on this domain' + Fore.RESET)
                 else:
-                    self.run_magic()
+                    self.run_magic(check, database, conn)
 
                 if mightyForce==True:
-                    print(Fore.RED + '\n[!] I don\'t care and know what i do mode! Yeahhhhhh! Force!!!\n' + Fore.RESET)
+                    print(Fore.RED + '[!] I don\'t care and know what i do mode! Yeahhhhhh! Force!!!\n' + Fore.RESET)
                     self.run_magic(check,database,conn)
+
                         
         except KeyboardInterrupt:
             print('\nReceived keyboard interrupt.\nQuitting...')
