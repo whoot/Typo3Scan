@@ -83,6 +83,7 @@ class Typo3:
                     # Search extensions
                     print('\n [+] Extension Search')
                     if not self.__extensions:
+                        database = os.path.join(self.__path, 'lib', 'typo3scan.db')
                         conn = sqlite3.connect(database)
                         c = conn.cursor()
                         if args.vuln:
