@@ -40,10 +40,10 @@ class Typo3:
         self.__extensions = []
 
     def run(self):
+        database = os.path.join(self.__path, 'lib', 'typo3scan.db')
         if (args.user_agent):
             user_agent = args.user_agent
         else:
-            database = os.path.join(self.__path, 'lib', 'typo3scan.db')
             conn = sqlite3.connect(database)
             c = conn.cursor()       
             c.execute('SELECT * FROM UserAgents ORDER BY RANDOM() LIMIT 1;')
