@@ -102,6 +102,7 @@ class Extensions:
                 continue
             print('   \u251c Extension Title: '.ljust(28) + '{}'.format(data[0]))
             print('   \u251c Extension Repo: '.ljust(28) + 'https://extensions.typo3.org/extension/{}'.format(extension))
+            print('   \u251c Extension Url: '.ljust(28) + '{}'.format(info['url']))
             if not 'stable' in data[2]:
             	print('   \u251c Current Version: '.ljust(28) + '{} ({})'.format(data[1], Fore.RED + data[2] + Style.RESET_ALL))
             else:

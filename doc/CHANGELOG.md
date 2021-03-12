@@ -1,3 +1,8 @@
+## Version 0.7
+
+* Enhanced version detection
+* Force mode
+
 ## Version 0.6.3
 
 * Fixed advisory URLs

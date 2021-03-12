@@ -18,7 +18,7 @@
 # along with this program. If not, see [http://www.gnu.org/licenses/](http://www.gnu.org/licenses/)
 #-------------------------------------------------------------------------------
 
-__version__ = '0.6.3'
+__version__ = '0.7'
 __program__ = 'Typo3Scan'
 __description__ = 'Automatic Typo3 enumeration tool'
 __author__ = 'https://github.com/whoot'
@@ -71,7 +71,7 @@ class Typo3:
                 default_files = check.check_default_files()
                 if not default_files:
                     check_404 = check.check_404()
-                if not check.is_typo3():
+                if not check.is_typo3() and args.force is False:
                     print(Fore.RED + '\n[x] It seems that Typo3 is not used on this domain\n' + Fore.RESET)
                 else:
                     # check for typo3 information
@@ -161,6 +161,8 @@ Options:
 
     --json              Output results to json file
 
+    --force             Force enumeration
+
   General:
     -u | --update       Update the database.
     -r | --reset        Reset the database.
@@ -173,6 +175,7 @@ Options:
     group.add_argument('-d', '--domain', dest='domain', type=str, nargs='+')
     group.add_argument('-u', '--update', dest='update', action='store_true')
     group.add_argument('-r', '--reset', dest='reset', action='store_true')
+    parser.add_argument('--force', dest='force', action='store_true')
     parser.add_argument('--vuln', dest='vuln', action='store_true')
     parser.add_argument('--threads', dest='threads', type=int, default=5)
     parser.add_argument('--auth', dest='auth', type=str, default='')
@@ -195,5 +198,7 @@ Options:
         Update()
 
     else:
+        if args.force:
+           print('\n' + Fore.RED + Style.BRIGHT + '!! FORCE MODE ENABLED: expect false positives !!'.center(73) + Style.RESET_ALL)
         main = Typo3()
         main.run()
