@@ -229,8 +229,14 @@ Options:
         database = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'lib', 'typo3scan.db')
         conn = sqlite3.connect('lib/typo3scan.db')
         c = conn.cursor()
-        name = (args.extension).split(':')[0]
-        version = (args.extension).split(':')[1]
+        name = ''
+        version = ''
+        if not ':' in args.extension:
+            name = args.extension
+            version = '0.0.0'
+        else:
+            name = (args.extension).split(':')[0]
+            version = (args.extension).split(':')[1]
         c.execute('SELECT advisory, vulnerability, affected_version_max, affected_version_min FROM extension_vulns WHERE (extensionkey=? AND ?<=affected_version_max AND ?>=affected_version_min)', (name, version, version,))
         data = c.fetchall()
         json_list = {}
@@ -239,14 +245,17 @@ Options:
                 if parse_version(version) <= parse_version(vulnerability[2]):
                     json_list[vulnerability[0]] = {'Type': vulnerability[1], 'Affected': '{} - {}'.format(vulnerability[2], vulnerability[3]), 'Advisory': 'https://typo3.org/security/advisory/{}'.format(vulnerability[0].lower())}
             if json_list:
-                print(Style.BRIGHT + '\nKnown Vulnerabilities for {} v{}\n'.format(name, version) + Style.RESET_ALL)
+                if version == '0.0.0':
+                    print(Style.BRIGHT + '\nKnown Vulnerabilities for \'{}\'\n'.format(name) + Style.RESET_ALL)
+                else:
+                    print(Style.BRIGHT + '\nKnown Vulnerabilities for \'{}\' v{}\n'.format(name, version) + Style.RESET_ALL)
                 for vulnerability in json_list.keys():
                     print(Style.BRIGHT + '   [!] {}'.format(Fore.RED + vulnerability + Style.RESET_ALL))
                     print('    \u251c Vulnerability Type: '.ljust(28) + json_list[vulnerability]['Type'])
                     print('    \u251c Affected Versions: '.ljust(28) + '{}'.format(json_list[vulnerability]['Affected']))
                     print('    \u2514 Advisory URL:'.ljust(28) + '{}\n'.format(json_list[vulnerability]['Advisory'].lower()))
         if not json_list:
-            print('\nNo Known Vulnerabilities for {} v{}\n'.format(name, version))
+            print('\nNo Known Vulnerabilities for \'{}\'\n'.format(name))
 
 
     else:
