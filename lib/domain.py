@@ -208,10 +208,10 @@ class Domain:
             c = conn.cursor()
             c.execute('SELECT advisory, vulnerability, subcomponent, affected_version_max, affected_version_min FROM core_vulns WHERE (?<=affected_version_max AND ?>=affected_version_min)', (version, version,))
             data = c.fetchall()
+            json_list = {}
             if data:
-                json_list = {}
                 for vulnerability in data:
-                    # maybe instead use this: https://oraerr.com/database/sql/how-to-compare-version-string-x-y-z-in-mysql-2/
+                    # maybe instead use this: https://zxq9.com/archives/797
                     if parse_version(version) <= parse_version(vulnerability[3]):
                         json_list[vulnerability[0]] = {'Type': vulnerability[1], 'Subcomponent': vulnerability[2], 'Affected': '{} - {}'.format(vulnerability[3], vulnerability[4]), 'Advisory': 'https://typo3.org/security/advisory/{}'.format(vulnerability[0].lower())}
                 if json_list:
@@ -223,7 +223,7 @@ class Domain:
                         print('      \u251c Subcomponent:'.ljust(28) + json_list[vulnerability]['Subcomponent'])
                         print('      \u251c Affected Versions:'.ljust(28) + json_list[vulnerability]['Affected'])
                         print('      \u2514 Advisory URL:'.ljust(28) + json_list[vulnerability]['Advisory'] + '\n')
-                else:
-                    print('  \u2514 No Known Vulnerabilities')
+            if not json_list:
+                print('  \u2514 No Known Vulnerabilities')
         else:
             print('  \u2514', Fore.RED + 'Could not be determined.' + Fore.RESET)

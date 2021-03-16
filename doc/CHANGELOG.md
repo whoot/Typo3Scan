@@ -1,6 +1,7 @@
 ## Version 0.7
 
 * Enhanced version detection
+* Introduction of *--core* and *--ext* parameter
 * Force mode
 
 ## Version 0.6.3
