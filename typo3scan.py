@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 #-------------------------------------------------------------------------------
 # Typo3Scan - Automatic Typo3 Enumeration Tool
-# Copyright (c) 2014-2020 Jan Rude
+# Copyright (c) 2014-2021 Jan Rude
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -103,7 +103,7 @@ class Typo3:
                         ext_list = extensions.search_ext_version(ext_list, args.threads)
                         json_ext = extensions.output(ext_list, database)
                     else:
-                        print ('\n  [!] No extensions found.\n')
+                        print ('\n [!] No extensions found.\n')
                     if args.json:
                         json_log = {}
                         json_log[check.get_name()] = {'Backend': check.get_backend(), 'Version': check.get_typo3_version(), 'Vulnerabilities':check.get_typo3_vulns(), 'Extensions': json_ext}
