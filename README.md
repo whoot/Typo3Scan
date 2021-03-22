@@ -13,38 +13,30 @@ Typo3Scan is intended to be used for legal security purposes only, and you shoul
 
 You can download the latest tarball by clicking [here](https://github.com/whoot/Typo3Scan/tarball/master) or latest zipball by clicking  [here](https://github.com/whoot/Typo3Scan/zipball/master).
 
-Preferably, you can download Type3Scan by cloning the [Git](https://github.com/whoot/Typo3Scan) repository:
+Preferably, you can download Type3Scan by cloning the repository:
 
     git clone https://github.com/whoot/Typo3Scan.git
 
-Typo3Scan works with [Python 3](http://www.python.org/download/) version **3.7** on Debian/Ubuntu and Windows platforms.
+Typo3Scan works with [Python 3](http://www.python.org/download/) version **>= 3.7** on Debian/Ubuntu and Windows platforms.
 
 You can install all required packages with pip3:
 
-	pip install -r requirements.txt
+	python3 -m pip install -r requirements.txt
 
 ## Usage
 
 To get a list of all options use:
 
-    python typo3scan.py -h
-
-You can use Typo3Scan with domains:
-
-	python typo3scan.py -d DOMAIN [DOMAIN ...] [--vuln]
-
-Or with a file with a list of domains:
-
-	python typo3scan.py -f FILE [--vuln]
+    python3 typo3scan.py -h
 
 Example:
 
-	python typo3scan.py -d http://dev001.vm-typo3.loc --vuln
+	python3 typo3scan.py -d http://dev001.vm-typo3.loc --vuln
 
 <img src="./doc/core_vulns.jpg" width="450">
 <img src="./doc/ext_vulns.jpg" width="450">
 
-## Bug Reporting
+## Bug Reporting / Support
 
 Bug reports are welcome! Please report all bugs on the [issue tracker](https://github.com/whoot/Typo3Scan/issues).
 
