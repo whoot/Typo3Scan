@@ -111,7 +111,7 @@
 ## Version 0.3.1
 
 * It is now possible to check for specific extensions (-e or --extension).
-* Domains must be specified with 'http://' or 'https://' (for example: https://127.0.0.1).
+* Domains must be specified with 'http://' or 'https://'.
 * Login page redirections can be followed or not.
 * Fixed the 'all extensions are installed' bug in the summary when using verbose mode.
 * Set sleep between threads to 0.5 to fix time out errors when checking a huge amount of extensions.
@@ -139,13 +139,6 @@
 ## Version 0.2
 
 * Added support for Privoxy and TOR
-* It is now possible to use Typo-Enumerator with Privoxy and TOR (--tor)<br>
-  Privoxy is used to prevent dns leakage ;)<br>
-  Please make sure the Privoxy config (/etc/privoxy/config) is set to something like:
- - listen-address   127.0.0.1:8118
- - forward-socks5 / 127.0.0.1:9150 .<br>
-  These are the standart ports for Privoxy and TOR<br>
-  If TOR is used, threads will be set to 2 in order to minimize errors
 * Version search for extensions is now more reliable
 
 ## Version 0.1.6
