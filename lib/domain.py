@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 #-------------------------------------------------------------------------------
 # Typo3Scan - Automatic Typo3 Enumeration Tool
-# Copyright (c) 2014-2020 Jan Rude
+# Copyright (c) 2014-2021 Jan Rude
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -20,7 +20,8 @@
 import re
 import string
 import random
-import sqlite3
+import hashlib
+import sqlite3, os.path
 from colorama import Fore, Style
 import lib.request as request
 from pkg_resources import parse_version
@@ -159,59 +160,51 @@ class Domain:
 
     def search_typo3_version(self):
         """
-        This methos will search for version information.
-            The exact version can be found in the ChangeLog, therefore it will be requested first.
-            Less specific version information can be found in the NEWS or INSTALL file. 
-        """           
-        files = {'typo3_src/composer.json': '(?:"typo3/cms-core":|"typo3/cms-backend":)\s?"([0-9]+\.[0-9]+\.?[0-9x]?[0-9x]?)"',
-                'typo3_src/public/typo3/sysext/install/composer.json': '(?:"typo3/cms-core":|"typo3/cms-backend":)\s?"([0-9]+\.[0-9]+\.?[0-9x]?[0-9x]?)"',
-                'typo3_src/typo3/sysext/adminpanel/composer.json': '(?:"typo3/cms-core":|"typo3/cms-backend":)\s?"([0-9]+\.[0-9]+\.?[0-9x]?[0-9x]?)"',
-                'typo3_src/typo3/sysext/backend/composer.json': '(?:"typo3/cms-core":|"typo3/cms-backend":)\s?"(\d{1,2}\.\d{1,2}\.?[0-9]?[0-9]?)"',
-                'typo3_src/typo3/sysext/info/composer.json': '(?:"typo3/cms-core":|"typo3/cms-backend":)\s?"(\d{1,2}\.\d{1,2}\.?[0-9]?[0-9]?)"',
-                'typo3_src/ChangeLog': '[Tt][Yy][Pp][Oo]3 (\d{1,2}\.\d{1,2}\.?[0-9]?[0-9]?)',
-                'ChangeLog': '[Tt][Yy][Pp][Oo]3 (\d{1,2}\.\d{1,2}\.?[0-9]?[0-9]?)',
-                'typo3/sysext/backend/ext_emconf.php': '(?:CMS |typo3_src-)(\d{1,2}\.\d{1,2}\.?[0-9]?[0-9]?)',
-                'typo3_src/typo3/sysext/install/Start/Install.php': '(?:CMS |typo3_src-)(\d{1,2}\.\d{1,2}\.?[0-9]?[0-9]?)',
-                'typo3/sysext/install/Start/Install.php': '(?:CMS |typo3_src-)(\d{1,2}\.\d{1,2}\.?[0-9]?[0-9]?)',
-                'typo3_src/NEWS.txt': 'http://wiki.typo3.org/TYPO3_(\d{1,2}\.\d{1,2})', 
-                'typo3_src/NEWS.md': '[Tt][Yy][Pp][Oo]3 [Cc][Mm][Ss] (\d{1,2}\.\d{1,2}) - WHAT\'S NEW',
-                'NEWS.txt': 'http://wiki.typo3.org/TYPO3_(\d{1,2}\.\d{1,2})',
-                'NEWS.md': '[Tt][Yy][Pp][Oo]3 [Cc][Mm][Ss] (\d{1,2}\.\d{1,2}) - WHAT\'S NEW',
-                'typo3_src/INSTALL.md': '(?:typo3_src-)(\d{1,2}\.\d{1,2}\.?[0-9x]?[0-9]?)',
-                'typo3_src/INSTALL.txt': '(?:typo3_src-)(\d{1,2}\.\d{1,2}\.?[0-9x]?[0-9]?)',
-                'INSTALL.md': '(?:typo3_src-)(\d{1,2}\.\d{1,2}\.?[0-9x]?[0-9]?)',
-                'INSTALL.txt': '(?:typo3_src-)(\d{1,2}\.\d{1,2}\.?[0-9x]?[0-9]?)'
-                }
-
+        This method will aggressively search for version information by comparing file hashes
+        """
         version = None
-        version_path = None
-        for path, regex in files.items():
-            response = request.version_information('{}/{}'.format(self.get_path(), path), regex)
-            if response and (version is None or (len(response) > len(version))):
-                version = response
-                version_path = path
+        paths = set()
+        hash_vers = dict()
+        database = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'typo3scan.db')
+        conn = sqlite3.connect(database)
+        c = conn.cursor()
+        c.execute('SELECT * FROM core_versions')
+        data = c.fetchall()
+
+        for entry in data:
+            paths.add(entry[1])
+            hash_vers[entry[0]] = entry[2]
+
+        for path in paths:
+            response = request.get_request('{}/{}'.format(self.get_path(), path))
+            if response and response['status_code'] == 200:
+                md5_hash = hashlib.md5()
+                md5_hash.update(response['html'].encode())
+                digest = md5_hash.hexdigest()
+                if digest in hash_vers:
+                    version = hash_vers[digest]
+                    if len(version) <= 4:
+                        continue
+                    else:
+                        break
 
         print('  | \n [+] Version Information')
         if version:
+            self.set_typo3_version(version)
             print('  \u251c Identified Version: '.ljust(28) + '{}'.format(Style.BRIGHT + Fore.GREEN + version + Style.RESET_ALL))
-            print('  \u251c Version File: '.ljust(28) + '{}{}'.format(self.get_path(), version_path))
-            if len(version) == 3:
+            if len(version) <= 4:
                 print('  \u251c Could not identify exact version.')
                 react = input('  \u251c Do you want to print all vulnerabilities for branch {}? (y/n): '.format(version))
                 if react.startswith('y'):
                     version = version + '.0'
                 else:
                     return False
-            self.set_typo3_version(version)
-            # sqlite stuff
-            conn = sqlite3.connect('lib/typo3scan.db')
-            c = conn.cursor()
             c.execute('SELECT advisory, vulnerability, subcomponent, affected_version_max, affected_version_min FROM core_vulns WHERE (?<=affected_version_max AND ?>=affected_version_min)', (version, version,))
             data = c.fetchall()
+            json_list = dict()
             if data:
-                json_list = {}
                 for vulnerability in data:
-                    # maybe instead use this: https://oraerr.com/database/sql/how-to-compare-version-string-x-y-z-in-mysql-2/
+                    # maybe instead use this: https://zxq9.com/archives/797
                     if parse_version(version) <= parse_version(vulnerability[3]):
                         json_list[vulnerability[0]] = {'Type': vulnerability[1], 'Subcomponent': vulnerability[2], 'Affected': '{} - {}'.format(vulnerability[3], vulnerability[4]), 'Advisory': 'https://typo3.org/security/advisory/{}'.format(vulnerability[0].lower())}
                 if json_list:
@@ -223,7 +216,7 @@ class Domain:
                         print('      \u251c Subcomponent:'.ljust(28) + json_list[vulnerability]['Subcomponent'])
                         print('      \u251c Affected Versions:'.ljust(28) + json_list[vulnerability]['Affected'])
                         print('      \u2514 Advisory URL:'.ljust(28) + json_list[vulnerability]['Advisory'] + '\n')
-                else:
-                    print('  \u2514 No Known Vulnerabilities')
+            if not json_list:
+                print('  \u2514 No Known Vulnerabilities')
         else:
             print('  \u2514', Fore.RED + 'Could not be determined.' + Fore.RESET)

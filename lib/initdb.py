@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 #-------------------------------------------------------------------------------
 # Typo3 Enumerator - Automatic Typo3 Enumeration Tool
-# Copyright (c) 2014-2020 Jan Rude
+# Copyright (c) 2014-2021 Jan Rude
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -33,6 +33,7 @@ class DB_Init:
             c.execute('''DROP TABLE IF EXISTS extensions''')
             c.execute('''DROP TABLE IF EXISTS extension_vulns''')
             c.execute('''DROP TABLE IF EXISTS core_vulns''')
+            c.execute('''DROP TABLE IF EXISTS core_versions''')
             c.execute('''DROP TABLE IF EXISTS UserAgents''')
             conn.commit()
 
@@ -47,6 +48,10 @@ class DB_Init:
             # Create table core_vulns
             c.execute('''CREATE TABLE IF NOT EXISTS core_vulns
                          (advisory text, vulnerability text, subcomponent text, affected_version_max text, affected_version_min text, cve text)''')
+
+            # Create table core_versions
+            c.execute('''CREATE TABLE IF NOT EXISTS core_versions
+                         (hash text, file text, version text)''')
 
             # Create table UserAgents
             c.execute('''CREATE TABLE IF NOT EXISTS UserAgents
@@ -77,6 +82,23 @@ class DB_Init:
             c.execute('INSERT INTO UserAgents VALUES (?)', ('Mozilla/5.0 (Macintosh; Intel Mac OS X 10_9_3) AppleWebKit/537.75.14 (KHTML, like Gecko) Version/7.0.3 Safari/7046A194A',))
             c.execute('INSERT INTO UserAgents VALUES (?)', ('Mozilla/5.0 (iPad; CPU OS 6_0 like Mac OS X) AppleWebKit/536.26 (KHTML, like Gecko) Version/6.0 Mobile/10A5355d Safari/8536.25',))
             c.execute('INSERT INTO UserAgents VALUES (?)', ('Mozilla/5.0 (Macintosh; Intel Mac OS X 10_6_8) AppleWebKit/537.13+ (KHTML, like Gecko) Version/5.1.7 Safari/534.57.2',))
+            conn.commit()
+
+            # add core_versions infos
+            c.execute('INSERT INTO core_versions VALUES (?,?,?)', ('e96f099821a3ff61b58ff583a8dac611', '/NEWS.txt', '4.0'))
+            c.execute('INSERT INTO core_versions VALUES (?,?,?)', ('f215556dc5952c7cd96a963259b1f846', '/NEWS.txt', '4.1'))
+            c.execute('INSERT INTO core_versions VALUES (?,?,?)', ('c24bb9fb057314e8281eb322ce2b933d', '/NEWS.txt', '4.2'))
+            c.execute('INSERT INTO core_versions VALUES (?,?,?)', ('8c2b17cc89a518ede434bb052bad04b8', '/typo3/cli_dispatch.phpsh', '4.2'))
+            c.execute('INSERT INTO core_versions VALUES (?,?,?)', ('8fafa862e9c9d40b8c441f08fea26bf2', '/NEWS.txt', '4.3'))
+            c.execute('INSERT INTO core_versions VALUES (?,?,?)', ('a960d13e6f65122e44972dce58d54efb', '/NEWS.txt', '4.4'))
+            c.execute('INSERT INTO core_versions VALUES (?,?,?)', ('1b99e5db8eb075025c905d1cb8fb9b59', '/typo3/sysext/em/res/js/em_repositorylist.js', '4.5'))
+            c.execute('INSERT INTO core_versions VALUES (?,?,?)', ('fb5304c15b5284e4d619b3efba7836d1', '/typo3/cli_dispatch.phpsh', '4.6'))
+            c.execute('INSERT INTO core_versions VALUES (?,?,?)', ('8cbf762a8445dd5374e018bcaa89f077', '/typo3/sysext/em/res/js/em_repositorylist.js', '4.6'))
+            c.execute('INSERT INTO core_versions VALUES (?,?,?)', ('6bf302fe9b4484ec740841aae4992898', '/typo3/sysext/em/res/js/em_repositorylist.js', '4.7'))
+            c.execute('INSERT INTO core_versions VALUES (?,?,?)', ('96eb884ba78b3da29ecec89fc7c71f57', '/typo3/cli_dispatch.phpsh', '6.0'))
+            c.execute('INSERT INTO core_versions VALUES (?,?,?)', ('890cda3f09ac47cc39ec0d1bb39c5979', '/typo3/cli_dispatch.phpsh', '6.1'))
+            c.execute('INSERT INTO core_versions VALUES (?,?,?)', ('fb6a9f8040b36f2218456bb9a98357d1', '/typo3/sysext/belog/composer.json', '7.6'))
+            c.execute('INSERT INTO core_versions VALUES (?,?,?)', ('e43e84c986975903fbae13e7912252ed', '/typo3/cli_dispatch.phpsh', '8.7'))
             conn.commit()
 
         except sqlite3.Error as e:
