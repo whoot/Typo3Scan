@@ -101,31 +101,6 @@ class Domain:
                 full_path = '{}/{}'.format(self.get_name(), path)            
         self.set_path(full_path)
 
-    def check_default_files(self):
-        """
-        This method requests different files, which are generated on installation.
-            Note: They are not accessible anymore on newer Typo3 installations
-        """
-        files = {'typo3_src/README.md':'TYPO3 CMS',
-                'typo3_src/README.txt':'TYPO3 CMS',
-                'typo3_src/INSTALL.md':'INSTALLING TYPO3',
-                'typo3_src/INSTALL.txt':'INSTALLING TYPO3',
-                'typo3_src/LICENSE.txt':'TYPO3',
-                'typo3_src/CONTRIBUTING.md':'TYPO3 CMS',
-                'typo3_src/composer.json':'TYPO3'
-            }
-        for path, regex in files.items():
-            try:
-                response = request.get_request('{}/{}'.format(self.get_path(), path))
-                regex = re.compile(regex)
-                searchInstallation = regex.search(response['html'])
-                installation = searchInstallation.groups()
-                self.set_typo3()
-                return True
-            except:
-                pass
-        return False
-
     def check_404(self):
         """
         This method requests a site which is not available by using a random generated string.

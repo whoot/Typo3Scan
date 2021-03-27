@@ -68,9 +68,8 @@ class Typo3:
             for domain in self.__domain_list:
                 print(Fore.CYAN + Style.BRIGHT + '\n\n[ Checking {} ]\n'.format(domain) + '-'* 73  + Fore.RESET + Style.RESET_ALL)
                 check = Domain(domain)
-                check.check_root()
-                default_files = check.check_default_files()
-                if not default_files:
+                root = check.check_root()
+                if not root:
                     check_404 = check.check_404()
                 if not check.is_typo3() and args.force is False:
                     print(Fore.RED + '\n[x] It seems that Typo3 is not used on this domain\n' + Fore.RESET)
