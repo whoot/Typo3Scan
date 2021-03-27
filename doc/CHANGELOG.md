@@ -1,3 +1,7 @@
+## Version 0.7.1
+
+* Added version detection for Typo3 versions <=11.1.1
+
 ## Version 0.7
 
 * Enhanced version detection
