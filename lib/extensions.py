@@ -19,6 +19,7 @@
 #-------------------------------------------------------------------------------
 
 import sqlite3
+import os.path
 from colorama import Fore, Style
 import lib.request as request
 from lib.thread_pool import ThreadPool
@@ -28,10 +29,11 @@ class Extensions:
     """
     Extension class
     """
-    def __init__(self):
-        pass
+    def __init__(self, threads):
+        self.__threads = threads
+        self.__database = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'typo3scan.db')
 
-    def search_extension(self, domain, extensions, threads):
+    def search_extension(self, domain, extensions):
         """
             This method loads the extensions from the database and searches for installed extensions.
                 /typo3conf/ext/:        Local installation path. This is where extensions usually get installed.
@@ -42,7 +44,7 @@ class Extensions:
         for ext in extensions:
             thread_pool.add_job((request.head_request, ('{}/typo3conf/ext/{}/'.format(domain, ext))))
             thread_pool.add_job((request.head_request, ('{}/typo3/sysext/{}/'.format(domain, ext))))
-        thread_pool.start(threads)
+        thread_pool.start(self.__threads)
 
         for installed_extension in thread_pool.get_result():
             name = installed_extension[1][:-1]
@@ -50,7 +52,7 @@ class Extensions:
             found_extensions[name] = {'url':installed_extension[1], 'version': None, 'file': None}
         return found_extensions
 
-    def search_ext_version(self, found_extensions, threads):
+    def search_ext_version(self, found_extensions):
         """
             This method adds a job for every installed extension.
             The goal is to find a file with version information.
@@ -71,7 +73,7 @@ class Extensions:
             thread_pool.add_job((request.version_information, (values['url'] + 'CHANGELOG.md', None)))
             thread_pool.add_job((request.version_information, (values['url'] + 'ChangeLog.txt', None)))
         
-        thread_pool.start(threads, version_search=True)
+        thread_pool.start(self.__threads, version_search=True)
 
         for version_path in thread_pool.get_result():
             path = version_path[0][0]
@@ -87,12 +89,12 @@ class Extensions:
         return found_extensions
 
 
-    def output(self, extension_dict, database):
-        conn = sqlite3.connect(database)
+    def output(self, extension_dict):
+        conn = sqlite3.connect(self.__database)
         c = conn.cursor()
         print('\n\n [+] Extension Information')
         print(' -------------------------')
-        json_list = {}
+        json_list = []
         for extension,info in extension_dict.items():
             c.execute('SELECT title,version,state FROM extensions where extensionkey=?', (extension,))
             data = c.fetchone()
@@ -107,9 +109,10 @@ class Extensions:
             	print('   \u251c Current Version: '.ljust(28) + '{} ({})'.format(data[1], Fore.RED + data[2] + Style.RESET_ALL))
             else:
             	print('   \u251c Current Version: '.ljust(28) + '{} ({})'.format(data[1], data[2]))
-            json_list[extension] = {'Title': data[0], 'Repo': 'https://extensions.typo3.org/extension/{}'.format(extension), 'Current': '{} ({})'.format(data[1], data[2]), 'Version': '', 'Vulnerabilities':''}
+            entry = {'Name': extension, 'Title': data[0], 'Repo': 'https://extensions.typo3.org/extension/{}'.format(extension), 'Current': '{} ({})'.format(data[1], data[2]), 'Url': info['url'], 'Version': 'unknown', 'Version File': 'not found', 'Vulnerabilities':[]}
             if info['version']:
-                json_list[extension].update(Version = info['version'])
+                entry.update({'Version': info['version']})
+                entry.update({'Version File': info['file']})
                 c.execute('SELECT advisory, vulnerability, affected_version_max, affected_version_min FROM extension_vulns WHERE (extensionkey=? AND ?<=affected_version_max AND ?>=affected_version_min)', (extension, info['version'], info['version'],))
                 data = c.fetchall()
                 print('   \u251c Identified Version: '.ljust(28) + '{}'.format(Style.BRIGHT + Fore.GREEN + info['version'] + Style.RESET_ALL))
@@ -121,9 +124,9 @@ class Extensions:
                             vuln_list.append(Style.BRIGHT + '     [!] {}'.format(Fore.RED + vulnerability[0] + Style.RESET_ALL))
                             vuln_list.append('      \u251c Vulnerability Type: '.ljust(28) + vulnerability[1])
                             vuln_list.append('      \u251c Affected Versions: '.ljust(28) + '{} - {}'.format(vulnerability[2], vulnerability[3]))
-                            vuln_list.append('      \u2514 Advisory URL:'.ljust(28) + 'https://typo3.org/security/advisory/{}\n'.format(vulnerability[0].lower()))
+                            vuln_list.append('      \u2514 Advisory Url:'.ljust(28) + 'https://typo3.org/security/advisory/{}\n'.format(vulnerability[0].lower()))
                             vuln[vulnerability[0]] = {'Type': vulnerability[1], 'Affected': '{} - {}'.format(vulnerability[2], vulnerability[3]), 'Advisory': 'https://typo3.org/security/advisory/{}'.format(vulnerability[0].lower())}
-                    json_list[extension].update(Vulnerabilities = vuln)
+                    entry.update({'Vulnerabilities': vuln})
                 if vuln_list:
                     print('   \u251c Version File: '.ljust(28) + '{}'.format(info['file']))
                     print('   \u2514 Known Vulnerabilities:\n')
@@ -134,5 +137,6 @@ class Extensions:
             else:
                 print('   \u2514 Identified Version: '.ljust(28) + '-unknown-')
             print()
+            json_list.append(entry)
         conn.close()
         return json_list

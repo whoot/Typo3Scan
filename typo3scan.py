@@ -18,7 +18,7 @@
 # along with this program. If not, see [http://www.gnu.org/licenses/](http://www.gnu.org/licenses/)
 #-------------------------------------------------------------------------------
 
-__version__ = '0.7.1'
+__version__ = '0.7.2'
 __program__ = 'Typo3Scan'
 __description__ = 'Automatic Typo3 enumeration tool'
 __author__ = 'https://github.com/whoot'
@@ -35,43 +35,44 @@ from colorama import Fore, init, deinit, Style
 init(strip=False)
 
 class Typo3:
-    def __init__(self):
-        self.__domain_list = []
-        self.__path = os.path.dirname(os.path.abspath(__file__))
+    def __init__(self, domain_list, threads, timeout, cookie, basic_auth, user_agent, args_json, force, vuln):
+        self.__database = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'lib', 'typo3scan.db')
+        self.__config = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'lib', 'config.json')
         self.__extensions = []
-
-    def run(self):
-        database = os.path.join(self.__path, 'lib', 'typo3scan.db')
-        if (args.user_agent):
-            user_agent = args.user_agent
-        else:
-            conn = sqlite3.connect(database)
+        self.__domain_list = domain_list
+        self.__threads = threads
+        self.__timeout = timeout
+        self.__json = args_json
+        self.__json_log = {}
+        self.__force = force
+        self.__vuln = vuln
+        if not user_agent:
+            conn = sqlite3.connect(self.__database)
             c = conn.cursor()       
             c.execute('SELECT * FROM UserAgents ORDER BY RANDOM() LIMIT 1;')
             user_agent = c.fetchone()[0]
             c.close()
-        config = {'threads': args.threads, 'timeout': args.timeout, 'cookie': args.cookie, 'auth': args.auth, 'User-Agent': user_agent}
-        json.dump(config, open(os.path.join(self.__path, 'lib', 'config.json'), 'w'))
-        try:
-            if args.domain:
-                for dom in args.domain:
-                    self.__domain_list.append(dom)
-            elif args.file:
-                if not os.path.isfile(args.file):
-                    print(Fore.RED + '\n[x] File not found: {}\n |  Aborting...'.format(args.file) + Fore.RESET)
-                    sys.exit(-1)
-                else:
-                    with open(args.file, 'r') as f:
-                        for line in f:
-                            self.__domain_list.append(line.strip())
+        self.__custom_headers = {'User-Agent' : user_agent}
+        if cookie:
+            name = cookie.split('=')[0]
+            value = cookie.split('=')[1]
+            self.__custom_headers[name] = value
+        self.__basic_auth = False
+        if basic_auth:
+            self.__basic_auth = (basic_auth.split(':')[0], basic_auth.split(':')[1])
 
+        #config = {'threads': threads, 'timeout': timeout, 'cookie': cookie, 'auth': basic_auth, 'User-Agent': user_agent}
+        #json.dump(config, open(self.__config, 'w'))
+
+    def run(self):
+        try:
             for domain in self.__domain_list:
                 print(Fore.CYAN + Style.BRIGHT + '\n\n[ Checking {} ]\n'.format(domain) + '-'* 73  + Fore.RESET + Style.RESET_ALL)
                 check = Domain(domain)
                 root = check.check_root()
                 if not root:
                     check_404 = check.check_404()
-                if not check.is_typo3() and args.force is False:
+                if not check.is_typo3() and self.__force is False:
                     print(Fore.RED + '\n[x] It seems that Typo3 is not used on this domain\n' + Fore.RESET)
                 else:
                     # check for typo3 information
@@ -83,9 +84,9 @@ class Typo3:
                     # Search extensions
                     print('\n [+] Extension Search')
                     if not self.__extensions:
-                        conn = sqlite3.connect(database)
+                        conn = sqlite3.connect(self.__database)
                         c = conn.cursor()
-                        if args.vuln:
+                        if self.__vuln:
                             for row in c.execute('SELECT extensionkey FROM extension_vulns'):
                                 self.__extensions.append(row[0])
                             self.__extensions = set(self.__extensions)
@@ -94,19 +95,19 @@ class Typo3:
                                 self.__extensions.append(row[0])
                         conn.close()
                     print ('  \u251c Brute-Forcing {} Extensions'.format(len(self.__extensions)))
-                    extensions = Extensions()
-                    ext_list = extensions.search_extension(check.get_path(), self.__extensions, args.threads)
+                    extensions = Extensions(self.__threads)
+                    ext_list = extensions.search_extension(check.get_path(), self.__extensions)
+                    json_ext = []
                     if ext_list:
                         print ('\n  \u251c Found {} extensions'.format(len(ext_list)))
                         print ('  \u251c Brute-Forcing Version Information'.format(len(self.__extensions)))
-                        ext_list = extensions.search_ext_version(ext_list, args.threads)
-                        json_ext = extensions.output(ext_list, database)
+                        ext_list = extensions.search_ext_version(ext_list)
+                        json_ext = extensions.output(ext_list)
                     else:
                         print ('\n [!] No extensions found.\n')
-                    if args.json:
-                        json_log = {}
-                        json_log[check.get_name()] = {'Backend': check.get_backend(), 'Version': check.get_typo3_version(), 'Vulnerabilities':check.get_typo3_vulns(), 'Extensions': json_ext}
-                        json.dump(json_log, open('typo3scan.json', 'w'))
+                    self.__json_log[domain] = {'Backend': check.get_backend(), 'Version': check.get_typo3_version(), 'Vulnerabilities':check.get_typo3_vulns(), 'Extensions': json_ext}
+            if self.__json:
+                json.dump(self.__json_log, open('typo3scan.json', 'w'))
         except KeyboardInterrupt:
             print('\nReceived keyboard interrupt.\nQuitting...')
             exit(-1)
@@ -182,11 +183,11 @@ Options:
     parser.add_argument('--force', dest='force', action='store_true')
     parser.add_argument('--vuln', dest='vuln', action='store_true')
     parser.add_argument('--threads', dest='threads', type=int, default=5)
-    parser.add_argument('--auth', dest='auth', type=str, default='')
+    parser.add_argument('--auth', dest='basic_auth', type=str, default='')
     parser.add_argument('--cookie', dest='cookie', type=str, default='')
     parser.add_argument('--agent', dest='user_agent', type=str, default='')
     parser.add_argument('--timeout', dest='timeout', type=int, default=10)
-    parser.add_argument('--json', dest='json', action='store_true')
+    parser.add_argument('--json', dest='json', action='store_true', default=False)
     help.add_argument( '-h', '--help', action='store_true')
     args = parser.parse_args()
 
@@ -260,5 +261,19 @@ Options:
     else:
         if args.force:
            print('\n' + Fore.RED + Style.BRIGHT + '!! FORCE MODE ENABLED: expect false positives !!'.center(73) + Style.RESET_ALL)
-        main = Typo3()
+        
+        domain_list = list()
+        if args.domain:
+            for dom in args.domain:
+                domain_list.append(dom)
+        elif args.file:
+            if not os.path.isfile(args.file):
+                print(Fore.RED + '\n[x] File not found: {}\n |  Aborting...'.format(args.file) + Fore.RESET)
+                sys.exit(-1)
+            else:
+                with open(args.file, 'r') as f:
+                    for line in f:
+                        domain_list.append(line.strip())
+
+        main = Typo3(domain_list, args.threads, args.timeout, args.cookie, args.basic_auth, args.user_agent, args.json, args.force, args.vuln)
         main.run()

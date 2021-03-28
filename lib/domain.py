@@ -46,7 +46,7 @@ class Domain:
         self.__typo3 = False
         self.__backend = 'Could not be found'
         self.__typo3_version = 'Unknown'
-        self.__typo3_vulnerabilities = ''
+        self.__typo3_vulnerabilities = []
         self.__installed_extensions = {'installed': 0}
         
     def get_name(self):
@@ -176,21 +176,21 @@ class Domain:
                     return False
             c.execute('SELECT advisory, vulnerability, subcomponent, affected_version_max, affected_version_min FROM core_vulns WHERE (?<=affected_version_max AND ?>=affected_version_min)', (version, version,))
             data = c.fetchall()
-            json_list = dict()
+            json_list = []
             if data:
                 for vulnerability in data:
                     # maybe instead use this: https://zxq9.com/archives/797
                     if parse_version(version) <= parse_version(vulnerability[3]):
-                        json_list[vulnerability[0]] = {'Type': vulnerability[1], 'Subcomponent': vulnerability[2], 'Affected': '{} - {}'.format(vulnerability[3], vulnerability[4]), 'Advisory': 'https://typo3.org/security/advisory/{}'.format(vulnerability[0].lower())}
+                        json_list.append({'Advisory': vulnerability[0], 'Type': vulnerability[1], 'Subcomponent': vulnerability[2], 'Affected': '{} - {}'.format(vulnerability[3], vulnerability[4]), 'Advisory URL': 'https://typo3.org/security/advisory/{}'.format(vulnerability[0].lower())})
                 if json_list:
                     self.set_typo3_vulns(json_list)
                     print('  \u2514 Known Vulnerabilities:\n')
-                    for vulnerability in json_list.keys():
-                        print(Style.BRIGHT + '     [!] {}'.format(Fore.RED + vulnerability + Style.RESET_ALL))
-                        print('      \u251c Vulnerability Type:'.ljust(28) + json_list[vulnerability]['Type'])
-                        print('      \u251c Subcomponent:'.ljust(28) + json_list[vulnerability]['Subcomponent'])
-                        print('      \u251c Affected Versions:'.ljust(28) + json_list[vulnerability]['Affected'])
-                        print('      \u2514 Advisory URL:'.ljust(28) + json_list[vulnerability]['Advisory'] + '\n')
+                    for vulnerability in json_list:
+                        print(Style.BRIGHT + '     [!] {}'.format(Fore.RED + vulnerability['Advisory'] + Style.RESET_ALL))
+                        print('      \u251c Vulnerability Type:'.ljust(28) + vulnerability['Type'])
+                        print('      \u251c Subcomponent:'.ljust(28) + vulnerability['Subcomponent'])
+                        print('      \u251c Affected Versions:'.ljust(28) + vulnerability['Affected'])
+                        print('      \u2514 Advisory URL:'.ljust(28) + vulnerability['Advisory URL'] + '\n')
             if not json_list:
                 print('  \u2514 No Known Vulnerabilities')
         else:
