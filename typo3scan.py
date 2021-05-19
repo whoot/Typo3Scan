@@ -61,8 +61,8 @@ class Typo3:
         if basic_auth:
             self.__basic_auth = (basic_auth.split(':')[0], basic_auth.split(':')[1])
 
-        #config = {'threads': threads, 'timeout': timeout, 'cookie': cookie, 'auth': basic_auth, 'User-Agent': user_agent}
-        #json.dump(config, open(self.__config, 'w'))
+        config = {'threads': threads, 'timeout': timeout, 'cookie': cookie, 'auth': basic_auth, 'User-Agent': user_agent}
+        json.dump(config, open(self.__config, 'w'))
 
     def run(self):
         try:
