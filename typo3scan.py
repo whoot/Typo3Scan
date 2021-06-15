@@ -35,7 +35,7 @@ from colorama import Fore, init, deinit, Style
 init(strip=False)
 
 class Typo3:
-    def __init__(self, domain_list, threads, timeout, cookie, basic_auth, user_agent, args_json, force, vuln):
+    def __init__(self, domain_list, threads, timeout, cookie, basic_auth, user_agent, args_json, force, vuln, no_interaction):
         self.__database = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'lib', 'typo3scan.db')
         self.__config = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'lib', 'config.json')
         self.__extensions = []
@@ -46,6 +46,7 @@ class Typo3:
         self.__json_log = {}
         self.__force = force
         self.__vuln = vuln
+        self.__no_interaction = no_interaction
         if not user_agent:
             conn = sqlite3.connect(self.__database)
             c = conn.cursor()       
@@ -68,12 +69,13 @@ class Typo3:
         try:
             for domain in self.__domain_list:
                 print(Fore.CYAN + Style.BRIGHT + '\n\n[ Checking {} ]\n'.format(domain) + '-'* 73  + Fore.RESET + Style.RESET_ALL)
-                check = Domain(domain)
+                check = Domain(domain, self.__no_interaction)
                 root = check.check_root()
                 if not root:
                     check_404 = check.check_404()
                 if not check.is_typo3() and self.__force is False:
                     print(Fore.RED + '\n[x] It seems that Typo3 is not used on this domain\n' + Fore.RESET)
+
                 else:
                     # check for typo3 information
                     print('\n [+] Core Information')
@@ -164,6 +166,8 @@ Options:
 
     --force             Force enumeration
 
+    --no-interaction    Do not ask any interactive question
+
   General:
     -u | --update       Update the database.
     -r | --reset        Reset the database.
@@ -188,6 +192,8 @@ Options:
     parser.add_argument('--agent', dest='user_agent', type=str, default='')
     parser.add_argument('--timeout', dest='timeout', type=int, default=10)
     parser.add_argument('--json', dest='json', action='store_true', default=False)
+    parser.add_argument('--no-interaction', dest='no_interaction', action='store_true')
+    
     help.add_argument( '-h', '--help', action='store_true')
     args = parser.parse_args()
 
@@ -275,5 +281,5 @@ Options:
                     for line in f:
                         domain_list.append(line.strip())
 
-        main = Typo3(domain_list, args.threads, args.timeout, args.cookie, args.basic_auth, args.user_agent, args.json, args.force, args.vuln)
+        main = Typo3(domain_list, args.threads, args.timeout, args.cookie, args.basic_auth, args.user_agent, args.json, args.force, args.vuln, args.no_interaction)
         main.run()

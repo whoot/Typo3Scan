@@ -37,7 +37,7 @@ class Domain:
         typo3_vulnerabilities:  List of known CORE vulnerabilities
         installed_extensions:   List of all installed extensions
     """
-    def __init__(self, name):
+    def __init__(self, name, no_interaction):
         if not ('http' in name):
             self.__name = 'https://' + name
         else:
@@ -48,6 +48,7 @@ class Domain:
         self.__typo3_version = 'Unknown'
         self.__typo3_vulnerabilities = []
         self.__installed_extensions = {'installed': 0}
+        self.__no_interaction = no_interaction
         
     def get_name(self):
         return self.__name
@@ -169,7 +170,7 @@ class Domain:
             print('  \u251c Identified Version: '.ljust(28) + '{}'.format(Style.BRIGHT + Fore.GREEN + version + Style.RESET_ALL))
             if len(version) <= 4:
                 print('  \u251c Could not identify exact version.')
-                react = input('  \u251c Do you want to print all vulnerabilities for branch {}? (y/n): '.format(version))
+                react = input('  \u251c Do you want to print all vulnerabilities for branch {}? (y/n): '.format(version)) if not self.__no_interaction else 'y'
                 if react.startswith('y'):
                     version = version + '.0'
                 else:
