@@ -13,7 +13,7 @@ Typo3Scan is intended to be used for legal security purposes only, and you shoul
 
 You can download the latest tarball by clicking [here](https://github.com/whoot/Typo3Scan/tarball/master) or latest zipball by clicking  [here](https://github.com/whoot/Typo3Scan/zipball/master).
 
-Preferably, you can download Type3Scan by cloning the repository:
+Preferably, you can download Typo3Scan by cloning the repository:
 
     git clone https://github.com/whoot/Typo3Scan.git
 
