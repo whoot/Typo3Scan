@@ -39,7 +39,7 @@ class DB_Init:
 
             # Create table extensions
             c.execute('''CREATE TABLE IF NOT EXISTS extensions
-                         (title text, extensionkey text PRIMARY KEY, description text, version text, state text)''')
+                         (extensionkey text PRIMARY KEY, title text, description text, version text, state text)''')
 
             # Create table extension_vulns
             c.execute('''CREATE TABLE IF NOT EXISTS extension_vulns

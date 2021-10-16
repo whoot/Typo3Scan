@@ -1,3 +1,7 @@
+## Version 0.7.3
+
+* Improve database update of extensions
+
 ## Version 0.7.2
 
 * JSON output fix
@@ -48,7 +52,7 @@
 * Rename to Typo3Scan
 * Code cleanup
 * Many improvements
-* Using Database to store extensions, version info and vulnerabilities (Core and Extensions)
+* Using database to store extensions, version info and vulnerabilities (Core and Extensions)
 * TOR support dropped
 * *--top* parameter support dropped. Can not be used anymore, because download counter is not used anymore.
   Instead *--vuln* parameter can be used to check for extensions with known vulnerabilities.
@@ -74,7 +78,7 @@
 
 ## Version 0.4.4
 
-* Added support for Typo3 version 8
+* Added support for Typo3 v8
 * Clean-up
 * Updated extension download URL
 
@@ -103,9 +107,9 @@
 * Using Python 3 now!
 * Using classes and objects
 * Better searching algorithm
-* Better threading (fixed local network DOS when cheking a lot of extensions)
+* Better threading (fixed local network DOS when checking a lot of extensions)
 * Clearer output
-* Version search for extensions is unreliable and not used atm. Isead a link to the changelog/readme will be given
+* Version search for extensions is unreliable and not used atm. Instead a link to the changelog/readme will be given
 * Used threads are now always 6
 
 ## Version 0.3.3
@@ -139,10 +143,7 @@
 ## Version 0.2.1
 
 * Fixed some bugs
-* It is now possible to specifiy threads.<br>
-  Default is 10.<br>
-  I strongly recommend to use only 2 or even 1 thread when using TOR!<br>
-  This is because TOR is (extremely) slow and will produce connection errors if too many threads are used.
+* It is now possible to specifiy threads.
 
 ## Version 0.2
 

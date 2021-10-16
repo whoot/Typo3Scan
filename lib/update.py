@@ -200,11 +200,14 @@ class Update:
         tree = ElementTree.parse('extensions.xml') 
         root = tree.getroot()
 
+        c.execute('''DROP TABLE IF EXISTS extensions''')
+        c.execute('''CREATE TABLE IF NOT EXISTS extensions (extensionkey text PRIMARY KEY, title text, description text, version text, state text)''')
+
         # for every extension get:
         #     title, extensionkey, description, version, state
         for extensions in root:
+            extensionkey = extensions.get('extensionkey').lower()
             title = extensions[1][0].text
-            extensionkey = extensions.get('extensionkey')
             description = extensions[1][1].text
             version = '0.0.0'
             state = ''
@@ -213,12 +216,18 @@ class Update:
             for extension in extensions.iter('version'):
                 if not(extension.attrib['version'] == ''):
                     try:
-                        if parse_version((extension.attrib['version']).split('-')[0]) > parse_version(version):
+                        temp_ver=((extension.attrib['version']).split('-')[0]).strip()
+                        if parse_version(temp_ver) > parse_version(version):
+                            title = (extension.find('title')).text
+                            description = (extension.find('description')).text
                             version = extension.attrib['version']
-                            state = (extension.find('state')).text
+                            if (extension.find('ownerusername')).text == 'abandoned_extensions':
+                                state = 'obsolete'
+                            else:
+                                state = (extension.find('state')).text
                     except ValueError:
                         pass
-            c.execute('INSERT OR REPLACE INTO extensions VALUES (?,?,?,?,?)', (title, extensionkey, description, version, state))
+            c.execute('INSERT OR REPLACE INTO extensions VALUES (?,?,?,?,?)', (extensionkey, title, description, version, state))
 
         conn.commit()
         os.remove('extensions.xml.gz')
