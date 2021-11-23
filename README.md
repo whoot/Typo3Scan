@@ -1,9 +1,9 @@
 # Typo3Scan
 
-Typo3Scan is an open source penetration testing tool that I wrote to automate the process of detecting the [Typo3](https://typo3.org) CMS and it's installed [extensions](https://extensions.typo3.org/).
-It also has a database with known vulnerabilities for core and extensions. 
+Typo3Scan is an open source penetration testing tool that I wrote to automate the process of detecting the [Typo3 CMS](https://typo3.org) version and its installed [extensions](https://extensions.typo3.org/).\
+Useful parts of the official [security advisories](https://typo3.org/help/security-advisories) are stored in a database and compared with the identified versions. If vulnerabilities are known for the version in use, the corresponding advisory is displayed.
 
-Typo3Scan does not exploit vulnerabilities! It´s soley purpose was to enumerate version info and installed extensions in penetration tests ever since.
+Typo3Scan does not exploit vulnerabilities! Its soley purpose was to enumerate version info and installed extensions in penetration tests ever since.
 
 **Disclaimer**\
 Typo3Scan is intended to be used for legal security purposes only, and you should only use it to test websites you own or have permission to test. Any other use is not the responsibility of the developer(s). Be sure that you understand and are complying with the laws in your area. In other words, don't be stupid, don't be an asshole, and use this tool responsibly and legally.
@@ -31,7 +31,7 @@ To get a list of all options use:
 
 Example:
 
-	python3 typo3scan.py -d http://dev001.vm-typo3.loc --vuln
+    python3 typo3scan.py -d http://dev001.vm-typo3.loc --vuln
 
 <img src="./doc/core_vulns.jpg" width="450">
 <img src="./doc/ext_vulns.jpg" width="450">
