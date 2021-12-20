@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 #-------------------------------------------------------------------------------
 # Typo3 Enumerator - Automatic Typo3 Enumeration Tool
-# Copyright (c) 2014-2021 Jan Rude
+# Copyright (c) 2014-2022 Jan Rude
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -103,14 +103,11 @@ def _work_function(job_q, result_q, version_search):
 		function = job[0]
 		args = job[1]
 		try:
-			if version_search:
-				result = function(*args)
-			else:
-				result = function(args)
+			result = function(*args)
 			if not version_search and (result == '403' or result == '200'):
 				result_q.put((job))
 			elif version_search and result:
-				result_q.put((args, result))
+				result_q.put((args[0], result))
 		except Exception as e:
 			print(e)
 		finally:

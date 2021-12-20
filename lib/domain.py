@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 #-------------------------------------------------------------------------------
 # Typo3Scan - Automatic Typo3 Enumeration Tool
-# Copyright (c) 2014-2021 Jan Rude
+# Copyright (c) 2014-2022 Jan Rude
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -37,18 +37,20 @@ class Domain:
         typo3_vulnerabilities:  List of known CORE vulnerabilities
         installed_extensions:   List of all installed extensions
     """
-    def __init__(self, name, no_interaction):
+    def __init__(self, name, config):
         if not ('http' in name):
             self.__name = 'https://' + name
         else:
             self.__name = name
+        if (name.endswith('/')):
+            self.__name = name[:-1]
         self.__path = ''
         self.__typo3 = False
         self.__backend = 'Could not be found'
         self.__typo3_version = 'Unknown'
         self.__typo3_vulnerabilities = []
         self.__installed_extensions = {'installed': 0}
-        self.__no_interaction = no_interaction
+        self.__config = config
         
     def get_name(self):
         return self.__name
@@ -94,7 +96,7 @@ class Domain:
             in order to determine the Typo3 installation path.
         """
         full_path = self.get_name()
-        response = request.get_request('{}'.format(self.get_name()))
+        response = request.get_request('{}'.format(self.get_name()), self.__config)
         if re.search('powered by TYPO3', response['html']):
             self.set_typo3()
             path = re.search('="(?:{})/?(\S*?)/?(?:typo3temp|typo3conf)/'.format(self.get_name()), response['html'])
@@ -109,7 +111,7 @@ class Domain:
             which can be used as an indicator.
         """
         random_string = ''.join(random.choice(string.ascii_lowercase) for i in range(10))
-        response = request.get_request('{}/{}'.format(self.get_path(), random_string))
+        response = request.get_request('{}/{}'.format(self.get_path(), random_string), self.__config)
         search404 = re.search('[Tt][Yy][Pp][Oo]3 CMS', response['html'])
         if search404:
             self.set_typo3()
@@ -121,8 +123,7 @@ class Domain:
             If the access is forbidden (403), extension search is still possible.
         """
         print(' [+] Backend Login')
-        # maybe /typo3_src/typo3/index.php too?
-        response = request.get_request('{}/typo3/index.php'.format(self.get_path()))
+        response = request.get_request('{}/typo3/index.php'.format(self.get_path()), self.__config)
         searchTitle = re.search('<title>(.*)</title>', response['html'])
         if searchTitle and 'Login' in searchTitle.group(0):
             print('  \u251c {}'.format(Fore.GREEN + '{}/typo3/index.php'.format(self.get_path()) + Fore.RESET))
@@ -152,7 +153,7 @@ class Domain:
             hash_vers[entry[0]] = entry[2]
 
         for path in paths:
-            response = request.get_request('{}/{}'.format(self.get_path(), path))
+            response = request.get_request('{}{}'.format(self.get_path(), path), self.__config)
             if response and response['status_code'] == 200:
                 md5_hash = hashlib.md5()
                 md5_hash.update(response['html'].encode())
@@ -170,7 +171,7 @@ class Domain:
             print('  \u251c Identified Version: '.ljust(28) + '{}'.format(Style.BRIGHT + Fore.GREEN + version + Style.RESET_ALL))
             if len(version) <= 4:
                 print('  \u251c Could not identify exact version.')
-                react = input('  \u251c Do you want to print all vulnerabilities for branch {}? (y/n): '.format(version)) if not self.__no_interaction else 'y'
+                react = input('  \u251c Do you want to print all vulnerabilities for branch {}? (y/n): '.format(version)) if not self.__config['no_interaction'] else 'y'
                 if react.startswith('y'):
                     version = version + '.0'
                 else:

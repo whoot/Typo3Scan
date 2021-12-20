@@ -1,3 +1,10 @@
+## Version 1.0
+
+* Correctly assigning the state for all obsolete extensions
+* Adjust version search for extensions
+* Small cosmetic changes
+* Remove config file
+
 ## Version 0.7.3
 
 * Improve database update of extensions

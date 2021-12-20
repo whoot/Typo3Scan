@@ -31,10 +31,9 @@ To get a list of all options use:
 
 Example:
 
-    python3 typo3scan.py -d http://dev001.vm-typo3.loc --vuln
+    python3 typo3scan.py -d http://dev01.vm-typo3.loc/ --vuln
 
-<img src="./doc/core_vulns.jpg" width="450">
-<img src="./doc/ext_vulns.jpg" width="450">
+<img src="./doc/Typo3Scan.png" width="450">
 
 ## Bug Reporting / Support
 
@@ -55,7 +54,7 @@ I´m developing this in my spare time. If you like my work, please consider supp
 
 Typo3Scan - Automatic Typo3 Enumeration Tool
 
-Copyright (c) 2015-2021 Jan Rude
+Copyright (c) 2015-2022 Jan Rude
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by

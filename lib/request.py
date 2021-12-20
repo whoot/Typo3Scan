@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 #-------------------------------------------------------------------------------
 # Typo3 Enumerator - Automatic Typo3 Enumeration Tool
-# Copyright (c) 2014-2021 Jan Rude
+# Copyright (c) 2014-2022 Jan Rude
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -26,7 +26,7 @@ from colorama import Fore
 from requests.packages.urllib3.exceptions import InsecureRequestWarning
 requests.packages.urllib3.disable_warnings(InsecureRequestWarning)
 
-def get_request(url):
+def get_request(url, config):
     """
     All GET requests are done in this method.
         This method is not used, when searching for extensions and their version info
@@ -35,21 +35,12 @@ def get_request(url):
             Connection error
             anything else
     """
-    config = json.load(open(os.path.join(os.path.dirname(os.path.abspath(__file__)), 'config.json')))
-    timeout = config['timeout']
-    auth = config['auth']
-    cookie = config['cookie']
-    custom_headers = {'User-Agent' : config['User-Agent']}
     try:
-        if cookie != '':
-            name = cookie.split('=')[0]
-            value = cookie.split('=')[1]
-            custom_headers[name] = value
         response = {}
-        if auth != '':
-            r = requests.get(url, timeout=config['timeout'], headers=custom_headers, auth=(auth.split(':')[0], auth.split(':')[1]), verify=False)
+        if config['auth']:
+            r = requests.get(url, timeout=config['timeout'], headers=config['headers'], auth=(config['auth'][0], config['auth'][1]), verify=False)
         else:
-            r = requests.get(url, timeout=config['timeout'], headers=custom_headers, verify=False)
+            r = requests.get(url, timeout=config['timeout'], headers=config['headers'], cookies=config['cookies'], verify=False)
         response['status_code'] = r.status_code
         response['html'] = r.text
         response['headers'] = r.headers
@@ -63,41 +54,31 @@ def get_request(url):
     except requests.exceptions.RequestException as e:
         print(Fore.RED + str(e) + Fore.RESET)
 
-def head_request(url):
+def head_request(url, config):
     """
     All HEAD requests are done in this method.
-        HEAD requests are used when searching for extensions and their version info
+        HEAD requests are used when searching for extensions
         There are three error types which can occur:
             Connection timeout
             Connection error
             anything else
     """
-    
-    config = json.load(open(os.path.join(os.path.dirname(os.path.abspath(__file__)), 'config.json')))
-    timeout = config['timeout']
-    auth = config['auth']
-    cookie = config['cookie']
-    custom_headers = {'User-Agent' : config['User-Agent']}
     try:
-        if cookie != '':
-            name = cookie.split('=')[0]
-            value = cookie.split('=')[1]
-            custom_headers[name] = value
-        if auth != '':
-            r = requests.head(url, timeout=config['timeout'], headers=custom_headers, auth=(auth.split(':')[0], auth.split(':')[1]), verify=False)
+        if config['auth']:
+            r = requests.head(url, timeout=config['timeout'], headers=config['headers'], auth=(config['auth'][0], config['auth'][1]), allow_redirects=False, verify=False)
         else:
-            r = requests.head(url, timeout=config['timeout'], headers=custom_headers, allow_redirects=False, verify=False)
+            r = requests.head(url, timeout=config['timeout'], headers=config['headers'], cookies=config['cookies'], allow_redirects=False, verify=False)
         status_code = str(r.status_code)
         if status_code == '405':
-            print(' [x] WARNING: \'HEAD\' method not allowed!')
-            exit(-1)
+            r = get_request(url, config)
+            status_code = r['status_code']
         return status_code
     except requests.exceptions.Timeout:
         print(Fore.RED + ' [x] Connection timed out on "{}"'.format(url) + Fore.RESET)
     except requests.exceptions.RequestException as e:
         print(Fore.RED + str(e) + Fore.RESET)
 
-def version_information(url, regex):
+def version_information(url, regex, config):
     """
         This method is used for version search only.
         It performs a GET request, if the response is 200 - Found, it reads the first 400 bytes the response only,
@@ -105,20 +86,11 @@ def version_information(url, regex):
     """
     if regex is None:
         regex = '([0-9]+\.[0-9]+\.[0-9x][0-9x]?)'
-    config = json.load(open(os.path.join(os.path.dirname(os.path.abspath(__file__)), 'config.json')))
-    timeout = config['timeout']
-    auth = config['auth']
-    cookie = config['cookie']
-    custom_headers = {'User-Agent' : config['User-Agent']}
     try:
-        if cookie != '':
-            name = cookie.split('=')[0]
-            value = cookie.split('=')[1]
-            custom_headers[name] = value
-        if auth != '':
-            r = requests.get(url, stream=True, timeout=config['timeout'], headers=custom_headers, auth=(auth.split(':')[0], auth.split(':')[1]), verify=False)
+        if config['auth']:
+            r = requests.get(url, stream=True, timeout=config['timeout'], headers=config['headers'], auth=(config['auth'][0], config['auth'][1]), verify=False)
         else:
-            r = requests.get(url, stream=True, timeout=config['timeout'], headers=custom_headers, verify=False)
+            r = requests.get(url, stream=True, timeout=config['timeout'], headers=config['headers'], cookies=config['cookies'], verify=False)
         if r.status_code == 200:
             version = None
             if ('manual.sxw' in url) and not ('Page Not Found' in r.text):
@@ -140,4 +112,4 @@ def version_information(url, regex):
     except requests.exceptions.Timeout:
         print(Fore.RED + ' [x] Connection timed out on "{}"'.format(url) + Fore.RESET)
     except requests.exceptions.RequestException as e:
-        print(Fore.RED + str(e) + Fore.RESET)    
+        print(Fore.RED + str(e) + Fore.RESET)

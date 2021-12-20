@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 #-------------------------------------------------------------------------------
 # Typo3 Enumerator - Automatic Typo3 Enumeration Tool
-# Copyright (c) 2014-2021 Jan Rude
+# Copyright (c) 2014-2022 Jan Rude
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -205,12 +205,15 @@ class Update:
 
         # for every extension get:
         #     title, extensionkey, description, version, state
+        counter = 0
         for extensions in root:
             extensionkey = extensions.get('extensionkey').lower()
+            if (extensionkey == 'aaaaa'):
+                continue
             title = extensions[1][0].text
             description = extensions[1][1].text
             version = '0.0.0'
-            state = ''
+            state = extensions[1][2].text
 
             # search for current version
             for extension in extensions.iter('version'):
@@ -221,18 +224,18 @@ class Update:
                             title = (extension.find('title')).text
                             description = (extension.find('description')).text
                             version = extension.attrib['version']
-                            if (extension.find('ownerusername')).text == 'abandoned_extensions':
+                            if ((extension.find('ownerusername').text == 'abandoned_extensions') or (extension.find('state').text == 'n/a') or (extension.find('state').text == 'test')):
                                 state = 'obsolete'
                             else:
                                 state = (extension.find('state')).text
                     except ValueError:
                         pass
             c.execute('INSERT OR REPLACE INTO extensions VALUES (?,?,?,?,?)', (extensionkey, title, description, version, state))
-
+            counter += 1
         conn.commit()
         os.remove('extensions.xml.gz')
         os.remove('extensions.xml')
-        print(' \u2514 Done. Added {} extensions to database'.format(len(root.findall('extension'))))
+        print(' \u2514 Done. Added {} extensions to database'.format(counter))
 
     def load_extension_vulns(self):
         """

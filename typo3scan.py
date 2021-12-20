@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 #-------------------------------------------------------------------------------
 # Typo3Scan - Automatic Typo3 Enumeration Tool
-# Copyright (c) 2014-2021 Jan Rude
+# Copyright (c) 2014-2022 Jan Rude
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -18,7 +18,7 @@
 # along with this program. If not, see [http://www.gnu.org/licenses/](http://www.gnu.org/licenses/)
 #-------------------------------------------------------------------------------
 
-__version__ = '0.7.3'
+__version__ = '1.0'
 __program__ = 'Typo3Scan'
 __description__ = 'Automatic Typo3 enumeration tool'
 __author__ = 'https://github.com/whoot'
@@ -40,13 +40,10 @@ class Typo3:
         self.__config = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'lib', 'config.json')
         self.__extensions = []
         self.__domain_list = domain_list
-        self.__threads = threads
-        self.__timeout = timeout
         self.__json = args_json
         self.__json_log = {}
         self.__force = force
         self.__vuln = vuln
-        self.__no_interaction = no_interaction
         if not user_agent:
             conn = sqlite3.connect(self.__database)
             c = conn.cursor()       
@@ -54,28 +51,26 @@ class Typo3:
             user_agent = c.fetchone()[0]
             c.close()
         self.__custom_headers = {'User-Agent' : user_agent}
+        self.__cookies = {}
         if cookie:
             name = cookie.split('=')[0]
             value = cookie.split('=')[1]
-            self.__custom_headers[name] = value
+            self.__cookies = {name: value}
         self.__basic_auth = False
         if basic_auth:
             self.__basic_auth = (basic_auth.split(':')[0], basic_auth.split(':')[1])
-
-        config = {'threads': threads, 'timeout': timeout, 'cookie': cookie, 'auth': basic_auth, 'User-Agent': user_agent}
-        json.dump(config, open(self.__config, 'w'))
+        self.__config = {'threads': threads, 'timeout': timeout, 'auth': self.__basic_auth, 'cookies': self.__cookies, 'headers': self.__custom_headers, 'no_interaction': no_interaction}
 
     def run(self):
         try:
             for domain in self.__domain_list:
                 print(Fore.CYAN + Style.BRIGHT + '\n\n[ Checking {} ]\n'.format(domain) + '-'* 73  + Fore.RESET + Style.RESET_ALL)
-                check = Domain(domain, self.__no_interaction)
+                check = Domain(domain, self.__config)
                 root = check.check_root()
                 if not root:
                     check_404 = check.check_404()
                 if not check.is_typo3() and self.__force is False:
                     print(Fore.RED + '\n[x] It seems that Typo3 is not used on this domain\n' + Fore.RESET)
-
                 else:
                     # check for typo3 information
                     print('\n [+] Core Information')
@@ -97,8 +92,8 @@ class Typo3:
                                 self.__extensions.append(row[0])
                         conn.close()
                     print ('  \u251c Brute-Forcing {} Extensions'.format(len(self.__extensions)))
-                    extensions = Extensions(self.__threads)
-                    ext_list = extensions.search_extension(check.get_path(), self.__extensions)
+                    extensions = Extensions(check.get_path(), self.__extensions, self.__config)
+                    ext_list = extensions.search_extension()
                     json_ext = []
                     if ext_list:
                         print ('\n  \u251c Found {} extensions'.format(len(ext_list)))
@@ -220,7 +215,7 @@ Options:
                 if parse_version(args.core) <= parse_version(vulnerability[3]):
                     json_list[vulnerability[0]] = {'Type': vulnerability[1], 'Subcomponent': vulnerability[2], 'Affected': '{} - {}'.format(vulnerability[3], vulnerability[4]), 'Advisory': 'https://typo3.org/security/advisory/{}'.format(vulnerability[0].lower())}
             if json_list:
-                print(Style.BRIGHT + '\nKnown Vulnerabilities for Typo3 v{}\n'.format(args.core) + Style.RESET_ALL)
+                print(Style.BRIGHT + '\n[+] Known Vulnerabilities for Typo3 v{}\n'.format(args.core) + Style.RESET_ALL)
                 for vulnerability in json_list.keys():
                     print(Style.BRIGHT + '   [!] {}'.format(Fore.RED + vulnerability + Style.RESET_ALL))
                     print('    \u251c Vulnerability Type:'.ljust(28) + json_list[vulnerability]['Type'])
@@ -228,8 +223,7 @@ Options:
                     print('    \u251c Affected Versions:'.ljust(28) + json_list[vulnerability]['Affected'])
                     print('    \u2514 Advisory URL:'.ljust(28) + json_list[vulnerability]['Advisory'] + '\n')
         if not json_list:
-            print('\nNo Known Vulnerabilities for Typo3 v{}\n'.format(args.core))
-
+            print('\n' + Fore.GREEN + Style.BRIGHT + '[+] Typo3 v{} has no known vulnerabilities\n'.format(args.core) + Style.RESET_ALL)
 
     elif args.extension:
         database = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'lib', 'typo3scan.db')
@@ -243,8 +237,15 @@ Options:
         else:
             name = (args.extension).split(':')[0]
             version = (args.extension).split(':')[1]
-        c.execute('SELECT advisory, vulnerability, affected_version_max, affected_version_min FROM extension_vulns WHERE (extensionkey=? AND ?<=affected_version_max AND ?>=affected_version_min)', (name, version, version,))
+        
+        c.execute('SELECT ROWID FROM extensions WHERE extensionkey=?', (name,))
         data = c.fetchall()
+        if (len(data) == 0):
+            print('\n' + Fore.RED + Style.BRIGHT + '[!] Extension \'{}\' does not exist\n'.format(name) + Style.RESET_ALL)
+            sys.exit(-1)
+        else:
+            c.execute('SELECT advisory, vulnerability, affected_version_max, affected_version_min FROM extension_vulns WHERE (extensionkey=? AND ?<=affected_version_max AND ?>=affected_version_min)', (name, version, version,))
+            data = c.fetchall()
         json_list = {}
         if data:
             for vulnerability in data:
@@ -252,21 +253,21 @@ Options:
                     json_list[vulnerability[0]] = {'Type': vulnerability[1], 'Affected': '{} - {}'.format(vulnerability[2], vulnerability[3]), 'Advisory': 'https://typo3.org/security/advisory/{}'.format(vulnerability[0].lower())}
             if json_list:
                 if version == '0.0.0':
-                    print(Style.BRIGHT + '\nKnown Vulnerabilities for \'{}\'\n'.format(name) + Style.RESET_ALL)
+                    print(Style.BRIGHT + '\n[+] Known vulnerabilities for \'{}\'\n'.format(name) + Style.RESET_ALL)
                 else:
-                    print(Style.BRIGHT + '\nKnown Vulnerabilities for \'{}\' v{}\n'.format(name, version) + Style.RESET_ALL)
+                    print(Style.BRIGHT + '\n[+] Known vulnerabilities for \'{}\' v{}\n'.format(name, version) + Style.RESET_ALL)
                 for vulnerability in json_list.keys():
                     print(Style.BRIGHT + '   [!] {}'.format(Fore.RED + vulnerability + Style.RESET_ALL))
                     print('    \u251c Vulnerability Type: '.ljust(28) + json_list[vulnerability]['Type'])
                     print('    \u251c Affected Versions: '.ljust(28) + '{}'.format(json_list[vulnerability]['Affected']))
                     print('    \u2514 Advisory URL:'.ljust(28) + '{}\n'.format(json_list[vulnerability]['Advisory'].lower()))
         if not json_list:
-            print('\nNo Known Vulnerabilities for \'{}\'\n'.format(name))
-
+            print('\n' + Fore.GREEN + Style.BRIGHT + '[+] \'{}\' v{} has no known vulnerabilities\n'.format(name, version) + Style.RESET_ALL)
 
     else:
         if args.force:
-           print('\n' + Fore.RED + Style.BRIGHT + '!! FORCE MODE ENABLED: expect false positives !!'.center(73) + Style.RESET_ALL)
+           print('\n' + Fore.RED + Style.BRIGHT + '!! FORCE MODE ENABLED !!'.center(73))
+           print('!! Expect False Positives !!'.center(73) + Style.RESET_ALL)
         
         domain_list = list()
         if args.domain:

@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 #-------------------------------------------------------------------------------
 # Typo3 Enumerator - Automatic Typo3 Enumeration Tool
-# Copyright (c) 2014-2021 Jan Rude
+# Copyright (c) 2014-2022 Jan Rude
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -29,11 +29,13 @@ class Extensions:
     """
     Extension class
     """
-    def __init__(self, threads):
-        self.__threads = threads
+    def __init__(self, domain, extensions, config):
+        self.__domain = domain
+        self.__extensions = extensions
+        self.__config = config
         self.__database = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'typo3scan.db')
 
-    def search_extension(self, domain, extensions):
+    def search_extension(self):
         """
             This method loads the extensions from the database and searches for installed extensions.
                 /typo3conf/ext/:        Local installation path. This is where extensions usually get installed.
@@ -41,15 +43,15 @@ class Extensions:
         """
         found_extensions = {}
         thread_pool = ThreadPool()
-        for ext in extensions:
-            thread_pool.add_job((request.head_request, ('{}/typo3conf/ext/{}/'.format(domain, ext))))
-            thread_pool.add_job((request.head_request, ('{}/typo3/sysext/{}/'.format(domain, ext))))
-        thread_pool.start(self.__threads)
+        for ext in self.__extensions:
+            thread_pool.add_job((request.head_request, ('{}/typo3conf/ext/{}/'.format(self.__domain, ext), self.__config)))
+            thread_pool.add_job((request.head_request, ('{}/typo3/sysext/{}/'.format(self.__domain, ext), self.__config)))
+        thread_pool.start(self.__config['threads'])
 
         for installed_extension in thread_pool.get_result():
-            name = installed_extension[1][:-1]
-            name = name[name.rfind('/')+1:]
-            found_extensions[name] = {'url':installed_extension[1], 'version': None, 'file': None}
+            url = (installed_extension[1][0])[:-1]
+            name = url[url.rfind('/')+1:]
+            found_extensions[name] = {'url':url, 'version': None, 'file': None}
         return found_extensions
 
     def search_ext_version(self, found_extensions):
@@ -59,26 +61,23 @@ class Extensions:
         """
         thread_pool = ThreadPool()
         for extension,values in found_extensions.items():
-            thread_pool.add_job((request.version_information, (values['url'] + 'Documentation/ChangeLog/Index.rst', None)))
-            thread_pool.add_job((request.version_information, (values['url'] + 'Documentation/Changelog/Index.rst', None)))
-            thread_pool.add_job((request.version_information, (values['url'] + 'Documentation/Settings.cfg', None)))
-            thread_pool.add_job((request.version_information, (values['url'] + 'Documentation/Settings.yml', '(?:release:)\s?([0-9]+\.[0-9]+\.?[0-9]?[0-9]?)')))
-            thread_pool.add_job((request.version_information, (values['url'] + 'Settings.yml', '(?:release:)\s?([0-9]+\.[0-9]+\.?[0-9]?[0-9]?)')))
-            thread_pool.add_job((request.version_information, (values['url'] + 'Documentation/ChangeLog', None)))
-            thread_pool.add_job((request.version_information, (values['url'] + 'Documentation/Index.rst', None)))
-            thread_pool.add_job((request.version_information, (values['url'] + 'composer.json', '(?:"dev-master":|"version":)\s?"([0-9]+\.[0-9]+\.?[0-9x]?[0-9x]?)')))
-            thread_pool.add_job((request.version_information, (values['url'] + 'Index.rst', None)))
-            thread_pool.add_job((request.version_information, (values['url'] + 'doc/manual.sxw', None)))
-            thread_pool.add_job((request.version_information, (values['url'] + 'ChangeLog', None)))
-            thread_pool.add_job((request.version_information, (values['url'] + 'CHANGELOG.md', None)))
-            thread_pool.add_job((request.version_information, (values['url'] + 'ChangeLog.txt', None)))
-        
-        thread_pool.start(self.__threads, version_search=True)
+            thread_pool.add_job((request.version_information, (values['url'] + '/ChangeLog', None, self.__config)))
+            thread_pool.add_job((request.version_information, (values['url'] + '/doc/manual.sxw', None, self.__config)))
+            thread_pool.add_job((request.version_information, (values['url'] + '/composer.json', '(?:"dev-master":|"version":)\s?"([0-9]+\.[0-9]+\.?[0-9x]?[0-9x]?)', self.__config)))
+            thread_pool.add_job((request.version_information, (values['url'] + '/doc/manual.pdf', None, self.__config)))
+            thread_pool.add_job((request.version_information, (values['url'] + '/doc/manual.odt', None, self.__config)))
+            thread_pool.add_job((request.version_information, (values['url'] + '/Documentation/Settings.yml', '(?:release:)\s?([0-9]+\.[0-9]+\.?[0-9]?[0-9]?)', self.__config)))
+            thread_pool.add_job((request.version_information, (values['url'] + '/Documentation/Settings.yaml', '(?:release:)\s?([0-9]+\.[0-9]+\.?[0-9]?[0-9]?)', self.__config)))
+            thread_pool.add_job((request.version_information, (values['url'] + '/Documentation/Settings.cfg', '(?:release:)\s?([0-9]+\.[0-9]+\.?[0-9]?[0-9]?)', self.__config)))
+            thread_pool.add_job((request.version_information, (values['url'] + '/ChangeLog.txt', None, self.__config)))
+            thread_pool.add_job((request.version_information, (values['url'] + '/Documentation/ChangeLog', None, self.__config)))
+            thread_pool.add_job((request.version_information, (values['url'] + '/CHANGELOG.md', None, self.__config)))
+        thread_pool.start(self.__config['threads'], version_search=True)
 
         for version_path in thread_pool.get_result():
-            path = version_path[0][0]
+            path = version_path[0]
             version = version_path[1]
-            name = version_path[0][0]
+            name = version_path[0]
             if 'Documentation/' in name:
                 name = name[:name.rfind('Documentation/')+1]
             if 'doc/' in name:
@@ -106,9 +105,9 @@ class Extensions:
             print('   \u251c Extension Repo: '.ljust(28) + 'https://extensions.typo3.org/extension/{}'.format(extension))
             print('   \u251c Extension Url: '.ljust(28) + '{}'.format(info['url']))
             if not 'stable' in data[2]:
-            	print('   \u251c Current Version: '.ljust(28) + '{} ({})'.format(data[1], Fore.RED + data[2] + Style.RESET_ALL))
+                print('   \u251c Current Version: '.ljust(28) + '{} ({})'.format(data[1], Fore.RED + data[2] + Style.RESET_ALL))
             else:
-            	print('   \u251c Current Version: '.ljust(28) + '{} ({})'.format(data[1], data[2]))
+                print('   \u251c Current Version: '.ljust(28) + '{} ({})'.format(data[1], data[2]))
             entry = {'Name': extension, 'Title': data[0], 'Repo': 'https://extensions.typo3.org/extension/{}'.format(extension), 'Current': '{} ({})'.format(data[1], data[2]), 'Url': info['url'], 'Version': 'unknown', 'Version File': 'not found', 'Vulnerabilities':[]}
             if info['version']:
                 entry.update({'Version': info['version']})
