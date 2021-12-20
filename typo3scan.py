@@ -37,7 +37,6 @@ init(strip=False)
 class Typo3:
     def __init__(self, domain_list, threads, timeout, cookie, basic_auth, user_agent, args_json, force, vuln, no_interaction):
         self.__database = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'lib', 'typo3scan.db')
-        self.__config = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'lib', 'config.json')
         self.__extensions = []
         self.__domain_list = domain_list
         self.__json = args_json

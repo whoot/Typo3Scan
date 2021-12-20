@@ -20,7 +20,6 @@
 
 import re
 import os.path
-import json
 import requests
 from colorama import Fore
 from requests.packages.urllib3.exceptions import InsecureRequestWarning
