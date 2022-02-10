@@ -35,11 +35,16 @@ from colorama import Fore, init, deinit, Style
 init(strip=False)
 
 class Typo3:
-    def __init__(self, domain_list, threads, timeout, cookie, basic_auth, user_agent, args_json, force, vuln, no_interaction):
+    def __init__(self, domain_list, threads, timeout, cookie, basic_auth, user_agent, json_out, force, vuln, no_interaction):
         self.__database = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'lib', 'typo3scan.db')
         self.__extensions = []
         self.__domain_list = domain_list
-        self.__json = args_json
+        if json_out.endswith('/'):
+            self.__json = json_out + 'typo3scan.json'
+        elif json_out.endswith('.json'):
+            self.__json = json_out
+        else:
+            self.__json = json_out + '/typo3scan.json'
         self.__json_log = {}
         self.__force = force
         self.__vuln = vuln
@@ -103,7 +108,7 @@ class Typo3:
                         print ('\n [!] No extensions found.\n')
                     self.__json_log[domain] = {'Backend': check.get_backend(), 'Version': check.get_typo3_version(), 'Vulnerabilities':check.get_typo3_vulns(), 'Extensions': json_ext}
             if self.__json:
-                json.dump(self.__json_log, open('typo3scan.json', 'w'))
+                json.dump(self.__json_log, open(self.__json, 'w'))
         except KeyboardInterrupt:
             print('\nReceived keyboard interrupt.\nQuitting...')
             exit(-1)
@@ -156,17 +161,18 @@ Options:
     --threads THREADS   The number of threads to use for enumerating extensions.
                         Default: 5
 
-    --json              Output results to json file
+    --json PATH         Path for json output file.
+                        Default: current working directory
 
-    --force             Force enumeration
+    --force             Force enumeration.
 
-    --no-interaction    Do not ask any interactive question
+    --no-interaction    Do not ask any interactive question.
 
   General:
-    -u | --update       Update the database.
+    -u | --update       Update extensions and vulnerability database.
     -r | --reset        Reset the database.
-    --core VERSION      Show all known vulnerabilities for given Typo3 version
-    --ext EXT:VERSION   Show all known vulnerabilities for given extension and version
+    --core VERSION      Show all known vulnerabilities for given Typo3 version.
+    --ext EXT:VERSION   Show all known vulnerabilities for given extension and version.
 """)
 
     parser = argparse.ArgumentParser(add_help=False)
@@ -185,7 +191,7 @@ Options:
     parser.add_argument('--cookie', dest='cookie', type=str, default='')
     parser.add_argument('--agent', dest='user_agent', type=str, default='')
     parser.add_argument('--timeout', dest='timeout', type=int, default=10)
-    parser.add_argument('--json', dest='json', action='store_true', default=False)
+    parser.add_argument('--json', dest='json', type=str, default=os.path.join(os.getcwd(), 'typo3scan.json'))
     parser.add_argument('--no-interaction', dest='no_interaction', action='store_true')
     
     help.add_argument( '-h', '--help', action='store_true')

@@ -1,3 +1,7 @@
+## Version 1.0.1
+
+* json file is now saved each time. --json parameter is now used for specifying path for json file. Default is the current working directory.
+
 ## Version 1.0
 
 * Correctly assigning the state for all obsolete extensions
