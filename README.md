@@ -1,5 +1,10 @@
 # Typo3Scan
 
+[![Packaging status](https://repology.org/badge/vertical-allrepos/typo3scan.svg)](https://repology.org/project/typo3scan/versions)
+[![GitHub tag (latest SemVer)](https://img.shields.io/github/v/tag/whoot/Typo3Scan)](https://github.com/whoot/Typo3Scan/tags)
+[![GitHub license](https://img.shields.io/github/license/whoot/Typo3Scan)](https://github.com/whoot/Typo3Scan/blob/master/LICENSE.txt)
+[![Rawsec's CyberSecurity Inventory](https://inventory.raw.pm/img/badges/Rawsec-inventoried-FF5050_flat.svg)](https://inventory.raw.pm/tools.html#Typo3Scan)
+
 Typo3Scan is an open source penetration testing tool that I wrote to automate the process of detecting the [Typo3 CMS](https://typo3.org) version and its installed [extensions](https://extensions.typo3.org/).\
 Useful parts of the official [security advisories](https://typo3.org/help/security-advisories) are stored in a database and compared with the identified versions. If vulnerabilities are known for the version in use, the corresponding advisory is displayed.
 
