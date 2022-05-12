@@ -1,3 +1,7 @@
+## Version 1.0.2
+
+* Bugfix for core and extensions advisory URLs
+
 ## Version 1.0.1
 
 * json file is now saved each time. --json parameter is now used for specifying path for json file. Default is the current working directory.

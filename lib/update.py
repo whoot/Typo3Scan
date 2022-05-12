@@ -57,14 +57,22 @@ class Update:
         """
         print('\n[+] Searching for new CORE vulnerabilities...')
         update_counter = 0
-        response = requests.get('https://typo3.org/help/security-advisories/typo3-cms/page-1')
-        pages = re.findall('<a class=\"page-link\" href=\"/help/security-advisories/typo3-cms/page-([0-9]+)\">', response.text)
-        last_page = int(pages[-1])
+        next_page = 2
+        last_page = 99
+        cHash = ''
 
         for current_page in range(1, last_page+1):
+            if current_page == 1:
+                url = 'https://typo3.org/help/security-advisories/typo3-cms/'
+            else:
+                url = 'https://typo3.org/help/security-advisories/typo3-cms/page?tx_news_pi1%5BcurrentPage%5D={}&amp;tx_sfeventmgt_pieventlist%5Baction%5D=list&amp;tx_sfeventmgt_pieventlist%5Bcontroller%5D=Event&amp;cHash={}'.format(current_page, cHash)
+            response = requests.get(url, timeout=6)
+            content = re.findall('<a class=\"page-link\" href=\"/help/security-advisories/typo3-cms/page\?tx_news_pi1%5BcurrentPage%5D=([0-9]+)&amp;tx_sfeventmgt_pieventlist%5Baction%5D=list&amp;tx_sfeventmgt_pieventlist%5Bcontroller%5D=Event&amp;cHash=([0-9a-f]+)\"', response.text)
+            last_page = (content[-1])[0]
+            cHash = (content[0])[1]
             print(' \u251c Page {}/{}'.format(current_page, last_page))
-            response = requests.get('https://typo3.org/help/security-advisories/typo3-cms/page-{}'.format(current_page), timeout=6)
             advisories = re.findall('TYPO3-CORE-SA-[0-9][0-9][0-9][0-9]-[0-9][0-9][0-9]', response.text)
+
             for advisory in advisories:
                 vulnerabilities = []
                 affected_version_max = '0.0.0' 
@@ -164,7 +172,7 @@ class Update:
                         if update_counter == 0:
                             print('[!] Already up-to-date.\n')
                         else:
-                            print(' \u2514 Done. Added {} new CORE vulnerabilities to database.\n'.format(update_counter))
+                            print(' \u2514 Done. Added {} new advisories to database.\n'.format(update_counter))
                         return True
 
     def dlProgress(self, count, blockSize, totalSize):
@@ -250,13 +258,19 @@ class Update:
         """
         print('\n[+] Searching for new extension vulnerabilities...')
         update_counter = 0
-        response = requests.get('https://typo3.org/help/security-advisories/typo3-extensions/page-1')
-        pages = re.findall('<a class=\"page-link\" href=\"/help/security-advisories/typo3-extensions/page-([0-9]+)\">', response.text)
-        last_page = int(pages[-1])
-
+        next_page = 2
+        last_page = 99
+        cHash = ''
         for current_page in range(1, last_page+1):
+            if current_page == 1:
+                url = 'https://typo3.org/help/security-advisories/typo3-extensions/'
+            else:
+                url = 'https://typo3.org/help/security-advisories/typo3-extensions/page?tx_news_pi1%5BcurrentPage%5D={}&amp;tx_sfeventmgt_pieventlist%5Baction%5D=list&amp;tx_sfeventmgt_pieventlist%5Bcontroller%5D=Event&amp;cHash={}'.format(current_page, cHash)
+            response = requests.get(url, timeout=6)
+            content = re.findall('<a class=\"page-link\" href=\"/help/security-advisories/typo3-extensions/page\?tx_news_pi1%5BcurrentPage%5D=([0-9]+)&amp;tx_sfeventmgt_pieventlist%5Baction%5D=list&amp;tx_sfeventmgt_pieventlist%5Bcontroller%5D=Event&amp;cHash=([0-9a-f]+)\"', response.text)
+            last_page = (content[-1])[0]
+            cHash = (content[0])[1]
             print(' \u251c Page {}/{}'.format(current_page, last_page))
-            response = requests.get('https://typo3.org/help/security-advisories/typo3-extensions/page-{}'.format(current_page), timeout=6)
             advisories = re.findall('TYPO3-EXT-SA-[0-9][0-9][0-9][0-9]-[0-9][0-9][0-9]', response.text)
             for advisory in advisories:
                 vulnerabilities = []
@@ -335,5 +349,5 @@ class Update:
                         if update_counter == 0:
                             print('[!] Already up-to-date.\n')
                         else:
-                            print(' \u2514 Done. Added {} new EXTENSION vulnerabilities to database.\n'.format(update_counter))
+                            print(' \u2514 Done. Added {} new advisories to database.\n'.format(update_counter))
                         return True
