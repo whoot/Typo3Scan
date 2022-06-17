@@ -116,6 +116,8 @@ class Update:
                             entry[0] = entry[0][:index]
 
                         for vuln_type, vuln_description in vulnerability_items.items():
+                            severity = re.search('Severity: (.+?)</li>', vuln_description[0]).group(1)
+                        
                             cve = re.search(':\s?(CVE-.*?)(<|\"|\()', vuln_description[0])
                             if cve:
                                 cve = cve.group(1)
@@ -154,7 +156,7 @@ class Update:
                                         affected_version_max = version[1]
                                         affected_version_min = version[0]
                                 # add vulnerability
-                                vulnerabilities.append([advisory, vuln_type, subcomponent, affected_version_max, affected_version_min, cve])
+                                vulnerabilities.append([advisory, vuln_type, subcomponent, affected_version_max, affected_version_min, cve, severity])
                 except Exception as e:
                     print("Error on receiving data for https://typo3.org/security/security-advisory/{}".format(advisory))
                     print(e)
@@ -162,11 +164,11 @@ class Update:
 
                 # Add vulnerability details to database
                 for core_vuln in vulnerabilities:
-                    c.execute('SELECT * FROM core_vulns WHERE advisory=? AND vulnerability=? AND subcomponent=? AND affected_version_max=? AND affected_version_min=? AND cve=?', (core_vuln[0], core_vuln[1], core_vuln[2], core_vuln[3], core_vuln[4], core_vuln[5],))
+                    c.execute('SELECT * FROM core_vulns WHERE advisory=? AND vulnerability=? AND subcomponent=? AND affected_version_max=? AND affected_version_min=? AND cve=? AND severity=?', (core_vuln[0], core_vuln[1], core_vuln[2], core_vuln[3], core_vuln[4], core_vuln[5], core_vuln[6]))
                     data = c.fetchall()
                     if not data:
                         update_counter+=1
-                        c.execute('INSERT INTO core_vulns VALUES (?,?,?,?,?,?)', (core_vuln[0], core_vuln[1], core_vuln[2], core_vuln[3], core_vuln[4], core_vuln[5]))
+                        c.execute('INSERT INTO core_vulns VALUES (?,?,?,?,?,?,?)', (core_vuln[0], core_vuln[1], core_vuln[2], core_vuln[3], core_vuln[4], core_vuln[5], core_vuln[6]))
                         conn.commit()
                     else:
                         if update_counter == 0:

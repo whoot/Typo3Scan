@@ -47,7 +47,7 @@ class DB_Init:
 
             # Create table core_vulns
             c.execute('''CREATE TABLE IF NOT EXISTS core_vulns
-                         (advisory text, vulnerability text, subcomponent text, affected_version_max text, affected_version_min text, cve text)''')
+                         (advisory text, vulnerability text, subcomponent text, affected_version_max text, affected_version_min text, cve text, severity text)''')
 
             # Create table core_versions
             #c.execute('''CREATE TABLE IF NOT EXISTS core_versions
