@@ -20,6 +20,7 @@
 
 import os.path
 from pkg_resources import parse_version
+from bs4 import BeautifulSoup
 import xml.etree.ElementTree as ElementTree
 import re, os, sys, gzip, urllib.request, sqlite3, requests
 from requests.packages.urllib3.exceptions import InsecureRequestWarning
@@ -43,6 +44,20 @@ class Update:
         self.load_extensions()
         self.load_extension_vulns()
 
+    def get_next_page_link_from_advisory(self, response):
+        """
+            This function will get a link to the next advisory page
+                response: The response object from which the link will be extracted
+                returns: The relative link to the next page
+        """
+        # Get the "li.next.page-item" element from response text and extract URL
+        soup = BeautifulSoup(response.text, 'html.parser')
+        for next_item_list in soup.find_all('li', {"class": "next page-item"}):
+            next_page_link = next_item_list.find_all('a')
+            next_page_link_href = next_page_link[0].get('href')
+
+            return next_page_link_href
+
     def load_core_vulns(self):
         """
             Grep the CORE vulnerabilities from the security advisory website
@@ -57,20 +72,14 @@ class Update:
         """
         print('\n[+] Searching for new CORE vulnerabilities...')
         update_counter = 0
-        next_page = 2
-        last_page = 99
-        cHash = ''
+        current_page = 1
+        base_url = 'https://typo3.org'
+        relative_starter_url = '/help/security-advisories/typo3-cms/'
+        url = base_url + relative_starter_url
 
-        for current_page in range(1, last_page+1):
-            if current_page == 1:
-                url = 'https://typo3.org/help/security-advisories/typo3-cms/'
-            else:
-                url = 'https://typo3.org/help/security-advisories/typo3-cms/page?tx_news_pi1%5BcurrentPage%5D={}&amp;tx_sfeventmgt_pieventlist%5Baction%5D=list&amp;tx_sfeventmgt_pieventlist%5Bcontroller%5D=Event&amp;cHash={}'.format(current_page, cHash)
+        while url:
             response = requests.get(url, timeout=6)
-            content = re.findall('<a class=\"page-link\" href=\"/help/security-advisories/typo3-cms/page\?tx_news_pi1%5BcurrentPage%5D=([0-9]+)&amp;tx_sfeventmgt_pieventlist%5Baction%5D=list&amp;tx_sfeventmgt_pieventlist%5Bcontroller%5D=Event&amp;cHash=([0-9a-f]+)\"', response.text)
-            last_page = (content[-1])[0]
-            cHash = (content[0])[1]
-            print(' \u251c Page {}/{}'.format(current_page, last_page))
+            print(' \u251c Getting Page {} / n'.format(current_page))
             advisories = re.findall('TYPO3-CORE-SA-[0-9][0-9][0-9][0-9]-[0-9][0-9][0-9]', response.text)
 
             for advisory in advisories:
@@ -116,6 +125,7 @@ class Update:
                             entry[0] = entry[0][:index]
 
                         for vuln_type, vuln_description in vulnerability_items.items():
+                            # This breaks for https://typo3.org/security/advisory/typo3-core-sa-2017-007 due to missing severity list (its a <p>)
                             severity = re.search('Severity: (.+?)</li>', vuln_description[0]).group(1)
                         
                             cve = re.search(':\s?(CVE-.*?)(<|\"|\()', vuln_description[0])
@@ -176,6 +186,8 @@ class Update:
                         else:
                             print(' \u2514 Done. Added {} new advisories to database.\n'.format(update_counter))
                         return True
+            url = base_url + self.get_next_page_link_from_advisory(response)
+            current_page += 1
 
     def dlProgress(self, count, blockSize, totalSize):
         """
@@ -268,8 +280,15 @@ class Update:
                 url = 'https://typo3.org/help/security-advisories/typo3-extensions/'
             else:
                 url = 'https://typo3.org/help/security-advisories/typo3-extensions/page?tx_news_pi1%5BcurrentPage%5D={}&amp;tx_sfeventmgt_pieventlist%5Baction%5D=list&amp;tx_sfeventmgt_pieventlist%5Bcontroller%5D=Event&amp;cHash={}'.format(current_page, cHash)
+
             response = requests.get(url, timeout=6)
-            content = re.findall('<a class=\"page-link\" href=\"/help/security-advisories/typo3-extensions/page\?tx_news_pi1%5BcurrentPage%5D=([0-9]+)&amp;tx_sfeventmgt_pieventlist%5Baction%5D=list&amp;tx_sfeventmgt_pieventlist%5Bcontroller%5D=Event&amp;cHash=([0-9a-f]+)\"', response.text)
+
+            # We require different regex depending if it's page 1 or 1+n
+            if current_page == 1:
+                content = re.findall('currentPage%5D=([0-9]+)&amp;tx_sfeventmgt_pieventlist%5Baction%5D=list&amp;tx_sfeventmgt_pieventlist%5Bcontroller%5D=Event&amp;cHash=([0-9a-z]+)">', response.text)
+            else:
+                content = re.findall('currentPage%5D=([0-9]+)&amp;cHash=([0-9a-f]+)\"', response.text)
+            
             last_page = (content[-1])[0]
             cHash = (content[0])[1]
             print(' \u251c Page {}/{}'.format(current_page, last_page))
@@ -315,6 +334,7 @@ class Update:
                             version_item = version_item.replace("and all versions below", "- 0.0.0")
                             version_item = version_item.replace("and all version below", "- 0.0.0") # typo
                             version_item = version_item.replace("and alll versions below", "- 0.0.0") # typo
+                            version_item = version_item.replace("to", "-") # typo
                             version_item = version_item.replace("and below of", "-")
                             version_item = version_item.replace("and below", "- 0.0.0")
                             version_item = version_item.replace("&nbsp;", " ")

@@ -25,6 +25,7 @@ from colorama import Fore
 from requests.packages.urllib3.exceptions import InsecureRequestWarning
 requests.packages.urllib3.disable_warnings(InsecureRequestWarning)
 
+
 def get_request(url, config):
     """
     All GET requests are done in this method.
