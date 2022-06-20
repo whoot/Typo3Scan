@@ -176,14 +176,14 @@ class Domain:
                     version = version + '.0'
                 else:
                     return False
-            c.execute('SELECT advisory, vulnerability, subcomponent, affected_version_max, affected_version_min FROM core_vulns WHERE (?<=affected_version_max AND ?>=affected_version_min)', (version, version,))
+            c.execute('SELECT advisory, vulnerability, subcomponent, affected_version_max, affected_version_min, severity FROM core_vulns WHERE (?<=affected_version_max AND ?>=affected_version_min)', (version, version,))
             data = c.fetchall()
             json_list = []
             if data:
                 for vulnerability in data:
                     # maybe instead use this: https://zxq9.com/archives/797
                     if parse_version(version) <= parse_version(vulnerability[3]):
-                        json_list.append({'Advisory': vulnerability[0], 'Type': vulnerability[1], 'Subcomponent': vulnerability[2], 'Affected': '{} - {}'.format(vulnerability[3], vulnerability[4]), 'Advisory URL': 'https://typo3.org/security/advisory/{}'.format(vulnerability[0].lower())})
+                        json_list.append({'Advisory': vulnerability[0], 'Type': vulnerability[1], 'Subcomponent': vulnerability[2], 'Affected': '{} - {}'.format(vulnerability[3], vulnerability[4]), 'Advisory URL': 'https://typo3.org/security/advisory/{}'.format(vulnerability[0].lower()), 'Severity':vulnerability[5]})
                 if json_list:
                     self.set_typo3_vulns(json_list)
                     print('  \u2514 Known Vulnerabilities:\n')
@@ -192,7 +192,8 @@ class Domain:
                         print('      \u251c Vulnerability Type:'.ljust(28) + vulnerability['Type'])
                         print('      \u251c Subcomponent:'.ljust(28) + vulnerability['Subcomponent'])
                         print('      \u251c Affected Versions:'.ljust(28) + vulnerability['Affected'])
-                        print('      \u2514 Advisory URL:'.ljust(28) + vulnerability['Advisory URL'] + '\n')
+                        print('      \u2514 Advisory URL:'.ljust(28) + vulnerability['Advisory URL'])
+                        print('      \u2514 Severity:'.ljust(28) + vulnerability['Severity'] + '\n')
             if not json_list:
                 print('  \u2514 No Known Vulnerabilities')
         else:
