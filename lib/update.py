@@ -125,8 +125,7 @@ class Update:
                             entry[0] = entry[0][:index]
 
                         for vuln_type, vuln_description in vulnerability_items.items():
-                            # This breaks for https://typo3.org/security/advisory/typo3-core-sa-2017-007 due to missing severity list (its a <p>)
-                            severity = re.search('Severity: (.+?)</li>', vuln_description[0]).group(1)
+                            severity = re.search('Severity: (.+?)(<|\"|\()', vuln_description[0]).group(1)
                         
                             cve = re.search(':\s?(CVE-.*?)(<|\"|\()', vuln_description[0])
                             if cve:
@@ -168,7 +167,7 @@ class Update:
                                 # add vulnerability
                                 vulnerabilities.append([advisory, vuln_type, subcomponent, affected_version_max, affected_version_min, cve, severity])
                 except Exception as e:
-                    print("Error on receiving data for https://typo3.org/security/security-advisory/{}".format(advisory))
+                    print("Error on receiving data for https://typo3.org/security/advisory/{}".format(advisory))
                     print(e)
                     exit(-1)
 
@@ -186,8 +185,13 @@ class Update:
                         else:
                             print(' \u2514 Done. Added {} new advisories to database.\n'.format(update_counter))
                         return True
-            url = base_url + self.get_next_page_link_from_advisory(response)
-            current_page += 1
+            # Get the link to the next advisory page
+            next_page_relative_link = self.get_next_page_link_from_advisory(response)
+            if next_page_relative_link:
+                url = base_url + next_page_relative_link
+                current_page += 1
+            else:
+                url = None
 
     def dlProgress(self, count, blockSize, totalSize):
         """
@@ -272,26 +276,14 @@ class Update:
         """
         print('\n[+] Searching for new extension vulnerabilities...')
         update_counter = 0
-        next_page = 2
-        last_page = 99
-        cHash = ''
-        for current_page in range(1, last_page+1):
-            if current_page == 1:
-                url = 'https://typo3.org/help/security-advisories/typo3-extensions/'
-            else:
-                url = 'https://typo3.org/help/security-advisories/typo3-extensions/page?tx_news_pi1%5BcurrentPage%5D={}&amp;tx_sfeventmgt_pieventlist%5Baction%5D=list&amp;tx_sfeventmgt_pieventlist%5Bcontroller%5D=Event&amp;cHash={}'.format(current_page, cHash)
-
+        current_page = 1
+        base_url = 'https://typo3.org'
+        relative_starter_url = '/help/security-advisories/typo3-extensions/'
+        url = base_url + relative_starter_url
+        while url:
+            print(' \u251c Getting Page {} / n'.format(current_page))
             response = requests.get(url, timeout=6)
 
-            # We require different regex depending if it's page 1 or 1+n
-            if current_page == 1:
-                content = re.findall('currentPage%5D=([0-9]+)&amp;tx_sfeventmgt_pieventlist%5Baction%5D=list&amp;tx_sfeventmgt_pieventlist%5Bcontroller%5D=Event&amp;cHash=([0-9a-z]+)">', response.text)
-            else:
-                content = re.findall('currentPage%5D=([0-9]+)&amp;cHash=([0-9a-f]+)\"', response.text)
-            
-            last_page = (content[-1])[0]
-            cHash = (content[0])[1]
-            print(' \u251c Page {}/{}'.format(current_page, last_page))
             advisories = re.findall('TYPO3-EXT-SA-[0-9][0-9][0-9][0-9]-[0-9][0-9][0-9]', response.text)
             for advisory in advisories:
                 vulnerabilities = []
@@ -373,3 +365,10 @@ class Update:
                         else:
                             print(' \u2514 Done. Added {} new advisories to database.\n'.format(update_counter))
                         return True
+            # Get the link to the next advisory page
+            next_page_relative_link = self.get_next_page_link_from_advisory(response)
+            if next_page_relative_link:
+                url = base_url + next_page_relative_link
+                current_page += 1
+            else:
+                url = None
