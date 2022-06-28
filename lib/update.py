@@ -19,6 +19,7 @@
 #-------------------------------------------------------------------------------
 
 import os.path
+from bs4 import BeautifulSoup
 from pkg_resources import parse_version
 import xml.etree.ElementTree as ElementTree
 import re, os, sys, gzip, urllib.request, sqlite3, requests
@@ -43,6 +44,20 @@ class Update:
         self.load_extensions()
         self.load_extension_vulns()
 
+    def get_next_page_from_advisory(self, response):
+        """
+            This function will get a link to the advisory pages
+                response: The response object from which the link will be extracted
+                returns: The relative link to the next page
+        """
+        # Get the "li.next.page-item" element from response text and extract URL
+        soup = BeautifulSoup(response.text, 'html.parser')
+        for next_item_list in soup.find_all('li', {"class": "next page-item"}):
+            next_page_link = next_item_list.find_all('a')
+            next_page_link_href = next_page_link[0].get('href')
+
+            return next_page_link_href
+
     def load_core_vulns(self):
         """
             Grep the CORE vulnerabilities from the security advisory website
@@ -53,29 +68,23 @@ class Update:
                 Vulnerability Type
                 Subcomponent(s)
                 Affected Versions
-                CVE Numbers
+                Severity
         """
         print('\n[+] Searching for new CORE vulnerabilities...')
         update_counter = 0
-        next_page = 2
+        current_page = 1
         last_page = 99
-        cHash = ''
+        url = 'https://typo3.org/help/security-advisories/typo3-cms/'
 
-        for current_page in range(1, last_page+1):
-            if current_page == 1:
-                url = 'https://typo3.org/help/security-advisories/typo3-cms/'
-            else:
-                url = 'https://typo3.org/help/security-advisories/typo3-cms/page?tx_news_pi1%5BcurrentPage%5D={}&amp;tx_sfeventmgt_pieventlist%5Baction%5D=list&amp;tx_sfeventmgt_pieventlist%5Bcontroller%5D=Event&amp;cHash={}'.format(current_page, cHash)
+        while url:
+            advisory_list = []
             response = requests.get(url, timeout=6)
-            content = re.findall('<a class=\"page-link\" href=\"/help/security-advisories/typo3-cms/page\?tx_news_pi1%5BcurrentPage%5D=([0-9]+)&amp;tx_sfeventmgt_pieventlist%5Baction%5D=list&amp;tx_sfeventmgt_pieventlist%5Bcontroller%5D=Event&amp;cHash=([0-9a-f]+)\"', response.text)
-            last_page = (content[-1])[0]
-            cHash = (content[0])[1]
-            print(' \u251c Page {}/{}'.format(current_page, last_page))
-            advisories = re.findall('TYPO3-CORE-SA-[0-9][0-9][0-9][0-9]-[0-9][0-9][0-9]', response.text)
-
-            for advisory in advisories:
+            soup = BeautifulSoup(response.text, 'html.parser')
+            for advisory_core in soup.find_all('h2', {"class": "mt-md-3 mb-0"}):
+                text = (advisory_core.text).strip()
+                advisory = text.split(':')[0]
                 vulnerabilities = []
-                affected_version_max = '0.0.0' 
+                affected_version_max = '0.0.0'
                 affected_version_min = '0.0.0'
                 html = requests.get('https://typo3.org/security/advisory/{}'.format(advisory.lower()))
                 beauty_html = html.text
@@ -116,11 +125,12 @@ class Update:
                             entry[0] = entry[0][:index]
 
                         for vuln_type, vuln_description in vulnerability_items.items():
-                            cve = re.search(':\s?(CVE-.*?)(<|\"|\()', vuln_description[0])
-                            if cve:
-                                cve = cve.group(1)
+                            severity = re.search('Severity:\s?(.+?)<', vuln_description[0])
+                            if severity:
+                                severity = severity.group(1)
                             else:
-                                cve = 'None assigned'
+                                print("ERROR! GOT SEVERITY:", severity)
+                                severity = 'None assigned'
                             search_affected = re.search('Affected Version[s]?:\s?(.+?)<', vuln_description[0])
                             if search_affected:
                                 affected_versions = search_affected.group(1)
@@ -153,16 +163,19 @@ class Update:
                                     else:
                                         affected_version_max = version[1]
                                         affected_version_min = version[0]
+                                # 'and below' affects only same branch
+                                if affected_version_min == '0.0.0':
+                                    affected_version_min = affected_version_min.replace(affected_version_min[:3], affected_version_max[:3])
                                 # add vulnerability
-                                vulnerabilities.append([advisory, vuln_type, subcomponent, affected_version_max, affected_version_min, cve])
+                                vulnerabilities.append([advisory, vuln_type, subcomponent, affected_version_max, affected_version_min, severity])
                 except Exception as e:
-                    print("Error on receiving data for https://typo3.org/security/security-advisory/{}".format(advisory))
+                    print("Error on receiving data for https://typo3.org/security/advisory/{}".format(advisory))
                     print(e)
                     exit(-1)
 
                 # Add vulnerability details to database
                 for core_vuln in vulnerabilities:
-                    c.execute('SELECT * FROM core_vulns WHERE advisory=? AND vulnerability=? AND subcomponent=? AND affected_version_max=? AND affected_version_min=? AND cve=?', (core_vuln[0], core_vuln[1], core_vuln[2], core_vuln[3], core_vuln[4], core_vuln[5],))
+                    c.execute('SELECT * FROM core_vulns WHERE advisory=? AND vulnerability=? AND subcomponent=? AND affected_version_max=? AND affected_version_min=? AND severity=?', (core_vuln[0], core_vuln[1], core_vuln[2], core_vuln[3], core_vuln[4], core_vuln[5],))
                     data = c.fetchall()
                     if not data:
                         update_counter+=1
@@ -170,10 +183,17 @@ class Update:
                         conn.commit()
                     else:
                         if update_counter == 0:
-                            print('[!] Already up-to-date.\n')
+                            print('[!] Already up-to-date.')
                         else:
-                            print(' \u2514 Done. Added {} new advisories to database.\n'.format(update_counter))
+                            print(' \u2514 Done. Added {} new advisories to database.'.format(update_counter))
                         return True
+
+            next_page = self.get_next_page_from_advisory(response)
+            if next_page:
+                url = 'https://typo3.org' + next_page
+                current_page += 1  
+            else:
+                url = None
 
     def dlProgress(self, count, blockSize, totalSize):
         """
@@ -187,7 +207,7 @@ class Update:
         """
             Download extensions from server and unpack the ZIP
         """
-        print('[+] Getting extension file...')
+        print('\n[+] Getting extension file...')
         try:
             # Maybe someday we need to use mirrors: https://repositories.typo3.org/mirrors.xml.gz
             urllib.request.urlretrieve('https://typo3.org/fileadmin/ter/extensions.xml.gz', 'extensions.xml.gz', reporthook=self.dlProgress)
@@ -258,35 +278,31 @@ class Update:
         """
         print('\n[+] Searching for new extension vulnerabilities...')
         update_counter = 0
-        next_page = 2
+        current_page = 1
         last_page = 99
-        cHash = ''
-        for current_page in range(1, last_page+1):
-            if current_page == 1:
-                url = 'https://typo3.org/help/security-advisories/typo3-extensions/'
-            else:
-                url = 'https://typo3.org/help/security-advisories/typo3-extensions/page?tx_news_pi1%5BcurrentPage%5D={}&amp;tx_sfeventmgt_pieventlist%5Baction%5D=list&amp;tx_sfeventmgt_pieventlist%5Bcontroller%5D=Event&amp;cHash={}'.format(current_page, cHash)
+        url = 'https://typo3.org/help/security-advisories/typo3-extensions/'
+
+        while url:
+            advisory_list = []
             response = requests.get(url, timeout=6)
-            content = re.findall('<a class=\"page-link\" href=\"/help/security-advisories/typo3-extensions/page\?tx_news_pi1%5BcurrentPage%5D=([0-9]+)&amp;tx_sfeventmgt_pieventlist%5Baction%5D=list&amp;tx_sfeventmgt_pieventlist%5Bcontroller%5D=Event&amp;cHash=([0-9a-f]+)\"', response.text)
-            last_page = (content[-1])[0]
-            cHash = (content[0])[1]
-            print(' \u251c Page {}/{}'.format(current_page, last_page))
-            advisories = re.findall('TYPO3-EXT-SA-[0-9][0-9][0-9][0-9]-[0-9][0-9][0-9]', response.text)
-            for advisory in advisories:
+            soup = BeautifulSoup(response.text, 'html.parser')
+            for advisory_core in soup.find_all('h2', {"class": "mt-md-3 mb-0"}):
+                text = (advisory_core.text).strip()
+                advisory = text.split(':')[0]
                 vulnerabilities = []
-                affected_version_max = '0.0.0' 
+                affected_version_max = '0.0.0'
                 affected_version_min = '0.0.0'
                 # adding vulns with odd stuff on website
                 if advisory == 'TYPO3-EXT-SA-2014-018':
-                    vulnerabilities.append(['TYPO3-EXT-SA-2014-018', 'phpmyadmin', 'Cross-Site Scripting, Denial of Service, Local File Inclusion', '4.18.4', '4.18.0'])
+                    vulnerabilities.append(['TYPO3-EXT-SA-2014-018', 'phpmyadmin', 'Cross-Site Scripting, Denial of Service, Local File Inclusion', '4.18.4', '0.0.0', 'High'])
                 elif advisory == 'TYPO3-EXT-SA-2014-015':
-                    vulnerabilities.append(['TYPO3-EXT-SA-2014-015', 'dce', 'Information Disclosure', '0.11.4', '0.0.0'])
+                    vulnerabilities.append(['TYPO3-EXT-SA-2014-015', 'dce', 'Information Disclosure', '0.11.4', '0.0.0', 'Low'])
                 elif advisory == 'TYPO3-EXT-SA-2014-013':
-                    vulnerabilities.append(['TYPO3-EXT-SA-2014-013', 'cal', 'Denial of Service', '1.5.8', '0.0.0'])
-                    vulnerabilities.append(['TYPO3-EXT-SA-2014-013', 'cal', 'Denial of Service', '1.6.0', '1.6.0'])
+                    vulnerabilities.append(['TYPO3-EXT-SA-2014-013', 'cal', 'Denial of Service', '1.5.8', '0.0.0', 'Medium'])
+                    vulnerabilities.append(['TYPO3-EXT-SA-2014-013', 'cal', 'Denial of Service', '1.6.0', '1.6.0', 'Medium'])
                 elif advisory == 'TYPO3-EXT-SA-2014-009':
-                    vulnerabilities.append(['TYPO3-EXT-SA-2014-009', 'news', 'Cross-Site Scripting', '3.0.0', '3.0.0'])
-                    vulnerabilities.append(['TYPO3-EXT-SA-2014-009', 'news', 'Cross-Site Scripting', '2.3.0', '2.0.0'])
+                    vulnerabilities.append(['TYPO3-EXT-SA-2014-009', 'news', 'Cross-Site Scripting', '3.0.0', '3.0.0', 'Medium'])
+                    vulnerabilities.append(['TYPO3-EXT-SA-2014-009', 'news', 'Cross-Site Scripting', '2.3.0', '2.0.0', 'Medium'])
                 else:
                     try:
                         html = requests.get('https://typo3.org/security/advisory/{}'.format(advisory.lower()))
@@ -298,6 +314,12 @@ class Update:
                         vulnerability = re.findall('Vulnerability Type[s]?:\s?(.*?)<', beauty_html)
                         affected_versions = re.findall('Affected Version[s]?:\s?(.+?)<', beauty_html)
                         extensionkey = re.findall('Extension[s]?:\s?(.*?)<', beauty_html)
+                        severity = re.search('Severity:\s?(.+?)<', beauty_html)
+                        if severity:
+                            severity = severity.group(1)
+                        else:
+                            print("ERROR! GOT SEVERITY:", severity)
+                            severity = 'None assigned'
                         # Sometimes there are multiple extensions in an advisory
                         if len(extensionkey) == 0: # If only one extension affected
                             if not '(' in advisory_info:
@@ -331,7 +353,7 @@ class Update:
                                     else:
                                         affected_version_max = version[1]
                                         affected_version_min = version[0]
-                                vulnerabilities.append([advisory, extensionkey_item, description, affected_version_max, affected_version_min])
+                                vulnerabilities.append([advisory, extensionkey_item, description, affected_version_max, affected_version_min, severity])
                     except Exception as e:
                         print("Error on receiving data for https://typo3.org/security/advisory/{}".format(advisory))
                         print(e)
@@ -339,15 +361,27 @@ class Update:
 
                 # Add vulnerability details to database
                 for ext_vuln in vulnerabilities:
-                    c.execute('SELECT * FROM extension_vulns WHERE advisory=? AND extensionkey=? AND vulnerability=? AND affected_version_max=? AND affected_version_min=?', (ext_vuln[0], ext_vuln[1], ext_vuln[2], ext_vuln[3], ext_vuln[4],))
+                    c.execute('SELECT * FROM extension_vulns WHERE advisory=? AND extensionkey=? AND vulnerability=? AND affected_version_max=? AND affected_version_min=? AND severity=?', (ext_vuln[0], ext_vuln[1], ext_vuln[2], ext_vuln[3], ext_vuln[4], ext_vuln[5],))
                     data = c.fetchall()
                     if not data:
                         update_counter+=1
-                        c.execute('INSERT INTO extension_vulns VALUES (?,?,?,?,?)', (ext_vuln[0], ext_vuln[1], ext_vuln[2], ext_vuln[3], ext_vuln[4]))
-                        conn.commit()
+                        try:
+                            c.execute('INSERT INTO extension_vulns VALUES (?,?,?,?,?,?)', (ext_vuln[0], ext_vuln[1], ext_vuln[2], ext_vuln[3], ext_vuln[4], ext_vuln[5]))
+                            conn.commit()
+                        except:
+                            print("Page:", current_page)
+                            print("Error in", advisory)
+                            print(ext_vuln[0], ext_vuln[1], ext_vuln[2], ext_vuln[3], ext_vuln[4], ext_vuln[5])
                     else:
                         if update_counter == 0:
                             print('[!] Already up-to-date.\n')
                         else:
                             print(' \u2514 Done. Added {} new advisories to database.\n'.format(update_counter))
                         return True
+
+            next_page = self.get_next_page_from_advisory(response)
+            if next_page:
+                url = 'https://typo3.org' + next_page
+                current_page += 1  
+            else:
+                url = None

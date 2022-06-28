@@ -2,3 +2,4 @@ requests
 colorama
 progressbar
 setuptools
+beautifulsoup4

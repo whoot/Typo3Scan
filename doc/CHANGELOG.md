@@ -1,3 +1,11 @@
+## Version 1.1
+
+* Add severity for core and exention vulns
+* Use beautifulsoup to parse html
+* Bugfix for version parsing
+* Bugfix on detection error
+* Remove -r parameter
+
 ## Version 1.0.2
 
 * Bugfix for core and extensions advisory URLs

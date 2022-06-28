@@ -33,6 +33,7 @@ def get_request(url, config):
             Connection timeout
             Connection error
             anything else
+        If a RequestException occurs, then we will return an empty html response body. This will cancel the root detection.
     """
     try:
         response = {}
@@ -52,6 +53,10 @@ def get_request(url, config):
         exit(-1)
     except requests.exceptions.RequestException as e:
         print(Fore.RED + str(e) + Fore.RESET)
+        # Return an empty response['html'] element. 
+        # If this error occurs within the first request made (TYPO3 detection), then all following scans will be canceled
+        response['html'] = ''
+        return response
 
 def head_request(url, config):
     """
