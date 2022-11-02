@@ -35,28 +35,35 @@ def get_request(url, config):
             anything else
         If a RequestException occurs, then we will return an empty html response body. This will cancel the root detection.
     """
-    try:
-        response = {}
-        if config['auth']:
-            r = requests.get(url, timeout=config['timeout'], headers=config['headers'], auth=(config['auth'][0], config['auth'][1]), verify=False)
-        else:
-            r = requests.get(url, timeout=config['timeout'], headers=config['headers'], cookies=config['cookies'], verify=False)
-        response['status_code'] = r.status_code
-        response['html'] = r.text
-        response['headers'] = r.headers
-        response['cookies'] = r.cookies
-        response['url'] = r.url
-        return response
-    except requests.exceptions.Timeout as e:
-        print(e)
-        print(Fore.RED + '[x] Connection error\n    Please make sure you provided the right URL\n' + Fore.RESET)
-        exit(-1)
-    except requests.exceptions.RequestException as e:
-        print(Fore.RED + str(e) + Fore.RESET)
-        # Return an empty response['html'] element. 
-        # If this error occurs within the first request made (TYPO3 detection), then all following scans will be canceled
-        response['html'] = ''
-        return response
+    for retry in range(1,4):
+        try:
+            response = {}
+            if config['auth']:
+                r = requests.get(url, timeout=config['timeout'], headers=config['headers'], auth=(config['auth'][0], config['auth'][1]), verify=False)
+            else:
+                r = requests.get(url, timeout=config['timeout'], headers=config['headers'], cookies=config['cookies'], verify=False)
+            response['status_code'] = r.status_code
+            response['html'] = r.text
+            response['headers'] = r.headers
+            response['cookies'] = r.cookies
+            response['url'] = r.url
+            return response
+        except requests.exceptions.Timeout as e:
+            print(e)
+            print(Fore.RED + '[x] Connection error\n    Please make sure you provided the right URL\n' + Fore.RESET)
+            if retry != 3:
+                continue
+            else:
+                exit(-1)
+        except requests.exceptions.RequestException as e:
+            print(Fore.RED + str(e) + Fore.RESET)
+            # Return an empty response['html'] element. 
+            # If this error occurs within the first request made (TYPO3 detection), then all following scans will be canceled
+            response['html'] = ''
+            if retry != 3:
+                continue
+            else:
+                return response
 
 def head_request(url, config):
     """
