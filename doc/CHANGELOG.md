@@ -1,3 +1,7 @@
+## Version 1.1.1
+
+* Adapted version regex for extensions
+
 ## Version 1.1
 
 * Add severity for core and exention vulns
