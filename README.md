@@ -26,7 +26,9 @@ Typo3Scan works with [Python 3](http://www.python.org/download/) version **>= 3.
 
 You can install all required packages with pip3:
 
-	python3 -m pip install -r requirements.txt
+	python3 -m venv ./venv
+	source ./venv/bin/activate
+	pip3 install -r requirements.txt
 
 ## Usage
 
