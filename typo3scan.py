@@ -62,7 +62,7 @@ class Typo3:
             self.__cookies = {name: value}
         self.__basic_auth = False
         if basic_auth:
-            self.__basic_auth = (basic_auth.split(':')[0], basic_auth.split(':')[1])
+            self.__basic_auth = basic_auth.split(':', 1)
         self.__config = {'threads': threads, 'timeout': timeout, 'auth': self.__basic_auth, 'cookies': self.__cookies, 'headers': self.__custom_headers, 'no_interaction': no_interaction}
 
     def run(self):
