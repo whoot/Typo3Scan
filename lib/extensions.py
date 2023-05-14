@@ -78,13 +78,18 @@ class Extensions:
             path = version_path[0]
             version = version_path[1]
             name = version_path[0]
-            if 'Documentation/' in name:
-                name = name[:name.rfind('Documentation/')+1]
-            if 'doc/' in name:
-                name = name[:name.rfind('doc/')+1] 
-            name = name[name.find('ext/')+4:name.rfind('/')]
-            found_extensions[name]['version'] = version
-            found_extensions[name]['file'] = path
+            if '/Documentation/' in name or '/doc/' in name:
+                name = name.rsplit('/',3)[1]
+            else:
+                name = name.rsplit('/',2)[1]
+            if '/doc/manual.' in path:
+                # If version info was already found, do not use manual
+                if found_extensions[name]['version'] is None:
+                    found_extensions[name]['version'] = 'Check manually'
+                    found_extensions[name]['file'] = path
+            else:
+                found_extensions[name]['version'] = version
+                found_extensions[name]['file'] = path
         return found_extensions
 
 

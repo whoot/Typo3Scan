@@ -165,7 +165,7 @@ class Domain:
                     else:
                         break
 
-        print('  | \n [+] Version Information')
+        print(' [+] Version Information')
         if version:
             self.set_typo3_version(version)
             print('  \u251c Identified Version: '.ljust(28) + '{}'.format(Style.BRIGHT + Fore.GREEN + version + Style.RESET_ALL))

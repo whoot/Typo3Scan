@@ -102,7 +102,7 @@ class Typo3:
                     if ext_list:
                         print ('\n  \u251c Found {} extensions'.format(len(ext_list)))
                         print ('  \u251c Brute-Forcing Version Information'.format(len(self.__extensions)))
-                        print (Fore.YELLOW + '  \u251c [!] Version detection for extensions is unreliable. Please verify manually [!]'.format(len(self.__extensions)) + Fore.RESET)
+                        print (Fore.YELLOW + ' [!] Version detection for extensions is unreliable. Verify manually!'.format(len(self.__extensions)) + Fore.RESET)
                         ext_list = extensions.search_ext_version(ext_list)
                         json_ext = extensions.output(ext_list)
                     else:

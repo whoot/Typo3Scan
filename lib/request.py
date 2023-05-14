@@ -97,8 +97,6 @@ def version_information(url, regex, config):
             r = requests.get(url, stream=True, timeout=config['timeout'], headers=config['headers'], cookies=config['cookies'], verify=False)
         if r.status_code == 200:
             version = None
-            if ('manual.sxw' in url) and not ('Page Not Found' in r.text):
-                return 'check manually'
             for content in r.iter_content(chunk_size=400, decode_unicode=False):
                 try:
                     search = re.search(regex, str(content))

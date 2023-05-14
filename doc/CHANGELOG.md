@@ -1,6 +1,7 @@
 ## Version 1.1.3
 
-* bugfix: Split basic auth parameter on the first colon only
+* bugfix: Split basic auth parameter on the first colon only (thanks @c0d3z3r0)
+* bugfix: correctly assign version when manual is available
 * Add warning for extension version detection
 * Database updates
 
