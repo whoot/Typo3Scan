@@ -83,7 +83,7 @@ class Extensions:
             else:
                 name = name.rsplit('/',2)[1]
             if '/doc/manual.' in path:
-                # If version info was already found, do not use manual
+                # Only use manual if version info has not already been found elsewhere
                 if found_extensions[name]['version'] is None:
                     found_extensions[name]['version'] = 'Check manually'
                     found_extensions[name]['file'] = path
