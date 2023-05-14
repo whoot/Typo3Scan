@@ -1,3 +1,13 @@
+## Version 1.1.3
+
+* bugfix: Split basic auth parameter on the first colon only
+* Add warning for extension version detection
+* Database updates
+
+## Version 1.1.2
+
+* Database updates
+
 ## Version 1.1.1
 
 * Adapted version regex for extensions

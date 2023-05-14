@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 #-------------------------------------------------------------------------------
 # Typo3Scan - Automatic Typo3 Enumeration Tool
-# Copyright (c) 2014-2022 Jan Rude
+# Copyright (c) 2014-2023 Jan Rude
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -18,7 +18,7 @@
 # along with this program. If not, see [http://www.gnu.org/licenses/](http://www.gnu.org/licenses/)
 #-------------------------------------------------------------------------------
 
-__version__ = '1.1.1'
+__version__ = '1.1.3'
 __program__ = 'Typo3Scan'
 __description__ = 'Automatic Typo3 enumeration tool'
 __author__ = 'https://github.com/whoot'
@@ -102,6 +102,7 @@ class Typo3:
                     if ext_list:
                         print ('\n  \u251c Found {} extensions'.format(len(ext_list)))
                         print ('  \u251c Brute-Forcing Version Information'.format(len(self.__extensions)))
+                        print (Fore.YELLOW + '  \u251c [!] Version detection for extensions is unreliable. Please verify manually [!]'.format(len(self.__extensions)) + Fore.RESET)
                         ext_list = extensions.search_ext_version(ext_list)
                         json_ext = extensions.output(ext_list)
                     else:

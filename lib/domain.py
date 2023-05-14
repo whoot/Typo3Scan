@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 #-------------------------------------------------------------------------------
 # Typo3Scan - Automatic Typo3 Enumeration Tool
-# Copyright (c) 2014-2022 Jan Rude
+# Copyright (c) 2014-2023 Jan Rude
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by

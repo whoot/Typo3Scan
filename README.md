@@ -42,6 +42,23 @@ Example:
 
 <img src="./doc/Typo3Scan.png" width="450">
 
+
+## Extension version detection
+
+While detecting a Typo3 core version is quite simple, it is not for extensions.\
+**Reliably** determining the extension version is **not possible**, because of the following issues:
+
+1. Extensions are basically just PHP files. Since it is (obviously) not possible to download a PHP file, it can't be used for version detection.
+2. Therefore you have to use other files like changelogs, setting files and so on. However, Typo3 restricts access to most of them by default.
+3. Extension developers tend to not update version numbers or descriptions on each update. Even if you could identify a version string, it does not mean that it is actually the version used. Just download a bunch of extensions and check yourself.
+4. Version information is not consistent. Developers do what they want. Some use a date, some actual version numbers, some may even just add a short text and some don't track versions at all.
+
+My solution to this was: download all extensions and get a list of common files which could include version information. If such a files exists for an extension, a generic regex is used to search for version info.
+
+**This will produce false positives!\
+You have to check found extensions manually by downloading them from the repo and check the files!**
+
+
 ## Bug Reporting / Support
 
 Bug reports are welcome! Please report all bugs on the [issue tracker](https://github.com/whoot/Typo3Scan/issues).
@@ -61,7 +78,7 @@ I´m developing this in my spare time. If you like my work, please consider supp
 
 Typo3Scan - Automatic Typo3 Enumeration Tool
 
-Copyright (c) 2015-2022 Jan Rude
+Copyright (c) 2015-2023 Jan Rude
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
