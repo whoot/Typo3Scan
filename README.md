@@ -56,7 +56,7 @@ While detecting a Typo3 core version is quite simple, it is not for extensions.\
 My solution to this was: download all extensions and get a list of common files which could include version information. If such a files exists for an extension, a generic regex is used to search for version info.
 
 **This will produce false positives!\
-You have to check found extensions manually by downloading them from the repo and check the files!**
+You have to check found extensions manually by downloading them from the [official extension repo](https://extensions.typo3.org/) and check the files!**
 
 
 ## Bug Reporting / Support
