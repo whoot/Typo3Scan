@@ -13,7 +13,21 @@ Typo3Scan does not exploit vulnerabilities! Its soley purpose was to enumerate v
 **Disclaimer**\
 Typo3Scan is intended to be used for legal security purposes only, and you should only use it to test websites you own or have permission to test. Any other use is not the responsibility of the developer(s). Be sure that you understand and are complying with the laws in your area. In other words, don't be stupid, don't be an asshole, and use this tool responsibly and legally.
 
+## A note on Extensions
 
+While detecting a Typo3 core version is quite simple, it is not for extensions.\
+**Reliably** determining the extension version is **not possible**, because of the following issues:
+
+1. Extensions are basically just PHP files. Since it is (obviously) not possible to download a PHP file, it can't be used for version detection. Therefore you have to use other files like changelogs, setting files and so on. However, Typo3 restricts access to most of them by default.
+2. Version information is not consistent. Developers do what they want. Some use a date, some actual version numbers, some may even just add a short text and some don't track versions at all. It's a mess.
+3. Extension developers tend to not update version numbers or descriptions on each update. Even if you identified a version string, this does not mean that it is the version actually in use. Most likely it hasn't been updated for a long time.
+
+My solution to this was: download all extensions and get a list of common files which _could_ include version information. If such a files exists for an extension, a generic regex is used to search for version info.
+
+**This will produce false positives!\
+You have to check found extensions manually by downloading them from the [official extension repo](https://extensions.typo3.org/) and check the files!**
+
+</br></br>
 ## Installation
 
 You can download the latest tarball by clicking [here](https://github.com/whoot/Typo3Scan/tarball/master) or latest zipball by clicking  [here](https://github.com/whoot/Typo3Scan/zipball/master).
@@ -43,22 +57,6 @@ Example:
 <img src="./doc/Typo3Scan.png" width="450">
 
 
-## Extension version detection
-
-While detecting a Typo3 core version is quite simple, it is not for extensions.\
-**Reliably** determining the extension version is **not possible**, because of the following issues:
-
-1. Extensions are basically just PHP files. Since it is (obviously) not possible to download a PHP file, it can't be used for version detection.
-2. Therefore you have to use other files like changelogs, setting files and so on. However, Typo3 restricts access to most of them by default.
-3. Extension developers tend to not update version numbers or descriptions on each update. Even if you could identify a version string, it does not mean that it is actually the version used. Just download a bunch of extensions and check yourself.
-4. Version information is not consistent. Developers do what they want. Some use a date, some actual version numbers, some may even just add a short text and some don't track versions at all.
-
-My solution to this was: download all extensions and get a list of common files which could include version information. If such a files exists for an extension, a generic regex is used to search for version info.
-
-**This will produce false positives!\
-You have to check found extensions manually by downloading them from the [official extension repo](https://extensions.typo3.org/) and check the files!**
-
-
 ## Bug Reporting / Support
 
 Bug reports are welcome! Please report all bugs on the [issue tracker](https://github.com/whoot/Typo3Scan/issues).
@@ -73,6 +71,7 @@ I´m developing this in my spare time. If you like my work, please consider supp
 * Download: [.tar.gz](https://github.com/whoot/Typo3Scan/tarball/master) or [.zip](https://github.com/whoot/Typo3Scan/archive/master.zip)
 * Changelog: [Here](https://github.com/whoot/Typo3Scan/blob/master/doc/CHANGELOG.md)
 * Issue tracker: [Here](https://github.com/whoot/Typo3Scan/issues)
+
 
 # License
 
