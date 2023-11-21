@@ -61,10 +61,10 @@ class Extensions:
         """
         thread_pool = ThreadPool()
         for extension,values in found_extensions.items():
-            thread_pool.add_job((request.version_information, (values['url'] + '/composer.json', '(?:"dev-master"|"version")\s?[:=]\s?"?([0-9]+\.[0-9]+\.?[0-9x]?[0-9x]?)', self.__config)))
-            thread_pool.add_job((request.version_information, (values['url'] + '/Documentation/Settings.yml', '(?:release\s?[=:])\s?"?([0-9]+\.[0-9]+\.?[0-9]?[0-9]?)', self.__config)))
-            thread_pool.add_job((request.version_information, (values['url'] + '/Documentation/Settings.yaml', '(?:release\s?[=:])\s?"?([0-9]+\.[0-9]+\.?[0-9]?[0-9]?)', self.__config)))
-            thread_pool.add_job((request.version_information, (values['url'] + '/Documentation/Settings.cfg', '(?:release\s?[=:])\s?"?([0-9]+\.[0-9]+\.?[0-9]?[0-9]?)', self.__config)))
+            thread_pool.add_job((request.version_information, (values['url'] + '/composer.json', r'(?:"dev-master"|"version")\s?[:=]\s?"?([0-9]+\.[0-9]+\.?[0-9x]?[0-9x]?)', self.__config)))
+            thread_pool.add_job((request.version_information, (values['url'] + '/Documentation/Settings.yml', r'(?:release\s?[=:])\s?"?([0-9]+\.[0-9]+\.?[0-9]?[0-9]?)', self.__config)))
+            thread_pool.add_job((request.version_information, (values['url'] + '/Documentation/Settings.yaml', r'(?:release\s?[=:])\s?"?([0-9]+\.[0-9]+\.?[0-9]?[0-9]?)', self.__config)))
+            thread_pool.add_job((request.version_information, (values['url'] + '/Documentation/Settings.cfg', r'(?:release\s?[=:])\s?"?([0-9]+\.[0-9]+\.?[0-9]?[0-9]?)', self.__config)))
             thread_pool.add_job((request.version_information, (values['url'] + '/ChangeLog.txt', None, self.__config)))
             thread_pool.add_job((request.version_information, (values['url'] + '/Documentation/ChangeLog', None, self.__config)))
             thread_pool.add_job((request.version_information, (values['url'] + '/CHANGELOG.md', None, self.__config)))

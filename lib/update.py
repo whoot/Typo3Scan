@@ -34,7 +34,7 @@ class Update:
     """
     This class updates the extension and vulnerability database
 
-    It will download the extension file from the official repository, 
+    It will download the extension file from the official repository,
     unpack it and insert the extensions in the database.
     Vulnerabilities will be parsed from the official homepage.
     """
@@ -61,7 +61,7 @@ class Update:
     def load_core_vulns(self):
         """
             Grep the CORE vulnerabilities from the security advisory website
-            
+
             Search for advisories and maximum pages
             Request every advisory and get:
                 Advisory Title
@@ -97,10 +97,10 @@ class Update:
 
                 # set as global versions
                 advisory_items = {}
-                subcomponents = re.findall('([sS]ubcomponent\s?#?[0-9]?:\s?(.*?))<', beauty_html)
+                subcomponents = re.findall(r'([sS]ubcomponent\s?#?[0-9]?:\s?(.*?))<', beauty_html)
                 # if no subcomponent / CORE vuln
                 if len(subcomponents) == 0:
-                    missed = re.search('Component Type:\s?(.*?)<', beauty_html).group(1)
+                    missed = re.search(r'Component Type:\s?(.*?)<', beauty_html).group(1)
                     advisory_items[missed] = []
                     advisory_items[missed].append(beauty_html)
                 subcomponents.reverse()
@@ -116,7 +116,7 @@ class Update:
 
                     for subcomponent, entry in advisory_items.items():
                         vulnerability_items = {}
-                        vulnerability_type = re.findall('(Vulnerability Type:\s?(.*?)<)', entry[0])
+                        vulnerability_type = re.findall(r'(Vulnerability Type:\s?(.*?)<)', entry[0])
                         vulnerability_type.reverse()
                         for type_entry in vulnerability_type:
                             index = entry[0].rfind(type_entry[0])
@@ -125,24 +125,24 @@ class Update:
                             entry[0] = entry[0][:index]
 
                         for vuln_type, vuln_description in vulnerability_items.items():
-                            severity = re.search('Severity:\s?(.+?)<', vuln_description[0])
+                            severity = re.search(r'Severity:\s?(.+?)<', vuln_description[0])
                             if severity:
                                 severity = severity.group(1)
                             else:
                                 print("ERROR! GOT SEVERITY:", severity)
                                 severity = 'None assigned'
-                            search_affected = re.search('Affected Version[s]?:\s?(.+?)<', vuln_description[0])
+                            search_affected = re.search(r'Affected Version[s]?:\s?(.+?)<', vuln_description[0])
                             if search_affected:
                                 affected_versions = search_affected.group(1)
                             else:
-                                affected_versions = re.search('Affected Version[s]?:\s?(.+?)<', beauty_html).group(1)
+                                affected_versions = re.search(r'Affected Version[s]?:\s?(.+?)<', beauty_html).group(1)
                             # separate versions
                             affected_versions = affected_versions.replace("and below", " - 0.0.0")
                             affected_versions = affected_versions.replace(";", ",")
                             affected_versions = affected_versions.replace(' and', ',')
                             versions = affected_versions.split(', ')
                             for version in versions:
-                                version = re.findall('([0-9]+\.[0-9x]+\.?[0-9x]?[0-9x]?)', version)
+                                version = re.findall(r'([0-9]+\.[0-9x]+\.?[0-9x]?[0-9x]?)', version)
                                 if len(version) == 0:
                                     print("[!] Unknown version info! Skipping...")
                                     print(" \u251c Advisory:", advisory)
@@ -191,7 +191,7 @@ class Update:
             next_page = self.get_next_page_from_advisory(response)
             if next_page:
                 url = 'https://typo3.org' + next_page
-                current_page += 1  
+                current_page += 1
             else:
                 url = None
 
@@ -225,7 +225,7 @@ class Update:
             Parse the extension file and add extensions in database
         """
         print('\n \u251c Parsing extension file...')
-        tree = ElementTree.parse('extensions.xml') 
+        tree = ElementTree.parse('extensions.xml')
         root = tree.getroot()
 
         c.execute('''DROP TABLE IF EXISTS extensions''')
@@ -268,7 +268,7 @@ class Update:
     def load_extension_vulns(self):
         """
             Grep the EXTENSION vulnerabilities from the security advisory website
-            
+
             Search for advisories and maximum pages
             Request every advisory and get:
                 Advisory Title
@@ -310,11 +310,11 @@ class Update:
                         beauty_html = beauty_html.replace('</strong>', '')
                         beauty_html = beauty_html.replace('&nbsp;', ' ')
                         beauty_html = beauty_html.replace('&amp;', '&')
-                        advisory_info = re.search('<title>(.*)</title>', beauty_html).group(1)
-                        vulnerability = re.findall('Vulnerability Type[s]?:\s?(.*?)<', beauty_html)
-                        affected_versions = re.findall('Affected Version[s]?:\s?(.+?)<', beauty_html)
-                        extensionkey = re.findall('Extension[s]?:\s?(.*?)<', beauty_html)
-                        severity = re.search('Severity:\s?(.+?)<', beauty_html)
+                        advisory_info = re.search(r'<title>(.*)</title>', beauty_html).group(1)
+                        vulnerability = re.findall(r'Vulnerability Type[s]?:\s?(.*?)<', beauty_html)
+                        affected_versions = re.findall(r'Affected Version[s]?:\s?(.+?)<', beauty_html)
+                        extensionkey = re.findall(r'Extension[s]?:\s?(.*?)<', beauty_html)
+                        severity = re.search(r'Severity:\s?(.+?)<', beauty_html)
                         if severity:
                             severity = severity.group(1)
                         else:
@@ -342,7 +342,7 @@ class Update:
                             version_item = version_item.replace(' and', ',')
                             versions = version_item.split(', ')
                             for version in versions:
-                                version = re.findall('([0-9]+\.[0-9x]+\.[0-9x]+)', version)
+                                version = re.findall(r'([0-9]+\.[0-9x]+\.[0-9x]+)', version)
                                 if len(version) == 1:
                                     affected_version_max = version[0]
                                     affected_version_min = version[0]
@@ -382,6 +382,6 @@ class Update:
             next_page = self.get_next_page_from_advisory(response)
             if next_page:
                 url = 'https://typo3.org' + next_page
-                current_page += 1  
+                current_page += 1
             else:
                 url = None
