@@ -112,7 +112,7 @@ class Typo3:
                 json.dump(self.__json_log, open(self.__json, 'w'))
         except KeyboardInterrupt:
             print('\nReceived keyboard interrupt.\nQuitting...')
-            exit(-1)
+            sys.exit(1)
         finally:
             deinit()
 
@@ -243,7 +243,7 @@ Options:
         data = c.fetchall()
         if (len(data) == 0):
             print('\n' + Fore.RED + Style.BRIGHT + '[!] Extension \'{}\' does not exist\n'.format(name) + Style.RESET_ALL)
-            sys.exit(-1)
+            sys.exit(1)
         else:
             c.execute('SELECT advisory, vulnerability, affected_version_max, affected_version_min, severity FROM extension_vulns WHERE (extensionkey=? AND ?<=affected_version_max AND ?>=affected_version_min)', (name, version, version,))
             data = c.fetchall()
@@ -278,7 +278,7 @@ Options:
         elif args.file:
             if not os.path.isfile(args.file):
                 print(Fore.RED + '\n[x] File not found: {}\n |  Aborting...'.format(args.file) + Fore.RESET)
-                sys.exit(-1)
+                sys.exit(1)
             else:
                 with open(args.file, 'r') as f:
                     for line in f:

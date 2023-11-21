@@ -17,7 +17,9 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see [http://www.gnu.org/licenses/](http://www.gnu.org/licenses/)
 #-------------------------------------------------------------------------------
-import sqlite3, os.path
+import os.path
+import sqlite3
+import sys
 
 class DB_Init:
     """
@@ -28,7 +30,7 @@ class DB_Init:
         try:
             conn = sqlite3.connect(database)
             c = conn.cursor()
-            
+
             # Delete all tables
             c.execute('''DROP TABLE IF EXISTS extensions''')
             c.execute('''DROP TABLE IF EXISTS extension_vulns''')
@@ -56,14 +58,14 @@ class DB_Init:
             # Create table UserAgents
             #c.execute('''CREATE TABLE IF NOT EXISTS UserAgents
             #             (userAgent text)''')
-            
+
             conn.commit()
 
         except sqlite3.Error as e:
             if conn:
                 conn.rollback()
             print(e)
-            exit(-1)
+            sys.exit(1)
 
         finally:
             if conn:

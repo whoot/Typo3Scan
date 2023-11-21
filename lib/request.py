@@ -19,7 +19,7 @@
 #-------------------------------------------------------------------------------
 
 import re
-import os.path
+import sys
 import requests
 from colorama import Fore
 from requests.packages.urllib3.exceptions import InsecureRequestWarning
@@ -50,7 +50,7 @@ def get_request(url, config):
     except requests.exceptions.Timeout as e:
         print(e)
         print(Fore.RED + '[x] Connection error\n    Please make sure you provided the right URL\n' + Fore.RESET)
-        exit(-1)
+        sys.exit(1)
     except requests.exceptions.RequestException as e:
         print(Fore.RED + str(e) + Fore.RESET)
         # Return an empty response['html'] element.

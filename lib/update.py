@@ -171,7 +171,7 @@ class Update:
                 except Exception as e:
                     print("Error on receiving data for https://typo3.org/security/advisory/{}".format(advisory))
                     print(e)
-                    exit(-1)
+                    sys.exit(1)
 
                 # Add vulnerability details to database
                 for core_vuln in vulnerabilities:
@@ -357,7 +357,7 @@ class Update:
                     except Exception as e:
                         print("Error on receiving data for https://typo3.org/security/advisory/{}".format(advisory))
                         print(e)
-                        exit(-1)
+                        sys.exit(1)
 
                 # Add vulnerability details to database
                 for ext_vuln in vulnerabilities:
