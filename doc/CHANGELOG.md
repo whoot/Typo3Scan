@@ -1,3 +1,8 @@
+## Version 1.1.4
+
+* Use rawstrings to avoid warnings in Python 3.12 (thanks @exploide)
+* fixed nagative exit codes (thanks @exploide)
+
 ## Version 1.1.3
 
 * bugfix: Split basic auth parameter on the first colon only (thanks @c0d3z3r0)
