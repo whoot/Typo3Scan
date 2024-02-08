@@ -18,6 +18,7 @@
 # along with this program. If not, see [http://www.gnu.org/licenses/](http://www.gnu.org/licenses/)
 #-------------------------------------------------------------------------------
 
+import sys
 import threading
 from queue import Queue
 from progressbar import Bar, AdaptiveETA, Percentage, ProgressBar
@@ -82,7 +83,7 @@ class ThreadPool:
 			[self.__work_queue.put(ThreadPoolSentinel()) for worker in self.__thread_list]
 		except KeyboardInterrupt:
 			print('\nReceived keyboard interrupt.\nQuitting...')
-			exit(-1)
+			sys.exit(1)
 
 	def join(self): # Clean exit
 		self.__work_queue.join()

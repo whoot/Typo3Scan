@@ -50,7 +50,7 @@ class Typo3:
         self.__vuln = vuln
         if not user_agent:
             conn = sqlite3.connect(self.__database)
-            c = conn.cursor()       
+            c = conn.cursor()
             c.execute('SELECT * FROM UserAgents ORDER BY RANDOM() LIMIT 1;')
             user_agent = c.fetchone()[0]
             c.close()
@@ -112,24 +112,24 @@ class Typo3:
                 json.dump(self.__json_log, open(self.__json, 'w'))
         except KeyboardInterrupt:
             print('\nReceived keyboard interrupt.\nQuitting...')
-            exit(-1)
+            sys.exit(1)
         finally:
             deinit()
-        
+
 if __name__ == '__main__':
     print('\n' + 73*'=' + Style.BRIGHT)
     print(Fore.CYAN)
-    print('________                   ________   _________                     '.center(73))
-    print('\_    _/__ __ ______  _____\_____  \ /   _____/ ____ _____    ___  '.center(73))
-    print('  |  | |  |  |\____ \|  _  | _(__  < \_____  \_/ ___\\\\__  \  /   \ '.center(73))
-    print('  |  | |___  ||  |_) | (_) |/       \/        \  \___ / __ \|  |  \ '.center(73))
-    print('  |__| / ____||   __/|_____|________/_________/\_____|_____/|__|__/ '.center(73))
-    print('       \/     |__|                                                  '.center(73))
+    print(r'________                   ________   _________                     '.center(73))
+    print(r'\_    _/__ __ ______  _____\_____  \ /   _____/ ____ _____    ___  '.center(73))
+    print(r'  |  | |  |  |\____ \|  _  | _(__  < \_____  \_/ ___\\\\__  \  /   \ '.center(73))
+    print(r'  |  | |___  ||  |_) | (_) |/       \/        \  \___ / __ \|  |  \ '.center(73))
+    print(r'  |__| / ____||   __/|_____|________/_________/\_____|_____/|__|__/ '.center(73))
+    print(r'       \/     |__|                                                  '.center(73))
     print(Fore.RESET + Style.RESET_ALL)
     print(__description__.center(73))
     print(('Version ' + __version__).center(73))
     print((__author__).center(73))
-    print(73*'=')    
+    print(73*'=')
 
     def print_help():
         print(
@@ -149,16 +149,16 @@ Options:
    You dont need to specify this arguments, but you may want to
 
     --vuln              Check for extensions with known vulnerabilities only.
-              
+
     --timeout TIMEOUT   Request Timeout.
                         Default: 10 seconds
-              
+
     --auth USER:PASS    Username and Password for HTTP Basic Authorization.
-    
+
     --cookie NAME=VALUE Can be used for authenticiation based on cookies.
 
     --agent USER-AGENT  Set custom User-Agent for requests.
-         
+
     --threads THREADS   The number of threads to use for enumerating extensions.
                         Default: 5
 
@@ -192,7 +192,7 @@ Options:
     parser.add_argument('--timeout', dest='timeout', type=int, default=10)
     parser.add_argument('--json', dest='json', type=str, default=os.path.join(os.getcwd(), 'typo3scan.json'))
     parser.add_argument('--no-interaction', dest='no_interaction', action='store_true')
-    
+
     help.add_argument( '-h', '--help', action='store_true')
     args = parser.parse_args()
 
@@ -207,7 +207,7 @@ Options:
         database = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'lib', 'typo3scan.db')
         conn = sqlite3.connect('lib/typo3scan.db')
         c = conn.cursor()
-        c.execute('SELECT advisory, vulnerability, subcomponent, affected_version_max, affected_version_min, severity FROM core_vulns WHERE (?<=affected_version_max AND ?>=affected_version_min)', (args.core, args.core,)) 
+        c.execute('SELECT advisory, vulnerability, subcomponent, affected_version_max, affected_version_min, severity FROM core_vulns WHERE (?<=affected_version_max AND ?>=affected_version_min)', (args.core, args.core,))
         data = c.fetchall()
         json_list = {}
         if data:
@@ -238,12 +238,12 @@ Options:
         else:
             name = (args.extension).split(':')[0]
             version = (args.extension).split(':')[1]
-        
+
         c.execute('SELECT ROWID FROM extensions WHERE extensionkey=?', (name,))
         data = c.fetchall()
         if (len(data) == 0):
             print('\n' + Fore.RED + Style.BRIGHT + '[!] Extension \'{}\' does not exist\n'.format(name) + Style.RESET_ALL)
-            sys.exit(-1)
+            sys.exit(1)
         else:
             c.execute('SELECT advisory, vulnerability, affected_version_max, affected_version_min, severity FROM extension_vulns WHERE (extensionkey=? AND ?<=affected_version_max AND ?>=affected_version_min)', (name, version, version,))
             data = c.fetchall()
@@ -270,7 +270,7 @@ Options:
         if args.force:
            print('\n' + Fore.RED + Style.BRIGHT + '!! FORCE MODE ENABLED !!'.center(73))
            print('!! Expect False Positives !!'.center(73) + Style.RESET_ALL)
-        
+
         domain_list = list()
         if args.domain:
             for dom in args.domain:
@@ -278,7 +278,7 @@ Options:
         elif args.file:
             if not os.path.isfile(args.file):
                 print(Fore.RED + '\n[x] File not found: {}\n |  Aborting...'.format(args.file) + Fore.RESET)
-                sys.exit(-1)
+                sys.exit(1)
             else:
                 with open(args.file, 'r') as f:
                     for line in f:

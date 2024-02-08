@@ -19,7 +19,7 @@
 #-------------------------------------------------------------------------------
 
 import re
-import os.path
+import sys
 import requests
 from colorama import Fore
 from requests.packages.urllib3.exceptions import InsecureRequestWarning
@@ -50,10 +50,10 @@ def get_request(url, config):
     except requests.exceptions.Timeout as e:
         print(e)
         print(Fore.RED + '[x] Connection error\n    Please make sure you provided the right URL\n' + Fore.RESET)
-        exit(-1)
+        sys.exit(1)
     except requests.exceptions.RequestException as e:
         print(Fore.RED + str(e) + Fore.RESET)
-        # Return an empty response['html'] element. 
+        # Return an empty response['html'] element.
         # If this error occurs within the first request made (TYPO3 detection), then all following scans will be canceled
         response['html'] = ''
         return response
@@ -89,7 +89,7 @@ def version_information(url, regex, config):
         because usually the TYPO3 version is in the first few lines of the response.
     """
     if regex is None:
-        regex = '([0-9]+\.[0-9]+\.[0-9x][0-9x]?)'
+        regex = r'([0-9]+\.[0-9]+\.[0-9x][0-9x]?)'
     try:
         if config['auth']:
             r = requests.get(url, stream=True, timeout=config['timeout'], headers=config['headers'], auth=(config['auth'][0], config['auth'][1]), verify=False)
@@ -103,7 +103,7 @@ def version_information(url, regex, config):
                     version = search.group(1)
                 except:
                     try:
-                        search = re.search('([0-9]+-[0-9]+-[0-9]+)', str(content))
+                        search = re.search(r'([0-9]+-[0-9]+-[0-9]+)', str(content))
                         version = search.group(1)
                     except:
                         continue

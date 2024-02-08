@@ -51,7 +51,7 @@ class Domain:
         self.__typo3_vulnerabilities = []
         self.__installed_extensions = {'installed': 0}
         self.__config = config
-        
+
     def get_name(self):
         return self.__name
 
@@ -97,11 +97,11 @@ class Domain:
         """
         full_path = self.get_name()
         response = request.get_request('{}'.format(self.get_name()), self.__config)
-        if re.search('powered by TYPO3', response['html']):
+        if re.search(r'powered by TYPO3', response['html']):
             self.set_typo3()
-            path = re.search('="(?:{})/?(\S*?)/?(?:typo3temp|typo3conf)/'.format(self.get_name()), response['html'])
+            path = re.search(r'="(?:{})/?(\S*?)/?(?:typo3temp|typo3conf)/'.format(self.get_name()), response['html'])
             if path and path.group(1) != '':
-                full_path = '{}/{}'.format(self.get_name(), path)            
+                full_path = '{}/{}'.format(self.get_name(), path)
         self.set_path(full_path)
 
     def check_404(self):
@@ -112,7 +112,7 @@ class Domain:
         """
         random_string = ''.join(random.choice(string.ascii_lowercase) for i in range(10))
         response = request.get_request('{}/{}'.format(self.get_path(), random_string), self.__config)
-        search404 = re.search('[Tt][Yy][Pp][Oo]3 CMS', response['html'])
+        search404 = re.search(r'[Tt][Yy][Pp][Oo]3 CMS', response['html'])
         if search404:
             self.set_typo3()
 
@@ -124,7 +124,7 @@ class Domain:
         """
         print(' [+] Backend Login')
         response = request.get_request('{}/typo3/index.php'.format(self.get_path()), self.__config)
-        searchTitle = re.search('<title>(.*)</title>', response['html'])
+        searchTitle = re.search(r'<title>(.*)</title>', response['html'])
         if searchTitle and 'Login' in searchTitle.group(0):
             print('  \u251c {}'.format(Fore.GREEN + '{}/typo3/index.php'.format(self.get_path()) + Fore.RESET))
             self.set_backend('{}/typo3/index.php'.format(self.get_path()))
