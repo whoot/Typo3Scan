@@ -1,3 +1,8 @@
+## Version 1.1.5
+
+* Use python-fake_useragent instead of predefined list in database
+* Update database
+
 ## Version 1.1.4
 
 * Use rawstrings to avoid warnings in Python 3.12 (thanks @exploide)
