@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 #-------------------------------------------------------------------------------
 # Typo3Scan - Automatic Typo3 Enumeration Tool
-# Copyright (c) 2014-2023 Jan Rude
+# Copyright (c) 2014-2024 Jan Rude
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -18,7 +18,7 @@
 # along with this program. If not, see [http://www.gnu.org/licenses/](http://www.gnu.org/licenses/)
 #-------------------------------------------------------------------------------
 
-__version__ = '1.1.4'
+__version__ = '1.1.5'
 __program__ = 'Typo3Scan'
 __description__ = 'Automatic Typo3 enumeration tool'
 __author__ = 'https://github.com/whoot'
@@ -29,6 +29,7 @@ import sqlite3
 import os.path
 import argparse
 from lib.domain import Domain
+from fake_useragent import UserAgent
 from lib.extensions import Extensions
 from pkg_resources import parse_version
 from colorama import Fore, init, deinit, Style
@@ -49,11 +50,8 @@ class Typo3:
         self.__force = force
         self.__vuln = vuln
         if not user_agent:
-            conn = sqlite3.connect(self.__database)
-            c = conn.cursor()
-            c.execute('SELECT * FROM UserAgents ORDER BY RANDOM() LIMIT 1;')
-            user_agent = c.fetchone()[0]
-            c.close()
+            ua = UserAgent()
+            user_agent = ua.random
         self.__custom_headers = {'User-Agent' : user_agent}
         self.__cookies = {}
         if cookie:

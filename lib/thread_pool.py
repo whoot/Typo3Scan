@@ -1,8 +1,8 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 #-------------------------------------------------------------------------------
-# Typo3 Enumerator - Automatic Typo3 Enumeration Tool
-# Copyright (c) 2014-2023 Jan Rude
+# Typo3Scan - Automatic Typo3 Enumeration Tool
+# Copyright (c) 2014-2024 Jan Rude
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by

@@ -3,3 +3,4 @@ colorama
 progressbar
 setuptools
 beautifulsoup4
+fake_useragent
