@@ -1,3 +1,10 @@
+# UNSUPPORTED
+Version 1.2 is the final release of Typo3Scan. This software will not get any updates.
+
+Since my initial release a lot changed in Typo3, but especially in version 12 onwards and with composer installations.
+It is not possible anymore to enumerate the Typo3 version and installed extensions (seems like they moved everything to the *vendor/* path, which is forbidden to access) and therefore Typo3Scan is useless for these installations.
+
+
 # Typo3Scan
 
 [![Packaging status](https://repology.org/badge/vertical-allrepos/typo3scan.svg)](https://repology.org/project/typo3scan/versions)

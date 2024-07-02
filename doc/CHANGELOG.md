@@ -1,3 +1,10 @@
+## version 1.2
+
+* Final release
+* Added check for 401 on backend login
+* Updated database
+* Set to public archive
+
 ## Version 1.1.5
 
 * Use python-fake_useragent instead of predefined list in database

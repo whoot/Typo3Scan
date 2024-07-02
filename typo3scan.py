@@ -18,7 +18,7 @@
 # along with this program. If not, see [http://www.gnu.org/licenses/](http://www.gnu.org/licenses/)
 #-------------------------------------------------------------------------------
 
-__version__ = '1.1.5'
+__version__ = '1.2'
 __program__ = 'Typo3Scan'
 __description__ = 'Automatic Typo3 enumeration tool'
 __author__ = 'https://github.com/whoot'
@@ -71,6 +71,8 @@ class Typo3:
                 root = check.check_root()
                 if not root:
                     check_404 = check.check_404()
+                if not check_404:
+                    check_nextGen = check.check_nextGen()
                 if not check.is_typo3() and self.__force is False:
                     print(Fore.RED + '\n[x] It seems that Typo3 is not used on this domain\n' + Fore.RESET)
                 else:

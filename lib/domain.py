@@ -117,6 +117,20 @@ class Domain:
         if search404:
             self.set_typo3()
 
+    def check_nextGen(self):
+        """
+        This method requests the /typo3 page and searches for a specific string.
+            This is needed for "next gen" Typo3 - meaning everything above version 13.
+        """
+        full_path = self.get_name()
+        response = request.get_request('{}/typo3'.format(self.get_name()), self.__config)
+        if re.search(r'powered by TYPO3', response['html']):
+            self.set_typo3()
+            path = re.search(r'="(?:{})/?(\S*?)/?(?:typo3temp|typo3conf)/'.format(self.get_name()), response['html'])
+            if path and path.group(1) != '':
+                full_path = '{}/{}'.format(self.get_name(), path)
+        self.set_path(full_path)
+
     def search_login(self):
         """
         This method requests the default login page
@@ -132,6 +146,10 @@ class Domain:
         elif ('Backend access denied: The IP address of your client' in response['html']) or (response['status_code'] == 403):
             print('  \u251c {}'.format(Fore.GREEN + '{}/typo3/index.php'.format(self.get_path()) + Fore.RESET))
             print('  \u251c {}'.format(Fore.YELLOW + 'But access is forbidden (IP Address Restriction)' + Fore.RESET))
+            self.set_backend('{}/typo3/index.php'.format(self.get_path()))
+        elif (response['status_code'] == 401):
+            print('  \u251c {}'.format(Fore.GREEN + '{}/typo3/index.php'.format(self.get_path()) + Fore.RESET))
+            print('  \u251c {}'.format(Fore.YELLOW + 'But got \'401 Authentication Required\'' + Fore.RESET))
             self.set_backend('{}/typo3/index.php'.format(self.get_path()))
         else:
             print('  \u251c {}'.format(Fore.RED + 'Could not be found' + Fore.RESET))
